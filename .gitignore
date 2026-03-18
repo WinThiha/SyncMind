@@ -5,7 +5,7 @@ build/
 .next/
 out/
 *.log
-.env*
+.env
 .vercel
 
 # PHP / Laravel
