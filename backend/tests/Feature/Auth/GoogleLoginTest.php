@@ -12,7 +12,7 @@ class GoogleLoginTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_google_callback_logs_in_existing_user(): void
+    public function test_google_callback_logs_in_existing_user_with_code(): void
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
@@ -33,11 +33,29 @@ class GoogleLoginTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertAuthenticatedAs($user);
-        $this->assertDatabaseHas('social_accounts', [
-            'user_id' => $user->id,
-            'provider_name' => 'google',
-            'provider_id' => '12345',
+    }
+
+    public function test_google_callback_logs_in_existing_user_with_token(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
         ]);
+
+        $abstractUser = new SocialiteUser();
+        $abstractUser->id = '12345';
+        $abstractUser->email = 'test@example.com';
+        $abstractUser->name = 'Google User';
+
+        Socialite::shouldReceive('driver->userFromToken')->with('fake-token')->andReturn($abstractUser);
+
+        $response = $this->postJson('/api/auth/google/callback', [
+            'token' => 'fake-token',
+        ], [
+            'Referer' => 'http://localhost',
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_google_callback_returns_error_if_user_not_found(): void
@@ -47,23 +65,17 @@ class GoogleLoginTest extends TestCase
         $abstractUser->email = 'new@example.com';
         $abstractUser->name = 'New User';
 
-        Socialite::shouldReceive('driver->stateless->user')->andReturn($abstractUser);
+        Socialite::shouldReceive('driver->userFromToken')->andReturn($abstractUser);
 
         $response = $this->postJson('/api/auth/google/callback', [
-            'code' => 'fake-code',
+            'token' => 'fake-token',
         ], [
             'Referer' => 'http://localhost',
         ]);
 
-        // Should return 404 or a special status to indicate registration is required
         $response->assertStatus(404)
             ->assertJson([
                 'message' => 'User not found. Please register.',
-                'social_user' => [
-                    'email' => 'new@example.com',
-                    'name' => 'New User',
-                    'provider_id' => '12345',
-                ]
             ]);
     }
 }

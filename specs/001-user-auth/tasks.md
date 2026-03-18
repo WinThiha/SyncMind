@@ -1,7 +1,7 @@
 # Tasks: User Authentication and Social Login
 
 **Feature Branch**: `001-user-auth`
-**Status**: Pending
+**Status**: Completed
 
 ## Strategy
 
@@ -68,7 +68,7 @@ Set up database schemas, models, and shared utilities.
 - [X] T019 [US2] Implement logout controller method to invalidate sessions in `backend/app/Http/Controllers/Auth/LoginController.php`
 - [X] T020 [US2] Create frontend login form component with validation and "Remember Me" toggle in `frontend/src/components/auth/LoginForm.tsx`
 - [X] T021 [US2] Create frontend login page integrating the form in `frontend/src/app/(auth)/login/page.tsx`
-- [X] T022 [US2] Implement frontend auth context/hook to manage session state and fetch current user in `frontend/src/lib/auth.ts`
+- [X] T022 [US2] Implement frontend auth context/hook to manage session state and fetch current user in `frontend/src/context/AuthContext.tsx`
 
 ## Phase 5: User Story 3 - Google Social Login
 
@@ -78,8 +78,8 @@ Set up database schemas, models, and shared utilities.
 - [X] T023 [US3] Create REST API contract test for Google callback endpoint in `backend/tests/Feature/Auth/GoogleLoginTest.php`
 - [X] T024 [US3] Implement Google callback controller method using stateless Socialite to verify token in `backend/app/Http/Controllers/Auth/GoogleAuthController.php`
 - [X] T025 [US3] Implement logic to link existing email or create new active user within Google callback controller in `backend/app/Http/Controllers/Auth/GoogleAuthController.php`
-- [ ] T026 [US3] Create frontend Google Login Button component utilizing `@react-oauth/google` in `frontend/src/components/auth/GoogleLoginButton.tsx`
-- [ ] T027 [US3] Integrate Google Login Button into both login and registration pages in `frontend/src/app/(auth)/login/page.tsx` and `frontend/src/app/(auth)/register/page.tsx`
+- [X] T026 [US3] Create frontend Google Login Button component utilizing `@react-oauth/google` in `frontend/src/components/auth/GoogleLoginButton.tsx`
+- [X] T027 [US3] Integrate Google Login Button into both login and registration pages in `frontend/src/app/(auth)/login/page.tsx` and `frontend/src/app/(auth)/register/page.tsx`
 
 ## Phase 6: User Story 4 - Protected System Access
 
@@ -92,6 +92,6 @@ Set up database schemas, models, and shared utilities.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [X] T031 Implement rate limiting on all authentication API endpoints (Register, Login) in `backend/app/Providers/RouteServiceProvider.php` (or AppServiceProvider in L12)
+- [X] T031 Implement rate limiting on all authentication API endpoints (Register, Login) in `backend/app/Providers/AppServiceProvider.php`
 - [X] T032 Implement account lockout mechanism for failed login attempts using Laravel's RateLimiter in `backend/app/Http/Controllers/Auth/LoginController.php`
 - [X] T033 Implement Model Observer to automatically delete associated `SocialAccount` records when a User's email is updated in `backend/app/Observers/UserObserver.php` and register it in `backend/app/Providers/AppServiceProvider.php`

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\SocialAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Laravel\Socialite\Facades\Socialite;
 
 class GoogleAuthController extends Controller
@@ -19,40 +20,86 @@ class GoogleAuthController extends Controller
      */
     public function callback(Request $request)
     {
+        $socialUser = null;
+        $errorDetails = null;
+
         try {
-            $socialUser = Socialite::driver('google')->stateless()->user();
+            if ($request->has('token')) {
+                try {
+                    $socialUser = Socialite::driver('google')->userFromToken($request->token);
+                } catch (\Exception $e) {
+                    $response = Http::get("https://www.googleapis.com/oauth2/v3/userinfo", [
+                        'access_token' => $request->token
+                    ]);
+
+                    if ($response->successful()) {
+                        $data = $response->json();
+                        $socialUser = new \stdClass();
+                        $socialUser->token = $request->token;
+                        $socialUser->id = $data['sub'] ?? null;
+                        $socialUser->email = $data['email'] ?? null;
+                        $socialUser->name = $data['name'] ?? null;
+                        
+                        $socialUser->getEmail = fn() => $data['email'] ?? null;
+                        $socialUser->getName = fn() => $data['name'] ?? null;
+                        $socialUser->getId = fn() => $data['sub'] ?? null;
+                    } else {
+                        $errorDetails = 'Google API verification failed: ' . $response->body();
+                    }
+                }
+            } else {
+                $socialUser = Socialite::driver('google')->stateless()->user();
+            }
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Google authentication failed.'], 401);
+            $errorDetails = $e->getMessage();
         }
 
-        $user = User::where('email', $socialUser->getEmail())->first();
+        if (!$socialUser || (is_object($socialUser) && method_exists($socialUser, 'getEmail') && !$socialUser->getEmail())) {
+            return response()->json([
+                'message' => 'Google authentication failed.',
+                'error' => $errorDetails ?: 'Could not retrieve user details.'
+            ], 401);
+        }
+
+        $email = method_exists($socialUser, 'getEmail') ? $socialUser->getEmail() : ($socialUser->email ?? null);
+        $name = method_exists($socialUser, 'getName') ? $socialUser->getName() : ($socialUser->name ?? null);
+        $id = method_exists($socialUser, 'getId') ? $socialUser->getId() : ($socialUser->id ?? null);
+
+        if (!$email) {
+            return response()->json(['message' => 'Email not found in Google response.'], 401);
+        }
+
+        $user = User::where('email', $email)->first();
 
         if (! $user) {
-            // User not found by email - need registration with a password
             return response()->json([
                 'message' => 'User not found. Please register.',
                 'social_user' => [
-                    'email' => $socialUser->getEmail(),
-                    'name' => $socialUser->getName(),
-                    'provider_id' => $socialUser->getId(),
+                    'email' => $email,
+                    'name' => $name,
+                    'provider_id' => $id,
                     'provider_name' => 'google',
                 ]
             ], 404);
         }
 
-        // Link the social account if not already linked
-        $socialAccount = SocialAccount::firstOrCreate(
+        // AUTO-VERIFY: If the user exists but is not verified, verify them now (FR-004)
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+        }
+
+        // Link/Update the social account
+        SocialAccount::updateOrCreate(
             [
                 'provider_name' => 'google',
-                'provider_id' => $socialUser->getId(),
+                'provider_id' => $id,
             ],
             [
                 'user_id' => $user->id,
-                'provider_email' => $socialUser->getEmail(),
+                'provider_email' => $email,
             ]
         );
 
-        // Log the user in
         Auth::login($user, true);
         $request->session()->regenerate();
 

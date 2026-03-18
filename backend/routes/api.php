@@ -19,7 +19,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/google/callback', [GoogleAuthController::class, 'callback'])->middleware('throttle:auth');
 
     Route::get('/verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['auth:sanctum', 'signed', 'throttle:6,1'])
+        ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
 
     Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
