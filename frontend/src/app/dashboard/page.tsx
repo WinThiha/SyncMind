@@ -3,6 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import ProjectList from '@/components/projects/ProjectList';
 
 export default function DashboardPage() {
     const { user, loading, logout } = useAuth();
@@ -53,30 +54,17 @@ export default function DashboardPage() {
 
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
                 <div className="px-4 py-6 sm:px-0">
-                    <div className="bg-white shadow rounded-lg p-10 border border-gray-100 flex items-center justify-center min-h-[400px]">
-                        <div className="text-center">
-                            <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
-                                Hello, {user.name}!
-                            </h2>
-                            <p className="text-xl text-gray-600">
-                                You are logged in with <span className="font-semibold text-gray-900">{user.email}</span>
-                            </p>
-                            
-                            {!user.email_verified_at ? (
-                                <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-md">
-                                    <p className="text-amber-700 font-medium">
-                                        Your email is not verified. Please check your inbox for a verification link.
-                                    </p>
-                                </div>
-                            ) : (
-                                <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-md">
-                                    <p className="text-green-700 font-medium">
-                                        ✓ Your account is verified and fully active.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900">Your Projects</h2>
+                        <button
+                            onClick={() => router.push('/projects/new')}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                        >
+                            Create New Project
+                        </button>
                     </div>
+                    
+                    <ProjectList />
                 </div>
             </main>
         </div>
