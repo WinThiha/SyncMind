@@ -5,12 +5,19 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware(['auth:sanctum', 'throttle:api']);
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    Route::apiResource('projects', ProjectController::class);
+    Route::post('projects/{project}/transfer', [ProjectController::class, 'transferOwnership']);
+    Route::apiResource('projects.members', \App\Http\Controllers\ProjectMemberController::class)->only(['index', 'store', 'update', 'destroy']);
+});
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:auth');
