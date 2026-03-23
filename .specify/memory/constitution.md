@@ -1,21 +1,16 @@
 <!--
 Sync Impact Report:
-- Version change: [CONSTITUTION_VERSION] → 1.0.0
-- List of modified principles:
-  - [PRINCIPLE_1_NAME] → I. Code Quality Excellence
-  - [PRINCIPLE_2_NAME] → II. Professional Testing Standards
-  - [PRINCIPLE_3_NAME] → III. Comprehensive API Documentation
-  - [PRINCIPLE_4_NAME] → IV. Safe Execution Protocols
-  - [PRINCIPLE_5_NAME] → V. Incredible UI/UX
+- Version change: 1.0.0 → 1.1.0
+- List of modified principles: None
 - Added sections:
-  - VI. Strict Secrets Management
+  - VII. Strict Git Management Flow
 - Removed sections:
   - None
 - Templates requiring updates (✅ updated / ⚠ pending):
   - ✅ .specify/templates/plan-template.md (No updates required based on generic constitution check gate)
   - ✅ .specify/templates/spec-template.md (No updates required)
   - ✅ .specify/templates/tasks-template.md (No updates required)
-  - ✅ .gemini/commands/speckit.constitution.toml (Updated to remove agent-specific references)
+  - ✅ .gemini/commands/speckit.constitution.toml (No updates required)
 - Follow-up TODOs: 
   - None
 -->
@@ -48,6 +43,10 @@ The application UI/UX MUST be incredible, prioritizing a fast and smooth interfa
 API keys and all other secrets MUST be properly kept secure and out of version control unless absolutely necessary (and appropriately encrypted if stored).
 **Rationale**: Protecting sensitive data is non-negotiable to prevent security breaches and comply with industry security best practices.
 
+### VII. Strict Git Management Flow
+All feature branches MUST be branched out from the `develop` branch of the remote repository. Merging flow MUST be `feature_branch -> develop`. Code MUST NOT be merged into `master` without an explicit command.
+**Rationale**: Ensures a controlled, stable release process and prevents unverified code from reaching production directly.
+
 ## Project Execution Constraints
 
 Any proposed implementation or feature plan MUST clearly identify its testing strategy, error handling, and potential security impact regarding secrets management.
@@ -58,10 +57,12 @@ The technology stack and architecture MUST align with the goal of delivering a f
 
 All Pull Requests MUST be reviewed against these core principles. Code MUST NOT be merged if it lacks professional testing, clear API documentation, or compromises established code quality standards.
 
+All feature branches MUST be branched out from the `develop` branch. Merging flow MUST strictly follow `feature_branch -> develop`. Code MUST NOT be merged into `master` without an explicit command.
+
 ## Governance
 
 This constitution supersedes all other general practices. Amendments to this constitution require a formal update, version bump, and team review. All future feature specifications, implementation plans, and tasks MUST comply with the rules set herein. 
 
 All PRs/reviews MUST verify compliance. Complexity MUST be justified against the goal of exceptional UX and code maintainability.
 
-**Version**: 1.0.0 | **Ratified**: 2026-03-16 | **Last Amended**: 2026-03-16
+**Version**: 1.1.0 | **Ratified**: 2026-03-16 | **Last Amended**: 2026-03-23
