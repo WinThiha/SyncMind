@@ -5,14 +5,15 @@ build/
 .next/
 out/
 *.log
-.env*
+.env
+.env.*
+!.env.example
 .vercel
 
 # PHP / Laravel
 vendor/
 *.log
 *.cache
-.env
 storage/*.key
 /public/hot
 /public/storage
