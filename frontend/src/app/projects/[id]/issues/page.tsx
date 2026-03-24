@@ -1,80 +1,59 @@
 'use client';
 
-import { useParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import IssueList from '@/components/issues/IssueList';
-import CreateIssueForm from '@/components/issues/CreateIssueForm';
+import React, { useEffect, useState } from 'react';
 import { getProject, Project } from '@/lib/api/projects';
-import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import IssueList from '@/components/issues/IssueList';
+import { motion } from 'framer-motion';
+import { ChevronLeft, Plus } from 'lucide-react';
+import { GlassButton } from '@/components/ui/GlassButton';
 
-interface ProjectWithMembers extends Project {
-  members?: Array<{
-    id: number;
-    pivot: {
-      role: string;
-    };
-  }>;
-}
-
-export default function IssuesPage() {
-  const params = useParams();
-  const projectId = params.id as string;
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [canCreate, setCanCreate] = useState(false);
-  const { user } = useAuth();
+export default function IssueListPage({ params }: { params: Promise<{ id: string }> }) {
+  const unwrappedParams = React.use(params);
+  const [project, setProject] = useState<Project | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    async function checkPermission() {
+    async function loadProject() {
       try {
-        const project = await getProject(projectId) as ProjectWithMembers;
-        const member = project.members?.find((m) => m.id === user?.id);
-        const isCreator = project.creator_id === user?.id;
-        const userRole = member?.pivot?.role || (isCreator ? 'admin' : 'normal');
-        
-        setCanCreate(userRole === 'admin' || isCreator);
-      } catch (err) {
-        console.error('Failed to check permissions', err);
+        const data = await getProject(unwrappedParams.id);
+        setProject(data);
+      } catch {
       }
     }
-    if (user) checkPermission();
-  }, [projectId, user]);
-
-  const handleCreateSuccess = () => {
-    setShowCreateForm(false);
-    setRefreshKey(prev => prev + 1);
-  };
+    loadProject();
+  }, [unwrappedParams.id]);
 
   return (
-    <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Issues</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage and track work for this project.</p>
-        </div>
-        {!showCreateForm && canCreate && (
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    <div className="flex flex-col">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <motion.button 
+            whileHover={{ x: -4 }}
+            onClick={() => router.push(`/projects/${unwrappedParams.id}`)} 
+            className="p-2 hover:bg-foreground/5 rounded-full transition-colors text-foreground/40 hover:text-foreground"
           >
-            Add Issue
-          </button>
-        )}
-      </div>
-
-      {showCreateForm && (
-        <div className="mb-8">
-          <CreateIssueForm
-            projectId={projectId}
-            onSuccess={handleCreateSuccess}
-            onCancel={() => setShowCreateForm(false)}
-          />
+            <ChevronLeft size={24} />
+          </motion.button>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold tracking-tight">Issues</h1>
+              <span className="text-foreground/40 text-sm font-medium">/</span>
+              <span className="text-foreground/60 text-sm font-bold">{project?.name || 'Loading...'}</span>
+            </div>
+            <p className="text-foreground/60 text-sm mt-1">Manage and track your project tasks.</p>
+          </div>
         </div>
-      )}
 
-      <div className="mt-6">
-        <IssueList projectId={projectId} key={refreshKey} />
+        <GlassButton
+          onClick={() => router.push(`/projects/${unwrappedParams.id}/issues/new`)}
+        >
+          <Plus size={18} />
+          New Issue
+        </GlassButton>
       </div>
+
+      <IssueList projectId={unwrappedParams.id} />
     </div>
   );
 }
