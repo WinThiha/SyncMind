@@ -42,11 +42,11 @@ export const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ childr
       <div className="flex-1 ml-64 min-h-screen relative">
         <Topbar />
         <main className="h-screen pt-24 px-10 pb-10 md:px-14 md:pb-14 overflow-y-auto">
-          <TransitionWrapper>
-            <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto w-full">
+            <TransitionWrapper>
               {children}
-            </div>
-          </TransitionWrapper>
+            </TransitionWrapper>
+          </div>
         </main>
       </div>
     </div>

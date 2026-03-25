@@ -5,6 +5,7 @@ import { getProject, Project } from '@/lib/api/projects';
 import { useRouter } from 'next/navigation';
 import MemberManagement from '@/components/projects/MemberManagement';
 import ProjectSettings from '@/components/projects/ProjectSettings';
+import { ProjectDetailSkeleton } from '@/components/projects/ProjectDetailSkeleton';
 import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import { 
@@ -49,7 +50,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
     loadProject();
   }, [unwrappedParams.id]);
 
-  if (loading) return <div className="p-8 text-center text-foreground/40">Loading project...</div>;
+  if (loading) return <ProjectDetailSkeleton />;
   
   if (error || !project) {
     return (

@@ -25,10 +25,7 @@ export const Sidebar: React.FC = () => {
   const { logout } = useAuth();
 
   return (
-    <motion.aside
-      initial={{ x: -280 }}
-      animate={{ x: 0 }}
-      transition={BASE_SPRING}
+    <aside
       className="fixed left-0 top-0 h-full w-64 z-50 flex flex-col p-4 bg-background border-r border-border-glow shadow-sm"
     >
       <div className="flex items-center gap-2 px-2 py-6">
@@ -77,6 +74,6 @@ export const Sidebar: React.FC = () => {
           <span className="font-medium">Logout</span>
         </button>
       </div>
-    </motion.aside>
+    </aside>
   );
 };

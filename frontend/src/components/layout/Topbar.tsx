@@ -11,9 +11,7 @@ export const Topbar: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <motion.header
-      initial={{ y: -80 }}
-      animate={{ y: 0 }}
+    <header
       className="fixed top-0 right-0 left-64 h-16 z-50 flex items-center justify-between px-8 bg-background border-b border-border-glow shadow-sm"
     >
       <div className="flex items-center gap-4 bg-background px-4 py-2 rounded-xl w-96 max-w-full border border-border-glow shadow-sm">
@@ -54,6 +52,6 @@ export const Topbar: React.FC = () => {
           </div>
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 };

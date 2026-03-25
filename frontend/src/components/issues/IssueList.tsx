@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import { getIssues, Issue } from '@/lib/api/issues';
 import { IssueListItem } from './IssueListItem';
 import { IssueDetailView } from './IssueDetailView';
+import { IssueSkeleton } from './IssueSkeleton';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Filter, RotateCcw, Search } from 'lucide-react';
+import { Filter, RotateCcw, Search, ChevronDown } from 'lucide-react';
 
 interface IssueListProps {
   projectId: number | string;
@@ -19,7 +20,6 @@ export default function IssueList({ projectId }: IssueListProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
 
-  // Filters
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,95 +41,87 @@ export default function IssueList({ projectId }: IssueListProps) {
 
   useEffect(() => {
     let filtered = issues;
-    
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(i => i.status === statusFilter);
-    }
-    
-    if (priorityFilter !== 'all') {
-      filtered = filtered.filter(i => i.priority === priorityFilter);
-    }
-
+    if (statusFilter !== 'all') filtered = filtered.filter(i => i.status === statusFilter);
+    if (priorityFilter !== 'all') filtered = filtered.filter(i => i.priority === priorityFilter);
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(i => 
-        i.summary.toLowerCase().includes(query) || 
-        i.key.toLowerCase().includes(query)
-      );
+      filtered = filtered.filter(i => i.summary.toLowerCase().includes(query) || i.key.toLowerCase().includes(query));
     }
-    
     setFilteredIssues(filtered);
   }, [statusFilter, priorityFilter, searchQuery, issues]);
 
   if (loading) {
     return (
-      <div className="space-y-3">
-        {[1, 2, 3, 4].map(i => (
-          <GlassCard key={i} className="h-20 animate-pulse bg-foreground/5" children={null} />
-        ))}
+      <div className="space-y-4">
+        {[1, 2, 3, 4, 5].map(i => <IssueSkeleton key={i} />)}
       </div>
     );
   }
 
-  if (error) return <GlassCard className="p-4 text-red-500">{error}</GlassCard>;
+  if (error) return <GlassCard className="p-8 text-red-500 font-bold text-center">{error}</GlassCard>;
 
   return (
     <div className="space-y-8">
       <GlassCard className="p-6 flex flex-wrap items-center gap-8">
-        <div className="flex items-center gap-3 bg-foreground/5 px-6 py-3 rounded-2xl flex-1 min-w-[250px]">
-          <Search size={18} className="text-foreground/40" />
+        <div className="flex items-center gap-3 bg-foreground/5 border border-border-glow rounded-2xl px-6 py-3 flex-1 min-w-[250px] group focus-within:ring-4 focus-within:ring-brand-primary/10 transition-all">
+          <Search size={18} className="text-foreground/30 group-focus-within:text-brand-primary transition-colors" />
           <input 
             type="text" 
             placeholder="Search issues by key or summary..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent border-none outline-none text-sm w-full placeholder:text-foreground/40"
+            className="bg-transparent border-none outline-none text-sm w-full placeholder:text-foreground/30 font-medium"
           />
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Filter size={16} className="text-foreground/40" />
-            <select 
-              value={statusFilter} 
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-transparent text-sm font-bold outline-none cursor-pointer"
-            >
-              <option value="all">All Status</option>
-              <option value="open">Open</option>
-              <option value="in_progress">In Progress</option>
-              <option value="resolved">Resolved</option>
-              <option value="closed">Closed</option>
-            </select>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
+            <Filter size={16} className="text-foreground/30" />
+            <div className="relative">
+              <select 
+                value={statusFilter} 
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="appearance-none bg-background border border-border-glow rounded-xl px-4 py-2 pr-10 text-xs font-bold text-foreground/60 outline-none cursor-pointer hover:border-brand-primary/30 transition-all"
+              >
+                <option value="all">ALL STATUS</option>
+                <option value="open">OPEN</option>
+                <option value="in_progress">IN PROGRESS</option>
+                <option value="resolved">RESOLVED</option>
+                <option value="closed">CLOSED</option>
+              </select>
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/30" />
+            </div>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="relative">
             <select 
               value={priorityFilter} 
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="bg-transparent text-sm font-bold outline-none cursor-pointer"
+              className="appearance-none bg-background border border-border-glow rounded-xl px-4 py-2 pr-10 text-xs font-bold text-foreground/60 outline-none cursor-pointer hover:border-brand-primary/30 transition-all"
             >
-              <option value="all">All Priority</option>
-              <option value="high">High</option>
-              <option value="normal">Normal</option>
-              <option value="low">Low</option>
+              <option value="all">ALL PRIORITY</option>
+              <option value="high">HIGH</option>
+              <option value="normal">NORMAL</option>
+              <option value="low">LOW</option>
             </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/30" />
           </div>
           
           <button 
             onClick={() => { setStatusFilter('all'); setPriorityFilter('all'); setSearchQuery(''); }}
-            className="p-2 hover:bg-foreground/5 rounded-lg transition-colors text-foreground/40 hover:text-brand-primary"
+            className="p-3 hover:bg-foreground/5 rounded-xl transition-all text-foreground/30 hover:text-brand-primary"
             title="Reset Filters"
           >
-            <RotateCcw size={18} />
+            <RotateCcw size={20} />
           </button>
         </div>
       </GlassCard>
 
-      <div className="space-y-1">
+      <div className="space-y-4">
         {filteredIssues.length === 0 ? (
-          <GlassCard className="text-center py-16 text-foreground/40 border-dashed">
-            No issues found matching your filters.
+          <GlassCard className="text-center py-20 text-foreground/30 border-dashed">
+            <Filter size={48} className="mx-auto mb-4 opacity-10" />
+            <p className="font-bold uppercase tracking-widest text-xs">No issues found matching your filters</p>
           </GlassCard>
         ) : (
           filteredIssues.map((issue) => (
@@ -137,6 +129,9 @@ export default function IssueList({ projectId }: IssueListProps) {
               key={issue.id} 
               issue={{
                 id: issue.id,
+                project_id: issue.project_id,
+                full_key: issue.full_key,
+                key: issue.key,
                 title: issue.summary,
                 status: issue.status,
                 priority: issue.priority,
@@ -153,6 +148,8 @@ export default function IssueList({ projectId }: IssueListProps) {
           <IssueDetailView 
             issue={{
               id: selectedIssue.id,
+              project_id: selectedIssue.project_id,
+              key: selectedIssue.full_key || selectedIssue.key,
               title: selectedIssue.summary,
               description: selectedIssue.description || '',
               status: selectedIssue.status,

@@ -35,8 +35,6 @@ export const IssueListItem: React.FC<IssueListItemProps> = ({ issue, onClick }) 
   return (
     <GlassCard
       glow
-      whileHover={{ scale: 1.01, x: 4 }}
-      whileTap={{ scale: 0.99 }}
       transition={FAST_SPRING}
       onClick={onClick}
       className="p-6 mb-4 flex items-center justify-between cursor-pointer group"
