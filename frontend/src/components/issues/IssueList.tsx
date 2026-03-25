@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { getIssues, Issue } from '@/lib/api/issues';
-import Link from 'next/link';
+import { IssueListItem } from './IssueListItem';
+import { IssueDetailView } from './IssueDetailView';
+import { IssueSkeleton } from './IssueSkeleton';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Filter, RotateCcw, Search, ChevronDown } from 'lucide-react';
 
 interface IssueListProps {
   projectId: number | string;
@@ -13,10 +18,11 @@ export default function IssueList({ projectId }: IssueListProps) {
   const [filteredIssues, setFilteredIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
 
-  // Filters
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     async function loadIssues() {
@@ -35,120 +41,126 @@ export default function IssueList({ projectId }: IssueListProps) {
 
   useEffect(() => {
     let filtered = issues;
-    
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(i => i.status === statusFilter);
+    if (statusFilter !== 'all') filtered = filtered.filter(i => i.status === statusFilter);
+    if (priorityFilter !== 'all') filtered = filtered.filter(i => i.priority === priorityFilter);
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(i => i.summary.toLowerCase().includes(query) || i.key.toLowerCase().includes(query));
     }
-    
-    if (priorityFilter !== 'all') {
-      filtered = filtered.filter(i => i.priority === priorityFilter);
-    }
-    
     setFilteredIssues(filtered);
-  }, [statusFilter, priorityFilter, issues]);
+  }, [statusFilter, priorityFilter, searchQuery, issues]);
 
-  if (loading) return <div className="p-4 text-gray-500">Loading issues...</div>;
-  if (error) return <div className="p-4 text-red-500">{error}</div>;
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3, 4, 5].map(i => <IssueSkeleton key={i} />)}
+      </div>
+    );
+  }
+
+  if (error) return <GlassCard className="p-8 text-red-500 font-bold text-center">{error}</GlassCard>;
 
   return (
-    <div className="space-y-4">
-      {/* Filter Bar */}
-      <div className="flex flex-wrap gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <div>
-          <label className="block text-xs font-medium text-gray-500 uppercase mb-1">Status</label>
-          <select 
-            value={statusFilter} 
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
-            <option value="all">All Statuses</option>
-            <option value="open">Open</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-            <option value="closed">Closed</option>
-          </select>
+    <div className="space-y-8">
+      <GlassCard className="p-6 flex flex-wrap items-center gap-8">
+        <div className="flex items-center gap-3 bg-foreground/5 border border-border-glow rounded-2xl px-6 py-3 flex-1 min-w-[250px] group focus-within:ring-4 focus-within:ring-brand-primary/10 transition-all">
+          <Search size={18} className="text-foreground/30 group-focus-within:text-brand-primary transition-colors" />
+          <input 
+            type="text" 
+            placeholder="Search issues by key or summary..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-transparent border-none outline-none text-sm w-full placeholder:text-foreground/30 font-medium"
+          />
         </div>
-        
-        <div>
-          <label className="block text-xs font-medium text-gray-500 uppercase mb-1">Priority</label>
-          <select 
-            value={priorityFilter} 
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="block w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
-            <option value="all">All Priorities</option>
-            <option value="high">High</option>
-            <option value="normal">Normal</option>
-            <option value="low">Low</option>
-          </select>
-        </div>
-        
-        <div className="flex items-end">
+
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
+            <Filter size={16} className="text-foreground/30" />
+            <div className="relative">
+              <select 
+                value={statusFilter} 
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="appearance-none bg-background border border-border-glow rounded-xl px-4 py-2 pr-10 text-xs font-bold text-foreground/60 outline-none cursor-pointer hover:border-brand-primary/30 transition-all"
+              >
+                <option value="all">ALL STATUS</option>
+                <option value="open">OPEN</option>
+                <option value="in_progress">IN PROGRESS</option>
+                <option value="resolved">RESOLVED</option>
+                <option value="closed">CLOSED</option>
+              </select>
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/30" />
+            </div>
+          </div>
+          
+          <div className="relative">
+            <select 
+              value={priorityFilter} 
+              onChange={(e) => setPriorityFilter(e.target.value)}
+              className="appearance-none bg-background border border-border-glow rounded-xl px-4 py-2 pr-10 text-xs font-bold text-foreground/60 outline-none cursor-pointer hover:border-brand-primary/30 transition-all"
+            >
+              <option value="all">ALL PRIORITY</option>
+              <option value="high">HIGH</option>
+              <option value="normal">NORMAL</option>
+              <option value="low">LOW</option>
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/30" />
+          </div>
+          
           <button 
-            onClick={() => { setStatusFilter('all'); setPriorityFilter('all'); }}
-            className="text-xs text-indigo-600 hover:text-indigo-800 underline pb-2"
+            onClick={() => { setStatusFilter('all'); setPriorityFilter('all'); setSearchQuery(''); }}
+            className="p-3 hover:bg-foreground/5 rounded-xl transition-all text-foreground/30 hover:text-brand-primary"
+            title="Reset Filters"
           >
-            Reset Filters
+            <RotateCcw size={20} />
           </button>
         </div>
+      </GlassCard>
+
+      <div className="space-y-4">
+        {filteredIssues.length === 0 ? (
+          <GlassCard className="text-center py-20 text-foreground/30 border-dashed">
+            <Filter size={48} className="mx-auto mb-4 opacity-10" />
+            <p className="font-bold uppercase tracking-widest text-xs">No issues found matching your filters</p>
+          </GlassCard>
+        ) : (
+          filteredIssues.map((issue) => (
+            <IssueListItem 
+              key={issue.id} 
+              issue={{
+                id: issue.id,
+                project_id: issue.project_id,
+                full_key: issue.full_key,
+                key: issue.key,
+                title: issue.summary,
+                status: issue.status,
+                priority: issue.priority,
+                comments_count: 0
+              }} 
+              onClick={() => setSelectedIssue(issue)}
+            />
+          ))
+        )}
       </div>
 
-      {filteredIssues.length === 0 ? (
-        <div className="text-center py-12 text-gray-500 bg-white shadow rounded-lg border border-dashed border-gray-300">
-          No issues match the selected filters.
-        </div>
-      ) : (
-        <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Key</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Summary</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assignee</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredIssues.map((issue) => (
-                <tr key={issue.id} className="hover:bg-gray-50 cursor-pointer transition">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                    <Link href={`/projects/${projectId}/issues/${issue.key}`}>
-                      {issue.key}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {issue.summary}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                      ${issue.status === 'open' ? 'bg-blue-100 text-blue-800' : 
-                        issue.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                        issue.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                        'bg-gray-100 text-gray-800'}`}>
-                      {issue.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold 
-                      ${issue.priority === 'high' ? 'text-red-600' : 
-                        issue.priority === 'normal' ? 'text-blue-600' : 'text-gray-600'}`}>
-                      {issue.priority}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {issue.issue_type}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {issue.assignee?.name || 'Unassigned'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <AnimatePresence>
+        {selectedIssue && (
+          <IssueDetailView 
+            issue={{
+              id: selectedIssue.id,
+              project_id: selectedIssue.project_id,
+              key: selectedIssue.full_key || selectedIssue.key,
+              title: selectedIssue.summary,
+              description: selectedIssue.description || '',
+              status: selectedIssue.status,
+              priority: selectedIssue.priority,
+              assigned_to: selectedIssue.assignee,
+              created_at: selectedIssue.created_at
+            }}
+            onClose={() => setSelectedIssue(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

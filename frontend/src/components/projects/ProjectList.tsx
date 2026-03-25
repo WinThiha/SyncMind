@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { getProjects, Project } from '@/lib/api/projects';
-import Link from 'next/link';
+import { ProjectCard } from '@/components/dashboard/ProjectCard';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { SkeletonCard } from '@/components/ui/SkeletonCard';
 
 export default function ProjectList() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -23,37 +25,33 @@ export default function ProjectList() {
     loadProjects();
   }, []);
 
-  if (loading) return <div>Loading projects...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
-
-  if (projects.length === 0) {
+  if (loading) {
     return (
-      <div className="text-center py-8 text-gray-500 bg-white shadow rounded-lg mt-4">
-        You are not involved in any projects yet.
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+        {[1, 2, 3].map((i) => (
+          <SkeletonCard key={i} />
+        ))}
       </div>
     );
   }
 
+  if (error) return <GlassCard className="p-6 text-red-500">{error}</GlassCard>;
+
+  if (projects.length === 0) {
+    return (
+      <GlassCard className="text-center py-16 text-foreground/40 mt-4 border-dashed">
+        You are not involved in any projects yet.
+      </GlassCard>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-6 pb-12">
       {projects.map((project) => (
-        <Link href={`/projects/${project.id}`} key={project.id}>
-          <div className="bg-white shadow rounded-lg p-6 hover:shadow-md transition cursor-pointer border border-gray-100">
-            <div className="flex items-center space-x-4 mb-4">
-              {project.icon ? (
-                <img src={project.icon} alt={project.name} className="w-12 h-12 rounded bg-gray-100 object-cover" />
-              ) : (
-                <div className="w-12 h-12 rounded bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xl">
-                  {project.key.substring(0, 2)}
-                </div>
-              )}
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{project.name}</h3>
-                <span className="text-sm font-medium text-gray-500">{project.key}</span>
-              </div>
-            </div>
-          </div>
-        </Link>
+        <ProjectCard key={project.id} project={{
+          ...project,
+          members_count: 0
+        }} />
       ))}
     </div>
   );

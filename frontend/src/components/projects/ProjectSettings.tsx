@@ -4,6 +4,10 @@ import { useState } from 'react';
 import { Project, updateProject, deleteProject, transferOwnership, getProjectMembers, ProjectMember } from '@/lib/api/projects';
 import { useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { GlassButton } from '@/components/ui/GlassButton';
+import { Settings, Trash2, UserPlus, AlertTriangle, Save, FolderEdit, ListTree, ChevronDown } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface ProjectSettingsProps {
   project: Project;
@@ -78,82 +82,124 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
   };
 
   return (
-    <div className="mt-8 space-y-8">
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-bold mb-4">Project Settings</h2>
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-        <form onSubmit={handleUpdate} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Project Name</label>
+    <div className="space-y-8">
+      <GlassCard className="p-8">
+        <div className="flex items-center gap-2 mb-8 text-brand-primary">
+          <Settings size={20} />
+          <h2 className="text-xl font-bold uppercase tracking-widest">Project Settings</h2>
+        </div>
+        
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl mb-6 text-sm font-medium">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleUpdate} className="space-y-6">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-foreground/40 uppercase tracking-widest ml-1">
+              <FolderEdit size={14} />
+              Project Name
+            </label>
             <input
               type="text"
               required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border"
+              className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Issue Types (Comma Separated)</label>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-foreground/40 uppercase tracking-widest ml-1">
+              <ListTree size={14} />
+              Issue Types
+            </label>
             <input
               type="text"
               required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border"
+              className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all"
               value={issueTypes}
               onChange={(e) => setIssueTypes(e.target.value)}
             />
+            <p className="text-[10px] text-foreground/30 font-medium ml-1">Comma separated list of allowed issue types.</p>
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-          >
-            {loading ? 'Saving...' : 'Save Changes'}
-          </button>
+
+          <div className="pt-4 border-t border-border-glow/50 flex justify-end">
+            <GlassButton
+              type="submit"
+              disabled={loading}
+              className="px-8"
+            >
+              <Save size={16} />
+              {loading ? 'SAVING...' : 'SAVE CHANGES'}
+            </GlassButton>
+          </div>
         </form>
-      </div>
+      </GlassCard>
 
       {isOwner && (
-        <div className="bg-white shadow rounded-lg p-6 border border-red-200">
-          <h2 className="text-xl font-bold mb-4 text-red-600">Danger Zone</h2>
+        <GlassCard className="p-8 border-red-500/20">
+          <div className="flex items-center gap-2 mb-8 text-red-500">
+            <AlertTriangle size={20} />
+            <h2 className="text-xl font-bold uppercase tracking-widest">Danger Zone</h2>
+          </div>
           
-          <div className="mb-6 pb-6 border-b border-gray-200">
-            <h3 className="font-medium mb-2">Transfer Ownership</h3>
-            <p className="text-sm text-gray-500 mb-4">Transfer this project to another admin member.</p>
-            {transferError && <div className="text-red-500 mb-2 text-sm">{transferError}</div>}
-            <div className="flex space-x-4">
-              <select
-                className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border flex-1 bg-white"
-                value={transferUserId}
-                onFocus={loadMembers}
-                onChange={(e) => setTransferUserId(e.target.value)}
+          <div className="space-y-10">
+            <div className="p-6 bg-red-500/[0.02] border border-red-500/10 rounded-2xl space-y-6">
+              <div>
+                <h3 className="text-sm font-bold flex items-center gap-2 mb-1">
+                  <UserPlus size={16} className="text-orange-500" />
+                  Transfer Ownership
+                </h3>
+                <p className="text-xs text-foreground/40 font-medium">Transfer this project to another administrator.</p>
+              </div>
+              
+              {transferError && <div className="text-red-500 text-xs font-bold">{transferError}</div>}
+              
+              <div className="flex flex-wrap gap-3">
+                <div className="relative flex-1 min-w-[200px]">
+                  <select
+                    className="w-full h-full appearance-none bg-background border border-border-glow rounded-xl px-4 py-2.5 text-xs font-bold outline-none cursor-pointer hover:border-brand-primary/30 transition-colors"
+                    value={transferUserId}
+                    onFocus={loadMembers}
+                    onChange={(e) => setTransferUserId(e.target.value)}
+                  >
+                    <option value="">Select a member...</option>
+                    {members.map((m) => (
+                      <option key={m.id} value={m.id}>{m.name.toUpperCase()} ({m.email})</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 pointer-events-none" />
+                </div>
+                <GlassButton
+                  onClick={handleTransfer}
+                  disabled={!transferUserId}
+                  className="bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"
+                >
+                  TRANSFER
+                </GlassButton>
+              </div>
+            </div>
+
+            <div className="p-6 bg-red-500/[0.02] border border-red-500/10 rounded-2xl flex items-center justify-between gap-6">
+              <div>
+                <h3 className="text-sm font-bold flex items-center gap-2 mb-1 text-red-500">
+                  <Trash2 size={16} />
+                  Delete Project
+                </h3>
+                <p className="text-xs text-foreground/40 font-medium">Permanently remove this project and all data.</p>
+              </div>
+              <GlassButton
+                onClick={handleDelete}
+                variant="danger"
+                className="px-6"
               >
-                <option value="">Select a member...</option>
-                {members.map((m) => (
-                  <option key={m.id} value={m.id}>{m.name} ({m.email})</option>
-                ))}
-              </select>
-              <button
-                onClick={handleTransfer}
-                disabled={!transferUserId}
-                className="bg-orange-600 text-white px-4 py-2 rounded shadow hover:bg-orange-700 disabled:opacity-50"
-              >
-                Transfer
-              </button>
+                DELETE
+              </GlassButton>
             </div>
           </div>
-
-          <div>
-            <h3 className="font-medium mb-2">Delete Project</h3>
-            <p className="text-sm text-gray-500 mb-4">Permanently remove this project and all its data.</p>
-            <button
-              onClick={handleDelete}
-              className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
-            >
-              Delete Project
-            </button>
-          </div>
-        </div>
+        </GlassCard>
       )}
     </div>
   );

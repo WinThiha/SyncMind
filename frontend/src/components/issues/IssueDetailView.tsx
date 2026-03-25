@@ -1,0 +1,291 @@
+'use client';
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
+import MarkdownEditor from '../shared/MarkdownEditor';
+import { 
+  X, 
+  Tag, 
+  Calendar, 
+  MessageSquare, 
+  History, 
+  User, 
+  Clock,
+  Send,
+  MoreVertical,
+  CheckCircle2,
+  AlertCircle,
+  FileText,
+  ChevronDown,
+  Edit2,
+  ArrowRight,
+  Maximize2
+} from 'lucide-react';
+import { GlassButton } from '@/components/ui/GlassButton';
+import { BASE_SPRING } from '@/lib/animations';
+import { getIssue, createIssueComment, updateIssue } from '@/lib/api/issues';
+import { getProjectMembers, ProjectMember } from '@/lib/api/projects';
+import { useAuth } from '@/context/AuthContext';
+
+interface Issue {
+  id: number;
+  project_id: number | string;
+  key: string;
+  summary: string;
+  description: string;
+  status: string;
+  priority: string;
+  assigned_to?: { id: number; name: string; avatar?: string };
+  assignee?: { id: number; name: string; avatar?: string };
+  assignee_id?: number;
+  created_at: string;
+  comments?: any[];
+  history?: any[];
+  estimated_hours?: number | string;
+  actual_hours?: number | string;
+}
+
+interface IssueDetailViewProps {
+  issue: Issue;
+  onClose: () => void;
+}
+
+export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initialIssue, onClose }) => {
+  const [issue, setIssue] = useState<Issue>(initialIssue);
+  const [newComment, setNewComment] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [members, setMembers] = useState<ProjectMember[]>([]);
+  const [isEditorFocused, setIsEditorFocused] = useState(false);
+  
+  const [quickData, setQuickData] = useState({
+    status: '',
+    priority: '',
+    assignee_id: '',
+    estimated_hours: '',
+    actual_hours: ''
+  });
+  
+  const { user } = useAuth();
+
+  useEffect(() => {
+    loadIssueDetails();
+    loadMembers();
+  }, [initialIssue.id, initialIssue.key, initialIssue.project_id]);
+
+  const loadIssueDetails = async () => {
+    setLoading(true);
+    try {
+      const data = await getIssue(initialIssue.project_id, initialIssue.key);
+      setIssue(data);
+      setQuickData({
+        status: data.status,
+        priority: data.priority,
+        assignee_id: data.assignee_id?.toString() || '',
+        estimated_hours: data.estimated_hours?.toString() || '',
+        actual_hours: data.actual_hours?.toString() || ''
+      });
+    } catch (err) {
+      console.error('Failed to load issue details', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMembers = async () => {
+    try {
+      const data = await getProjectMembers(initialIssue.project_id);
+      setMembers(data);
+    } catch (err) {
+      console.error('Failed to load members', err);
+    }
+  };
+
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const hasDataChanges = 
+      quickData.status !== issue.status || 
+      quickData.priority !== issue.priority ||
+      quickData.assignee_id !== (issue.assignee_id?.toString() || '') ||
+      quickData.estimated_hours !== (issue.estimated_hours?.toString() || '') ||
+      quickData.actual_hours !== (issue.actual_hours?.toString() || '');
+
+    if (!newComment.trim() && !hasDataChanges) return;
+
+    setSubmittingComment(true);
+    try {
+      if (hasDataChanges) {
+        await updateIssue(issue.project_id, issue.key, {
+          status: quickData.status,
+          priority: quickData.priority,
+          assignee_id: quickData.assignee_id ? parseInt(quickData.assignee_id) : null,
+          estimated_hours: quickData.estimated_hours ? parseFloat(quickData.estimated_hours) : null,
+          actual_hours: quickData.actual_hours ? parseFloat(quickData.actual_hours) : null
+        });
+      }
+      if (newComment.trim()) {
+        await createIssueComment(issue.project_id, issue.key, { content: newComment });
+      }
+      setNewComment('');
+      setIsEditorFocused(false);
+      await loadIssueDetails();
+    } catch (err) {
+      console.error('Failed to update issue or add comment', err);
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const activityEntities = useMemo(() => {
+    const combined = [
+      ...(issue.comments || []).map(c => ({ ...c, type: 'comment' })),
+      ...(issue.history || []).map(h => ({ ...h, type: 'history' }))
+    ];
+    combined.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    const entities: any[] = [];
+    combined.forEach(item => {
+      const prevEntity = entities[entities.length - 1];
+      const itemTime = new Date(item.created_at).getTime();
+      const prevTime = prevEntity ? new Date(prevEntity.created_at).getTime() : 0;
+      if (prevEntity && prevEntity.user.id === item.user.id && Math.abs(prevTime - itemTime) < 2000) {
+        if (item.type === 'comment') prevEntity.comments.push(item);
+        else prevEntity.history.push(item);
+      } else {
+        entities.push({ id: `${item.type}-${item.id}`, user: item.user, created_at: item.created_at, comments: item.type === 'comment' ? [item] : [], history: item.type === 'history' ? [item] : [] });
+      }
+    });
+    return entities;
+  }, [issue.comments, issue.history]);
+
+  const currentAssignee = issue.assignee || issue.assigned_to;
+
+  return (
+    <>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100]" />
+      <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={BASE_SPRING} className="fixed right-0 top-0 h-full w-full max-w-3xl z-[101] bg-background border-l border-border-glow shadow-2xl flex flex-col">
+        <div className="flex items-center justify-between p-6 border-b border-border-glow">
+          <div className="flex items-center gap-3">
+            <span className="bg-brand-primary/10 text-brand-primary text-xs font-bold px-3 py-1 rounded-full border border-brand-primary/20">{issue.key}</span>
+            <h3 className="font-bold text-xl line-clamp-1">{issue.summary}</h3>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href={`/projects/${issue.project_id}/issues/${issue.key}/edit`}><GlassButton variant="ghost" className="px-4 py-2 text-xs font-bold gap-2"><Edit2 size={14} />Edit Issue</GlassButton></Link>
+            <button onClick={onClose} className="p-2 hover:bg-foreground/5 rounded-full transition-colors text-foreground/40 hover:text-foreground"><X size={24} /></button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
+          <div className="max-w-3xl mx-auto space-y-12">
+            <section className="space-y-4">
+              <div className="flex items-center gap-2 text-brand-primary"><FileText size={18} /><h4 className="text-sm font-bold uppercase tracking-widest">Description</h4></div>
+              <div className="p-6 bg-foreground/[0.03] rounded-3xl text-sm leading-relaxed border border-border-glow/30 whitespace-pre-wrap shadow-inner min-h-[100px]">{issue.description || 'No description provided.'}</div>
+              <div className="grid grid-cols-2 gap-8 pt-6">
+                <div className="space-y-4"><h4 className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Status</h4><div className="flex items-center gap-2 px-4 py-2 bg-brand-primary/10 text-brand-primary rounded-xl text-xs font-bold border border-brand-primary/10 w-fit"><CheckCircle2 size={14} />{issue.status?.toUpperCase()}</div></div>
+                <div className="space-y-4"><h4 className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Priority</h4><div className="flex items-center gap-2 px-4 py-2 bg-foreground/5 text-foreground/60 rounded-xl text-xs font-bold border border-foreground/10 w-fit"><AlertCircle size={14} />{issue.priority?.toUpperCase()}</div></div>
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Assignee</h4>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-brand-accent/20 rounded-2xl flex items-center justify-center text-brand-primary font-bold text-sm border border-brand-accent/30">{currentAssignee?.name?.charAt(0) || 'U'}</div>
+                    <div><p className="text-sm font-bold">{currentAssignee?.name || 'Unassigned'}</p><p className="text-[10px] text-foreground/40 font-medium">Assigned Member</p></div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Time Tracking</h4>
+                  <div className="flex flex-wrap gap-4">
+                    <div><span className="text-[10px] font-medium text-foreground/40">Est.</span><p className="text-xs font-bold text-foreground/60">{issue.estimated_hours || 0}h</p></div>
+                    <div><span className="text-[10px] font-medium text-foreground/40">Act.</span><p className="text-xs font-bold text-foreground/60">{issue.actual_hours || 0}h</p></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <div className="h-px bg-border-glow/50" />
+            <section className="space-y-8">
+              <div className="flex items-center gap-2 text-brand-primary"><History size={18} /><h4 className="text-sm font-bold uppercase tracking-widest">Activity</h4></div>
+              <div className="space-y-10">
+                {loading ? <div className="flex items-center justify-center h-20 opacity-40"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div></div> : activityEntities.length === 0 ? <div className="text-center py-12 text-foreground/30 bg-foreground/[0.02] rounded-3xl border border-dashed border-border-glow"><p className="font-medium italic">No activity yet.</p></div> : 
+                  activityEntities.map((entity) => (
+                    <div key={entity.id} className="relative flex gap-5">
+                      <div className="absolute left-[19px] top-[40px] bottom-[-40px] w-px bg-border-glow/20 last:hidden" /><div className="w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center z-10 shadow-sm border bg-background text-brand-primary border-border-glow font-bold text-xs">{entity.user.name.charAt(0)}</div>
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center justify-between"><span className="text-sm font-bold">{entity.user.name}</span><span className="text-[10px] font-bold text-foreground/30 uppercase">{new Date(entity.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span></div>
+                        <div className="bg-foreground/[0.03] border border-border-glow/30 rounded-2xl overflow-hidden shadow-sm">
+                          {entity.history.length > 0 && (
+                            <div className={`p-4 space-y-2 bg-foreground/[0.01] ${entity.comments.length > 0 ? 'border-b border-border-glow/10' : ''}`}>
+                              {entity.history.map((h: any) => {
+                                let displayField = h.field; let displayOld = h.old_value; let displayNew = h.new_value;
+                                if (h.field === 'assignee_id') { displayField = 'assignee'; const oldMember = members.find(m => m.id.toString() === h.old_value?.toString()); const newMember = members.find(m => m.id.toString() === h.new_value?.toString()); displayOld = oldMember ? oldMember.name : (h.old_value || 'None'); displayNew = newMember ? newMember.name : (h.new_value || 'None'); }
+                                return (<div key={h.id} className="flex items-center gap-3 text-[11px] font-bold"><span className="text-foreground/40 uppercase tracking-wider shrink-0">{displayField.replace('_', ' ')}:</span><div className="flex flex-wrap items-center gap-2"><span className="text-foreground/30 line-through font-medium">{displayOld || 'None'}</span><ArrowRight size={10} className="text-brand-primary/40" /><span className="text-brand-primary">{displayNew || 'None'}</span></div></div>);
+                              })}
+                            </div>
+                          )}
+                          {entity.comments.length > 0 && <div className="p-5 text-sm leading-relaxed text-foreground/80">{entity.comments.map((c: any) => <div key={c.id} className="whitespace-pre-wrap">{c.content}</div>)}</div>}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                }
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div className="p-6 border-t border-border-glow bg-foreground/[0.02] shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
+          <div className="relative group">
+            {isEditorFocused || newComment.trim() ? (
+              <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                {/* Scrollable area for inputs if they get too tall */}
+                <div className="max-h-[50vh] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-background border border-border-glow rounded-2xl p-4 shadow-sm space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-foreground/40 uppercase">Status</label>
+                          <select value={quickData.status} onChange={(e) => setQuickData({...quickData, status: e.target.value})} className="w-full bg-foreground/5 border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold text-brand-primary outline-none">
+                            <option value="open">OPEN</option><option value="in_progress">IN PROGRESS</option><option value="resolved">RESOLVED</option><option value="closed">CLOSED</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-foreground/40 uppercase">Priority</label>
+                          <select value={quickData.priority} onChange={(e) => setQuickData({...quickData, priority: e.target.value})} className="w-full bg-foreground/5 border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold text-foreground/60 outline-none">
+                            <option value="low">LOW</option><option value="normal">NORMAL</option><option value="high">HIGH</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-foreground/40 uppercase">Assignee</label>
+                        <select value={quickData.assignee_id} onChange={(e) => setQuickData({...quickData, assignee_id: e.target.value})} className="w-full bg-foreground/5 border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold text-foreground/60 outline-none">
+                          <option value="">Unassigned</option>{members.map(m => <option key={m.id} value={m.id}>{m.name.toUpperCase()}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="bg-background border border-border-glow rounded-2xl p-4 shadow-sm space-y-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-foreground/40 uppercase">Est. Hours</label>
+                        <div className="relative"><Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30" /><input type="number" step="0.5" value={quickData.estimated_hours} onChange={(e) => setQuickData({...quickData, estimated_hours: e.target.value})} placeholder="0.0" className="w-full bg-foreground/5 border border-border-glow rounded-lg pl-8 pr-3 py-1.5 text-xs font-bold outline-none" /></div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-foreground/40 uppercase">Act. Hours</label>
+                        <div className="relative"><History size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30" /><input type="number" step="0.5" value={quickData.actual_hours} onChange={(e) => setQuickData({...quickData, actual_hours: e.target.value})} placeholder="0.0" className="w-full bg-foreground/5 border border-border-glow rounded-lg pl-8 pr-3 py-1.5 text-xs font-bold outline-none" /></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl overflow-hidden border border-brand-primary/30 shadow-lg ring-4 ring-brand-primary/5 bg-background">
+                    <MarkdownEditor value={newComment} onChange={setNewComment} placeholder="Write your comment..." rows={3} />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 shrink-0">
+                  <GlassButton variant="ghost" size="sm" onClick={() => { if (!newComment.trim()) setIsEditorFocused(false); else if (window.confirm('Discard?')) { setNewComment(''); setIsEditorFocused(false); } }}>Cancel</GlassButton>
+                  <GlassButton size="sm" disabled={submittingComment} onClick={(e) => handleAddComment(e as any)}><Send size={14} />Update & Post</GlassButton>
+                </div>
+              </div>
+            ) : (
+              <div onClick={() => setIsEditorFocused(true)} className="w-full bg-background border border-border-glow rounded-2xl pl-12 pr-14 py-4 text-sm font-medium text-foreground/40 cursor-text hover:border-brand-primary/30 hover:shadow-md transition-all flex items-center shadow-inner"><div className="absolute left-5 top-1/2 -translate-y-1/2 text-foreground/30"><MessageSquare size={18} /></div>Update fields and post a comment...<div className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/20"><Maximize2 size={16} /></div></div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </>
+  );
+};

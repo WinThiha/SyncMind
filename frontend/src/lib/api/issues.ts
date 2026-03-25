@@ -52,3 +52,9 @@ export async function deleteIssue(projectId: number | string, key: string) {
   const response = await api.delete(`/api/projects/${projectId}/issues/${key}`);
   return response.data;
 }
+
+export async function createIssueComment(projectId: number | string, key: string, data: any) {
+  // Backend route is: projects/{project}/issues/{issue_key}/comments
+  const response = await api.post(`/api/projects/${projectId}/issues/${key}/comments`, data);
+  return response.data.data;
+}
