@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\AIIssueController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\IssueController;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::apiResource('projects.members', \App\Http\Controllers\ProjectMemberController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::apiResource('projects.issues', IssueController::class);
     Route::post('projects/{project}/issues/{issue_key}/comments', [\App\Http\Controllers\CommentController::class, 'store']);
+    Route::post('projects/{project}/ai/suggest-issue', [AIIssueController::class, 'suggest']);
 });
 
 Route::prefix('auth')->group(function () {

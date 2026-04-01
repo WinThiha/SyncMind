@@ -1,20 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createIssue } from '@/lib/api/issues';
+import { suggestIssueFields } from '@/lib/api/issues';
 import { getProject, getProjectMembers, ProjectMember } from '@/lib/api/projects';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import MarkdownEditor from '../shared/MarkdownEditor';
 import { motion } from 'framer-motion';
-import { 
-  Type, 
-  AlignLeft, 
-  Layers, 
-  AlertCircle, 
-  Clock, 
+import {
+  Type,
+  AlignLeft,
+  Layers,
+  AlertCircle,
+  Clock,
   User,
-  CheckCircle2
+  Sparkles
 } from 'lucide-react';
 
 interface CreateIssueFormProps {
@@ -33,11 +34,16 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
     estimated_hours: '',
     status: 'open',
   });
-  
+
+  // Track which fields have been manually touched by the user
+  const touchedFields = useRef<Set<string>>(new Set());
+
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -79,17 +85,61 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    touchedFields.current.add(name);
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleDescriptionChange = (value: string) => {
+    if (value !== formData.description) {
+      touchedFields.current.add('description');
+    }
     setFormData(prev => ({ ...prev, description: value }));
   };
+
+  const handleAISuggest = async () => {
+    if (!formData.summary.trim()) {
+      setAiError('Please enter a summary first.');
+      return;
+    }
+    setAiLoading(true);
+    setAiError(null);
+
+    try {
+      const suggestions = await suggestIssueFields(projectId, formData.summary);
+      setFormData(prev => {
+        const next = { ...prev };
+        if (suggestions.description && !touchedFields.current.has('description')) {
+          next.description = suggestions.description;
+        }
+        if (suggestions.issue_type && !touchedFields.current.has('issue_type')) {
+          next.issue_type = suggestions.issue_type;
+        }
+        if (suggestions.priority && !touchedFields.current.has('priority')) {
+          next.priority = suggestions.priority;
+        }
+        if (suggestions.estimated_hours != null && !touchedFields.current.has('estimated_hours')) {
+          next.estimated_hours = String(suggestions.estimated_hours);
+        }
+        if (suggestions.assignee_id != null && !touchedFields.current.has('assignee_id')) {
+          next.assignee_id = String(suggestions.assignee_id);
+        }
+        return next;
+      });
+    } catch (err: any) {
+      setAiError(err.response?.data?.message || 'AI suggestion failed. Please try again.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const shimmer = aiLoading
+    ? 'animate-pulse bg-brand-primary/5 pointer-events-none'
+    : '';
 
   return (
     <GlassCard className="p-10 w-full">
       {error && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl mb-8 text-sm font-medium"
@@ -99,12 +149,23 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Summary - Full Width */}
+        {/* Summary + AI button */}
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider ml-1">
-            <Type size={16} className="text-brand-primary" />
-            Summary
-          </label>
+          <div className="flex items-center justify-between ml-1">
+            <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider">
+              <Type size={16} className="text-brand-primary" />
+              Summary
+            </label>
+            <button
+              type="button"
+              onClick={handleAISuggest}
+              disabled={aiLoading || !formData.summary.trim()}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Sparkles size={13} className={aiLoading ? 'animate-spin' : ''} />
+              {aiLoading ? 'Thinking…' : 'Auto-fill with AI'}
+            </button>
+          </div>
           <input
             type="text"
             name="summary"
@@ -114,17 +175,20 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
             value={formData.summary}
             onChange={handleChange}
           />
+          {aiError && (
+            <p className="text-xs text-red-400 mt-1">{aiError}</p>
+          )}
         </div>
 
-        {/* Description - Full Width */}
+        {/* Description */}
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider ml-1">
             <AlignLeft size={16} className="text-brand-primary" />
             Description
           </label>
-          <div className="rounded-xl overflow-hidden border border-border-glow bg-foreground/[0.02]">
-            <MarkdownEditor 
-              value={formData.description} 
+          <div className={`rounded-xl overflow-hidden border border-border-glow bg-foreground/[0.02] ${shimmer}`}>
+            <MarkdownEditor
+              value={formData.description}
               onChange={handleDescriptionChange}
               placeholder="Provide more details..."
               rows={8}
@@ -143,7 +207,8 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               name="issue_type"
               value={formData.issue_type}
               onChange={handleChange}
-              className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer"
+              disabled={aiLoading}
+              className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
             >
               {project?.issue_types?.map((type: string) => (
                 <option key={type} value={type}>{type}</option>
@@ -166,7 +231,8 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               name="priority"
               value={formData.priority}
               onChange={handleChange}
-              className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer"
+              disabled={aiLoading}
+              className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
             >
               <option value="low">Low</option>
               <option value="normal">Normal</option>
@@ -184,14 +250,15 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               step="0.5"
               name="estimated_hours"
               placeholder="e.g. 8"
-              className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold"
+              disabled={aiLoading}
+              className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold ${shimmer}`}
               value={formData.estimated_hours}
               onChange={handleChange}
             />
           </div>
         </div>
 
-        {/* Assignee - Half Width (could be full or grid) */}
+        {/* Assignee */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider ml-1">
@@ -202,7 +269,8 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               name="assignee_id"
               value={formData.assignee_id}
               onChange={handleChange}
-              className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer"
+              disabled={aiLoading}
+              className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
             >
               <option value="">Unassigned</option>
               {members.map((member) => (
@@ -224,7 +292,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
           </GlassButton>
           <GlassButton
             type="submit"
-            disabled={loading}
+            disabled={loading || aiLoading}
             className="px-10"
           >
             {loading ? 'Creating...' : 'Create Issue'}

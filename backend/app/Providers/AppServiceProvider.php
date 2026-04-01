@@ -24,7 +24,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(\OpenAI\Client::class, function () {
+            return \OpenAI::factory()
+                ->withApiKey(config('openai.api_key', ''))
+                ->withBaseUri(config('openai.base_uri', 'api.openai.com/v1'))
+                ->withHttpHeader('HTTP-Referer', config('app.url'))
+                ->withHttpHeader('X-Title', config('app.name'))
+                ->make();
+        });
     }
 
     /**

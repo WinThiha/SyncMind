@@ -58,3 +58,16 @@ export async function createIssueComment(projectId: number | string, key: string
   const response = await api.post(`/api/projects/${projectId}/issues/${key}/comments`, data);
   return response.data.data;
 }
+
+export interface AISuggestion {
+  description: string | null;
+  issue_type: string | null;
+  priority: string | null;
+  estimated_hours: number | null;
+  assignee_id: number | null;
+}
+
+export async function suggestIssueFields(projectId: number | string, summary: string): Promise<AISuggestion> {
+  const response = await api.post(`/api/projects/${projectId}/ai/suggest-issue`, { summary });
+  return response.data.data;
+}

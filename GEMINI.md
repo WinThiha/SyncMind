@@ -25,6 +25,19 @@ tests/
 
 npm test; npm run lint
 
+## Docker Support
+
+The project includes a `docker-compose.yml` file to spin up the entire stack:
+- **db**: PostgreSQL 16 (port 5432)
+- **backend**: Laravel application (port 8000)
+- **frontend**: Next.js application (port 3000)
+
+### Usage
+- `docker compose up -d`: Start the development environment.
+- `docker compose down`: Stop the services.
+- `docker compose ps`: Check the status of the containers.
+- `docker compose logs -f [service]`: Follow the logs of a specific service.
+
 ## Code Style
 
 PHP 8.2+ (via scoop), Node.js 20+ (via nvs), TypeScript: Follow standard conventions
