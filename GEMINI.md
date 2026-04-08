@@ -1,8 +1,10 @@
 ﻿# SyncMind Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-16
+Auto-generated from all feature plans. Last updated: 2026-04-08
 
 ## Active Technologies
+- Kotlin 2.0+ / Java 17 + Jetpack Compose (BOM), Hilt (DI), Retrofit/OkHttp (Networking), Compose Navigation, Kotlin Serialization (005-android-app-setup)
+- EncryptedSharedPreferences (Auth tokens) (005-android-app-setup)
 
 - PHP 8.2+ (via scoop), Node.js 20+ (via nvs), TypeScript + Laravel 12, Next.js 16, TailwindCSS, Laravel Sanctum, Laravel Socialite (001-user-auth)
 
@@ -23,6 +25,7 @@ npm test; npm run lint
 PHP 8.2+ (via scoop), Node.js 20+ (via nvs), TypeScript: Follow standard conventions
 
 ## Recent Changes
+- 005-android-app-setup: Added Kotlin 2.0+ / Java 17 + Jetpack Compose (BOM), Hilt (DI), Retrofit/OkHttp (Networking), Compose Navigation, Kotlin Serialization
 
 - 001-user-auth: Added PHP 8.2+ (via scoop), Node.js 20+ (via nvs), TypeScript + Laravel 12, Next.js 16, TailwindCSS, Laravel Sanctum, Laravel Socialite
 
