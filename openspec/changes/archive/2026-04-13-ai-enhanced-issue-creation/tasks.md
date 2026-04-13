@@ -11,6 +11,7 @@
 - [x] 2.3 Create `AIIssueSuggestionService` to handle prompt construction, project context gathering, and LLM API calls with structured JSON output
 - [x] 2.4 Create `AIIssueController` with `suggest` method
 - [x] 2.5 Add `POST /api/projects/{project}/ai/suggest-issue` route to `api.php`
+- [x] 2.6 Fix compact() undefined variable error in AIIssueSuggestionService::sanitize()
 
 ## 3. Frontend Integration
 
@@ -22,5 +23,5 @@
 ## 4. Testing & Validation
 
 - [x] 4.1 Write feature tests for `AIIssueController` to verify correct JSON structure handling and authentication
-- [ ] 4.2 Manually verify end-to-end flow using OpenRouter (e.g., Llama 3 or GPT-4o-mini)
-- [ ] 4.3 Verify that invalid `assignee_id`s or `issue_type`s are not returned/applied
+- [x] 4.2 Manually verify end-to-end flow using OpenRouter (e.g., Llama 3 or GPT-4o-mini)
+- [x] 4.3 Verify that invalid `assignee_id`s or `issue_type`s are not returned/applied

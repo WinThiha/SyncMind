@@ -90,17 +90,17 @@ export default function MarkdownEditor({ value, onChange, placeholder, rows = 5,
   };
 
   return (
-    <div className="w-full border border-gray-300 rounded-md overflow-hidden focus-within:ring-1 focus-within:ring-indigo-500 focus-within:border-indigo-500">
+    <div className="w-full border border-border-glow rounded-md overflow-hidden focus-within:ring-1 focus-within:ring-brand-primary/20 focus-within:border-border-glow">
       {label && <label className="sr-only">{label}</label>}
       
       {/* Tabs and Toolbar */}
-      <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-2">
+      <div className="flex items-center justify-between bg-foreground/5 border-b border-border-glow px-2">
         <div className="flex">
           <button
             type="button"
             onClick={() => setMode('write')}
             className={`px-3 py-2 text-sm font-medium flex items-center space-x-1 border-b-2 transition ${
-              mode === 'write' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+              mode === 'write' ? 'border-border-glow text-brand-primary' : 'border-transparent text-foreground/60 hover:text-foreground'
             }`}
           >
             <Edit2 size={14} />
@@ -110,7 +110,7 @@ export default function MarkdownEditor({ value, onChange, placeholder, rows = 5,
             type="button"
             onClick={() => setMode('preview')}
             className={`px-3 py-2 text-sm font-medium flex items-center space-x-1 border-b-2 transition ${
-              mode === 'preview' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+              mode === 'preview' ? 'border-border-glow text-brand-primary' : 'border-transparent text-foreground/60 hover:text-foreground'
             }`}
           >
             <Eye size={14} />
@@ -120,11 +120,11 @@ export default function MarkdownEditor({ value, onChange, placeholder, rows = 5,
 
         {mode === 'write' && (
           <div className="flex space-x-1 py-1">
-            <button type="button" onClick={() => insertText('**', '**')} title="Bold" className="p-1.5 text-gray-500 hover:bg-gray-200 rounded transition"><Bold size={16} /></button>
-            <button type="button" onClick={() => insertText('_', '_')} title="Italic" className="p-1.5 text-gray-500 hover:bg-gray-200 rounded transition"><Italic size={16} /></button>
-            <button type="button" onClick={() => insertText('\n- ', '')} title="Bullet List" className="p-1.5 text-gray-500 hover:bg-gray-200 rounded transition"><List size={16} /></button>
-            <button type="button" onClick={() => insertText('\n1. ', '')} title="Numbered List" className="p-1.5 text-gray-500 hover:bg-gray-200 rounded transition"><ListOrdered size={16} /></button>
-            <button type="button" onClick={() => insertText('[', '](url)')} title="Link" className="p-1.5 text-gray-500 hover:bg-gray-200 rounded transition"><LinkIcon size={16} /></button>
+            <button type="button" onClick={() => insertText('**', '**')} title="Bold" className="p-1.5 text-foreground/60 hover:bg-foreground/10 rounded transition"><Bold size={16} /></button>
+            <button type="button" onClick={() => insertText('_', '_')} title="Italic" className="p-1.5 text-foreground/60 hover:bg-foreground/10 rounded transition"><Italic size={16} /></button>
+            <button type="button" onClick={() => insertText('\n- ', '')} title="Bullet List" className="p-1.5 text-foreground/60 hover:bg-foreground/10 rounded transition"><List size={16} /></button>
+            <button type="button" onClick={() => insertText('\n1. ', '')} title="Numbered List" className="p-1.5 text-foreground/60 hover:bg-foreground/10 rounded transition"><ListOrdered size={16} /></button>
+            <button type="button" onClick={() => insertText('[', '](url)')} title="Link" className="p-1.5 text-foreground/60 hover:bg-foreground/10 rounded transition"><LinkIcon size={16} /></button>
           </div>
         )}
       </div>
@@ -139,14 +139,14 @@ export default function MarkdownEditor({ value, onChange, placeholder, rows = 5,
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             rows={rows}
-            className="block w-full border-0 p-3 text-gray-900 placeholder-gray-400 focus:ring-0 sm:text-sm resize-y"
+            className="block w-full border-0 p-3 text-foreground placeholder:text-foreground/40 focus:ring-0 sm:text-sm resize-y bg-transparent"
           />
         ) : (
-          <div className="p-3 bg-white min-h-[120px] overflow-auto">
+          <div className="p-3 bg-transparent min-h-[120px] overflow-auto">
             {value ? (
               <Markdown content={value} />
             ) : (
-              <span className="text-gray-400 italic text-sm">Nothing to preview</span>
+              <span className="text-foreground/40 italic text-sm">Nothing to preview</span>
             )}
           </div>
         )}

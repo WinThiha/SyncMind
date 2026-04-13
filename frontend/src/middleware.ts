@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const hasSession = request.cookies.get('laravel_session');
+  const hasSession = request.cookies.get('syncmind_session');
   const isProtectedPage = request.nextUrl.pathname.startsWith('/dashboard');
 
   // ONLY protect the dashboard. 

@@ -7,7 +7,12 @@ use OpenAI\Client;
 
 class AIIssueSuggestionService
 {
-    public function __construct(private Client $client) {}
+    private Client $client;
+
+    public function __construct()
+    {
+        $this->client = app('ai.client');
+    }
 
     /**
      * Suggest issue fields based on a summary and project context.
@@ -24,15 +29,15 @@ class AIIssueSuggestionService
             ->select('users.id', 'users.name', 'users.position')
             ->get()
             ->map(fn ($m) => [
-                'id'       => $m->id,
-                'name'     => $m->name,
+                'id' => $m->id,
+                'name' => $m->name,
                 'position' => $m->position ?? 'Team Member',
             ])
             ->values()
             ->all();
 
-        $membersJson    = json_encode($members, JSON_UNESCAPED_UNICODE);
-        $typesJson      = json_encode($issueTypes, JSON_UNESCAPED_UNICODE);
+        $membersJson = json_encode($members, JSON_UNESCAPED_UNICODE);
+        $typesJson = json_encode($issueTypes, JSON_UNESCAPED_UNICODE);
         $prioritiesJson = json_encode($priorities);
 
         $systemPrompt = <<<PROMPT
@@ -59,7 +64,7 @@ Respond ONLY with a valid JSON object matching this exact schema:
 }
 PROMPT;
 
-        $model    = config('openai.model', 'gpt-4o-mini');
+        $model = config('openai.model', 'gpt-4o-mini');
         $messages = [
             ['role' => 'system', 'content' => $systemPrompt],
             ['role' => 'user',   'content' => "Issue summary: {$summary}"],
@@ -68,20 +73,20 @@ PROMPT;
         // Try with structured JSON mode first; fall back for models that don't support it.
         try {
             $response = $this->client->chat()->create([
-                'model'           => $model,
-                'messages'        => $messages,
+                'model' => $model,
+                'messages' => $messages,
                 'response_format' => ['type' => 'json_object'],
-                'temperature'     => 0.3,
+                'temperature' => 0.3,
             ]);
         } catch (\Throwable) {
             $response = $this->client->chat()->create([
-                'model'       => $model,
-                'messages'    => $messages,
+                'model' => $model,
+                'messages' => $messages,
                 'temperature' => 0.3,
             ]);
         }
 
-        $raw  = $response->choices[0]->message->content ?? '{}';
+        $raw = $response->choices[0]->message->content ?? '{}';
         $data = $this->parseJson($raw);
 
         return $this->sanitize($data, $issueTypes, $members);
@@ -117,7 +122,7 @@ PROMPT;
     {
         $validMemberIds = array_column($members, 'id');
 
-        $issueType = in_array($data['issue_type'] ?? null, $issueTypes)
+        $issue_type = in_array($data['issue_type'] ?? null, $issueTypes)
             ? $data['issue_type']
             : null;
 
@@ -125,11 +130,11 @@ PROMPT;
             ? $data['priority']
             : null;
 
-        $assigneeId = in_array($data['assignee_id'] ?? null, $validMemberIds)
+        $assignee_id = in_array($data['assignee_id'] ?? null, $validMemberIds)
             ? (int) $data['assignee_id']
             : null;
 
-        $estimatedHours = is_numeric($data['estimated_hours'] ?? null) && $data['estimated_hours'] > 0
+        $estimated_hours = is_numeric($data['estimated_hours'] ?? null) && $data['estimated_hours'] > 0
             ? (float) $data['estimated_hours']
             : null;
 
