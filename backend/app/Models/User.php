@@ -24,6 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'position',
     ];
 
     /**
@@ -55,5 +56,23 @@ class User extends Authenticatable implements MustVerifyEmail
     public function socialAccounts(): HasMany
     {
         return $this->hasMany(SocialAccount::class);
+    }
+
+    /**
+     * Get the projects created by the user.
+     */
+    public function createdProjects(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Project::class, 'creator_id');
+    }
+
+    /**
+     * Get the projects the user is a member of.
+     */
+    public function projects(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'project_members')
+                    ->withPivot('role')
+                    ->withTimestamps();
     }
 }

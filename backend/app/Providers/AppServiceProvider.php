@@ -3,12 +3,18 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Models\Project;
+use App\Models\Issue;
+use App\Policies\ProjectPolicy;
+use App\Policies\IssuePolicy;
 use App\Observers\UserObserver;
+use App\Observers\IssueObserver;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -18,7 +24,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(\OpenAI\Client::class, function () {
+            return \OpenAI::factory()
+                ->withApiKey(config('openai.api_key', ''))
+                ->withBaseUri(config('openai.base_uri', 'api.openai.com/v1'))
+                ->withHttpHeader('HTTP-Referer', config('app.url'))
+                ->withHttpHeader('X-Title', config('app.name'))
+                ->make();
+        });
     }
 
     /**
@@ -26,8 +39,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register User Observer
+        // Register Policies
+        Gate::policy(Project::class, ProjectPolicy::class);
+        Gate::policy(Issue::class, IssuePolicy::class);
+
+        // Register Observers
         User::observe(UserObserver::class);
+        Issue::observe(IssueObserver::class);
 
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
