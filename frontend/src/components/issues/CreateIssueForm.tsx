@@ -211,12 +211,12 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
             >
               {project?.issue_types?.map((type: string) => (
-                <option key={type} value={type}>{type}</option>
+                <option key={type} value={type} className="bg-background text-foreground">{type}</option>
               )) || (
                 <>
-                  <option value="Task">Task</option>
-                  <option value="Bug">Bug</option>
-                  <option value="Request">Request</option>
+                  <option value="Task" className="bg-background text-foreground">Task</option>
+                  <option value="Bug" className="bg-background text-foreground">Bug</option>
+                  <option value="Request" className="bg-background text-foreground">Request</option>
                 </>
               )}
             </select>
@@ -234,9 +234,9 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               disabled={aiLoading}
               className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
             >
-              <option value="low">Low</option>
-              <option value="normal">Normal</option>
-              <option value="high">High</option>
+              <option value="low" className="bg-background text-foreground">Low</option>
+              <option value="normal" className="bg-background text-foreground">Normal</option>
+              <option value="high" className="bg-background text-foreground">High</option>
             </select>
           </div>
 
@@ -272,9 +272,9 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               disabled={aiLoading}
               className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
             >
-              <option value="">Unassigned</option>
+              <option value="" className="bg-background text-foreground">Unassigned</option>
               {members.map((member) => (
-                <option key={member.id} value={member.id}>{member.name}</option>
+                <option key={member.id} value={member.id} className="bg-background text-foreground">{member.name}</option>
               ))}
             </select>
           </div>
