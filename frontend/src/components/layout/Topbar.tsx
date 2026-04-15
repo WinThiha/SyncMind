@@ -1,18 +1,21 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Bell, Search, Sun, Moon } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/context/AuthContext';
+import { useSidebar } from '@/context/SidebarContext';
 
 export const Topbar: React.FC = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const { user } = useAuth();
+  const { collapsed } = useSidebar();
 
   return (
     <header
-      className="fixed top-0 right-0 left-64 h-16 z-50 flex items-center justify-between px-8 bg-background border-b border-border-glow shadow-sm"
+      className={`fixed top-0 right-0 h-16 z-50 flex items-center justify-between px-8 bg-background border-b border-border-glow shadow-sm transition-[left] duration-200 ease ${
+        collapsed ? 'left-20' : 'left-64'
+      }`}
     >
       <div className="flex items-center gap-4 bg-background px-4 py-2 rounded-xl w-96 max-w-full border border-border-glow shadow-sm">
         <Search size={18} className="text-foreground/40" />

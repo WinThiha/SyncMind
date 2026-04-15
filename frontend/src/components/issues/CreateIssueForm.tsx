@@ -44,6 +44,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [assigneeSuggestions, setAssigneeSuggestions] = useState<Array<{ assignee_id: number; reason: string }>>([]);
 
   useEffect(() => {
     async function loadData() {
@@ -87,6 +88,29 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
     const { name, value } = e.target;
     touchedFields.current.add(name);
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'assignee_id') {
+      setAssigneeSuggestions([]);
+    }
+  };
+
+  const handleSummaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    touchedFields.current.add(name);
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'summary' && value !== formData.summary) {
+      setAssigneeSuggestions([]);
+    }
+  };
+
+  const handleAssignFromSuggestion = (assigneeId: number) => {
+    touchedFields.current.add('assignee_id');
+    setFormData(prev => ({ ...prev, assignee_id: String(assigneeId) }));
+    setAssigneeSuggestions([]);
+  };
+
+  const getMemberName = (memberId: number): string => {
+    const member = members.find(m => m.id === memberId);
+    return member?.name ?? 'Unknown Member';
   };
 
   const handleDescriptionChange = (value: string) => {
@@ -103,6 +127,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
     }
     setAiLoading(true);
     setAiError(null);
+    setAssigneeSuggestions([]);
 
     try {
       const suggestions = await suggestIssueFields(projectId, formData.summary);
@@ -120,11 +145,9 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
         if (suggestions.estimated_hours != null && !touchedFields.current.has('estimated_hours')) {
           next.estimated_hours = String(suggestions.estimated_hours);
         }
-        if (suggestions.assignee_id != null && !touchedFields.current.has('assignee_id')) {
-          next.assignee_id = String(suggestions.assignee_id);
-        }
         return next;
       });
+      setAssigneeSuggestions(suggestions.assignee_suggestions || []);
     } catch (err: any) {
       setAiError(err.response?.data?.message || 'AI suggestion failed. Please try again.');
     } finally {
@@ -173,7 +196,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
             placeholder="What needs to be done?"
             className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-medium text-lg"
             value={formData.summary}
-            onChange={handleChange}
+            onChange={handleSummaryChange}
           />
           {aiError && (
             <p className="text-xs text-red-400 mt-1">{aiError}</p>
@@ -277,6 +300,30 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
                 <option key={member.id} value={member.id} className="bg-background text-foreground">{member.name}</option>
               ))}
             </select>
+            {assigneeSuggestions.length > 0 && (
+              <div className="mt-3 space-y-2">
+                <p className="text-xs font-semibold text-foreground/40 uppercase tracking-wider">AI Suggestions</p>
+                {assigneeSuggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start justify-between gap-3 p-3 rounded-lg bg-brand-primary/5 border border-brand-primary/20"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-foreground">{getMemberName(suggestion.assignee_id)}</p>
+                      <p className="text-xs text-foreground/60 mt-0.5 line-clamp-2">{suggestion.reason}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleAssignFromSuggestion(suggestion.assignee_id)}
+                      className="shrink-0 flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 transition-colors"
+                    >
+                      <User size={12} />
+                      Assign
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

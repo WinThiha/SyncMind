@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\Issue;
 use App\Models\IssueHistory;
 use App\Models\Project;
+use App\Models\ProjectIssueCounter;
 use App\Models\ProjectMember;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -63,6 +64,11 @@ class AITestEnvironmentSeeder extends Seeder
             'milestones' => ['M1 - Foundation', 'M2 - Core Features', 'M3 - Polish'],
             'versions' => ['v0.1.0', 'v0.2.0'],
             'creator_id' => $users['alice']->id,
+        ]);
+
+        ProjectIssueCounter::create([
+            'project_id' => $project->id,
+            'last_number' => 7,
         ]);
 
         ProjectMember::create([

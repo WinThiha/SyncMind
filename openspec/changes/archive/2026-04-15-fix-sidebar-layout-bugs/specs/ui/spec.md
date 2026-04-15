@@ -1,12 +1,5 @@
 ## MODIFIED Requirements
 
-### Requirement: Issue creation UI handles dark mode correctly
-The system MUST render the issue creation forms properly in dark mode, ensuring text is legible.
-
-#### Scenario: User views the issue creation form in dark mode
-- **WHEN** user enables dark mode and navigates to the issue creation page
-- **THEN** the Markdown Editor and Assignee select dropdown render with correct contrast
-
 ### Requirement: Collapsible sidebar layout synchronization
 The system SHALL ensure that the Sidebar width, Topbar horizontal offset, and Main Content margin-left are synchronized to exactly 80px (20 units) when the sidebar is in a collapsed state.
 
@@ -34,16 +27,3 @@ The system SHALL ensure the Logout button icon is horizontally centered within t
 #### Scenario: User views Logout button in collapsed sidebar
 - **WHEN** the sidebar is collapsed
 - **THEN** the Logout icon is centered within the 80px sidebar width, with no horizontal shift caused by invisible text or spacing.
-
-## ADDED Requirements
-
-### Requirement: Authenticated layout offsets react to sidebar collapsed state
-The Topbar and main content area MUST use dynamic horizontal offsets driven by SidebarContext instead of hardcoded pixel values.
-
-#### Scenario: Topbar uses dynamic left offset
-- **WHEN** the sidebar state changes between collapsed and expanded
-- **THEN** the Topbar's `left` CSS property transitions between `80px` and `256px` respectively
-
-#### Scenario: Main content uses dynamic margin-left
-- **WHEN** the sidebar state changes between collapsed and expanded
-- **THEN** the main content area's `margin-left` CSS property transitions between `80px` and `256px` respectively

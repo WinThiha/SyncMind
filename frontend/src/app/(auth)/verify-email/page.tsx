@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import { useAuth } from '@/context/AuthContext';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { refreshUser } = useAuth();
@@ -82,5 +82,13 @@ export default function VerifyEmailPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function VerifyEmailPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 text-center text-gray-500">Loading...</div>}>
+            <VerifyEmailContent />
+        </Suspense>
     );
 }

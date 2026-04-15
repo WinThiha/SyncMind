@@ -8,11 +8,15 @@ The system SHALL provide an AI-driven mechanism to suggest issue fields (Descrip
 - **THEN** the system requests AI suggestions and populates the empty fields in the form without overwriting existing user input
 
 ### Requirement: Smart Assignee Recommendation
-The system SHALL recommend an appropriate assignee for an issue based on the issue summary, the project members, and their designated `position`s.
+The system SHALL recommend multiple ranked assignees for an issue based on the issue summary, the project members, and their designated `position`s, each with a reason explaining the recommendation.
 
-#### Scenario: AI suggests an assignee based on role
+#### Scenario: AI suggests assignees based on role
 - **WHEN** the AI analyzes a front-end related issue summary
-- **THEN** the AI suggests a project member whose position is "Frontend Developer" (if available)
+- **THEN** the AI returns up to 3 assignee suggestions, where the top suggestion is a project member whose position is "Frontend Developer" (if available), with a reason explaining the role match
+
+#### Scenario: AI suggests assignees with reasons
+- **WHEN** the AI returns assignee suggestions
+- **THEN** each suggestion includes a `reason` string that explains why the member is recommended (e.g., role match, relevant expertise, team lead responsibility)
 
 ### Requirement: User Position Context
 The system SHALL store and provide user positions (e.g., "Product Manager", "Backend Engineer") to the AI to facilitate role-based logic.
