@@ -2,8 +2,12 @@
 set -e
 
 echo "==> Fixing storage permissions..."
-chmod -R 775 storage bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
+if [ "$(id -u)" = "0" ]; then
+    chmod -R 775 storage bootstrap/cache
+    chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
+else
+    echo "    (running as non-root, skipping chown/chmod)"
+fi
 
 echo "==> Generating APP_KEY if missing..."
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "base64:" ]; then
