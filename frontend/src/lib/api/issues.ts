@@ -64,7 +64,7 @@ export interface AISuggestion {
   issue_type: string | null;
   priority: string | null;
   estimated_hours: number | null;
-  assignee_id: number | null;
+  assignee_suggestions: Array<{ assignee_id: number; reason: string }>;
 }
 
 export async function suggestIssueFields(projectId: number | string, summary: string): Promise<AISuggestion> {

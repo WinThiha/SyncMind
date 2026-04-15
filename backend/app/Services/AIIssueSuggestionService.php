@@ -17,8 +17,9 @@ class AIIssueSuggestionService
     /**
      * Suggest issue fields based on a summary and project context.
      *
-     * Returns an array with keys: description, issue_type, priority, estimated_hours, assignee_id
-     * Each key is null if the AI could not produce a valid value.
+     * Returns an array with keys: description, issue_type, priority, estimated_hours, assignee_suggestions
+     * Each field is null if the AI could not produce a valid value.
+     * assignee_suggestions is an array of {assignee_id, reason} objects, capped at 3 entries.
      */
     public function suggest(Project $project, string $summary): array
     {
@@ -50,7 +51,7 @@ Team members: {$membersJson}
 Rules:
 - issue_type MUST be one of the available issue types exactly as listed.
 - priority MUST be one of: "low", "normal", "high".
-- assignee_id MUST be one of the integer IDs from the team members list, or null.
+- assignee_suggestions is an array of up to 3 objects, each with assignee_id (integer, must be one of the team member IDs from the team members list) and reason (string, non-empty explanation for why this person is a good fit for this issue).
 - estimated_hours should be a reasonable estimate in hours (a positive number, e.g. 2, 4, 8), or null if unclear.
 - description should be a concise markdown description expanding on the summary with context, steps, and acceptance criteria where applicable.
 
@@ -60,7 +61,7 @@ Respond ONLY with a valid JSON object matching this exact schema:
   "issue_type": "<string>",
   "priority": "<string>",
   "estimated_hours": <number or null>,
-  "assignee_id": <integer or null>
+  "assignee_suggestions": [{"assignee_id": <integer>, "reason": "<string>"}, ...]
 }
 PROMPT;
 
@@ -130,10 +131,6 @@ PROMPT;
             ? $data['priority']
             : null;
 
-        $assignee_id = in_array($data['assignee_id'] ?? null, $validMemberIds)
-            ? (int) $data['assignee_id']
-            : null;
-
         $estimated_hours = is_numeric($data['estimated_hours'] ?? null) && $data['estimated_hours'] > 0
             ? (float) $data['estimated_hours']
             : null;
@@ -142,6 +139,23 @@ PROMPT;
             ? $data['description']
             : null;
 
-        return compact('description', 'issue_type', 'priority', 'estimated_hours', 'assignee_id');
+        $assignee_suggestions = [];
+        if (is_array($data['assignee_suggestions'] ?? null)) {
+            foreach ($data['assignee_suggestions'] as $suggestion) {
+                if (count($assignee_suggestions) >= 3) {
+                    break;
+                }
+                $assigneeId = $suggestion['assignee_id'] ?? null;
+                $reason = $suggestion['reason'] ?? null;
+                if (in_array($assigneeId, $validMemberIds) && is_string($reason) && $reason !== '') {
+                    $assignee_suggestions[] = [
+                        'assignee_id' => (int) $assigneeId,
+                        'reason' => $reason,
+                    ];
+                }
+            }
+        }
+
+        return compact('description', 'issue_type', 'priority', 'estimated_hours', 'assignee_suggestions');
     }
 }
