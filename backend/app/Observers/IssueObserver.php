@@ -4,10 +4,19 @@ namespace App\Observers;
 
 use App\Models\Issue;
 use App\Models\IssueHistory;
+use App\Jobs\GenerateIssueEmbeddingJob;
 use Illuminate\Support\Facades\Auth;
 
 class IssueObserver
 {
+    /**
+     * Handle the Issue "created" event.
+     */
+    public function created(Issue $issue): void
+    {
+        GenerateIssueEmbeddingJob::dispatch($issue);
+    }
+
     /**
      * Handle the Issue "updated" event.
      */
@@ -15,6 +24,11 @@ class IssueObserver
     {
         $dirty = $issue->getDirty();
         $original = $issue->getOriginal();
+
+        // Dispatch embedding job if summary or description changed
+        if (array_intersect(['summary', 'description'], array_keys($dirty))) {
+            GenerateIssueEmbeddingJob::dispatch($issue);
+        }
 
         foreach ($dirty as $field => $newValue) {
             // Skip fields we don't want to track

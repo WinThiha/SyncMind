@@ -22,6 +22,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::apiResource('projects.issues', IssueController::class);
     Route::post('projects/{project}/issues/{issue_key}/comments', [\App\Http\Controllers\CommentController::class, 'store']);
     Route::post('projects/{project}/ai/suggest-issue', [AIIssueController::class, 'suggest']);
+    Route::get('projects/{project}/ai/similar-issues', [AIIssueController::class, 'similar']);
 });
 
 Route::prefix('auth')->group(function () {

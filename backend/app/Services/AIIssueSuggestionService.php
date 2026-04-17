@@ -23,6 +23,7 @@ class AIIssueSuggestionService
      */
     public function suggest(Project $project, string $summary): array
     {
+        \Log::info('test');
         $issueTypes = $project->issue_types ?? ['Task', 'Bug', 'Request'];
         $priorities = ['low', 'normal', 'high'];
 
@@ -79,13 +80,15 @@ PROMPT;
                 'response_format' => ['type' => 'json_object'],
                 'temperature' => 0.3,
             ]);
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            \Log::debug($e->getMessage());
             $response = $this->client->chat()->create([
                 'model' => $model,
                 'messages' => $messages,
                 'temperature' => 0.3,
             ]);
         }
+        \Log::debug(collect($response)->toArray());
 
         $raw = $response->choices[0]->message->content ?? '{}';
         $data = $this->parseJson($raw);

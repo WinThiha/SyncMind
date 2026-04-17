@@ -71,3 +71,20 @@ export async function suggestIssueFields(projectId: number | string, summary: st
   const response = await api.post(`/api/projects/${projectId}/ai/suggest-issue`, { summary });
   return response.data.data;
 }
+
+export interface SimilarIssue {
+  id: number;
+  project_id: number;
+  key_number: number;
+  summary: string;
+  status: string;
+  priority: string;
+  similarity: number;
+}
+
+export async function getSimilarIssues(projectId: number | string, text: string): Promise<SimilarIssue[]> {
+  const response = await api.get(`/api/projects/${projectId}/ai/similar-issues`, {
+    params: { text }
+  });
+  return response.data.data;
+}
