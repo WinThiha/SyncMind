@@ -27,6 +27,7 @@ class Issue extends Model
         'category',
         'milestone',
         'version',
+        'embedding',
     ];
 
     protected $casts = [

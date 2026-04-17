@@ -28,6 +28,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Vector Search Service (Gemini)
+    |--------------------------------------------------------------------------
+    */
+
+    'vector' => [
+        'base_uri' => env('AI_VECTOR_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta/'),
+        'model' => env('AI_VECTOR_MODEL', 'gemini-embedding-001'),
+        'output_dimensionality' => env('AI_VECTOR_OUTPUT_DIMENSIONALITY', 768),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Model
     |--------------------------------------------------------------------------
     */

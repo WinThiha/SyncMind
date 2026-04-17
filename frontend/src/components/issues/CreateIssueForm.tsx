@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createIssue } from '@/lib/api/issues';
-import { suggestIssueFields } from '@/lib/api/issues';
+import { suggestIssueFields, getSimilarIssues, SimilarIssue } from '@/lib/api/issues';
 import { getProject, getProjectMembers, ProjectMember } from '@/lib/api/projects';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import MarkdownEditor from '../shared/MarkdownEditor';
-import { motion } from 'framer-motion';
+import { SimilarIssuesCard } from './SimilarIssuesCard';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Type,
   AlignLeft,
@@ -45,6 +46,8 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
   const [error, setError] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [assigneeSuggestions, setAssigneeSuggestions] = useState<Array<{ assignee_id: number; reason: string }>>([]);
+  const [similarIssues, setSimilarIssues] = useState<SimilarIssue[]>([]);
+  const [isSearchingSimilar, setIsSearchingSimilar] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -64,6 +67,29 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
     }
     loadData();
   }, [projectId]);
+
+  // Debounced semantic search for similar issues
+  useEffect(() => {
+    if (formData.summary.length < 5) {
+      setSimilarIssues([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingSimilar(true);
+      try {
+        const issues = await getSimilarIssues(projectId, formData.summary);
+        // Only show issues with similarity > 0.7
+        setSimilarIssues(issues.filter(i => i.similarity > 0.7));
+      } catch (err) {
+        console.error('Failed to fetch similar issues', err);
+      } finally {
+        setIsSearchingSimilar(false);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [formData.summary, projectId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -198,6 +224,19 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
             value={formData.summary}
             onChange={handleSummaryChange}
           />
+          <AnimatePresence>
+            {isSearchingSimilar && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-[10px] font-bold text-brand-primary/60 uppercase tracking-widest mt-2 ml-1"
+              >
+                Checking for duplicates…
+              </motion.p>
+            )}
+          </AnimatePresence>
+          <SimilarIssuesCard issues={similarIssues} projectKey={project?.key} />
           {aiError && (
             <p className="text-xs text-red-400 mt-1">{aiError}</p>
           )}
