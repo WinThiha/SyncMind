@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Comment;
 use App\Models\Issue;
 use App\Models\Project;
 use App\Models\User;
+use App\Observers\CommentObserver;
 use App\Observers\IssueObserver;
 use App\Observers\UserObserver;
 use App\Policies\IssuePolicy;
@@ -46,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
         // Register Observers
         User::observe(UserObserver::class);
         Issue::observe(IssueObserver::class);
+        Comment::observe(CommentObserver::class);
 
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());

@@ -22,6 +22,9 @@ class IssueObserver
      */
     public function updated(Issue $issue): void
     {
+        // Invalidate AI thread summary cache
+        \Illuminate\Support\Facades\Cache::forget("issue_{$issue->id}_summary");
+
         $dirty = $issue->getDirty();
         $original = $issue->getOriginal();
 

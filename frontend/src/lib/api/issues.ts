@@ -88,3 +88,15 @@ export async function getSimilarIssues(projectId: number | string, text: string)
   });
   return response.data.data;
 }
+
+export interface ThreadSummary {
+  summary: string;
+  decisions: string[];
+  consensus: string;
+  action_items: string[];
+}
+
+export async function summarizeIssue(projectId: number | string, key: string, force = false): Promise<ThreadSummary> {
+  const response = await api.post(`/api/projects/${projectId}/issues/${key}/ai/summarize`, { force });
+  return response.data.data;
+}
