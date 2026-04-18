@@ -10,14 +10,15 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'default' => (defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__')) 
+    'default' => env('DB_CONNECTION', (defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__')) 
         ? 'sqlite' 
-        : env('DB_CONNECTION', 'sqlite'),
+        : 'sqlite'),
 
     /*
     |--------------------------------------------------------------------------
     | Database Connections
     |--------------------------------------------------------------------------
+    |
     */
 
     'connections' => [
@@ -25,9 +26,7 @@ return [
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),
-            'database' => (defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__')) 
-                ? ':memory:' 
-                : env('DB_DATABASE', database_path('database.sqlite')),
+            'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
             'busy_timeout' => null,
