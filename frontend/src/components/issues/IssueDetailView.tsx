@@ -20,11 +20,13 @@ import {
   ChevronDown,
   Edit2,
   ArrowRight,
-  Maximize2
+  Maximize2,
+  Sparkles
 } from 'lucide-react';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { BASE_SPRING } from '@/lib/animations';
-import { getIssue, createIssueComment, updateIssue } from '@/lib/api/issues';
+import { getIssue, createIssueComment, updateIssue, summarizeIssue, ThreadSummary } from '@/lib/api/issues';
+import SummaryCard from './SummaryCard';
 import { getProjectMembers, ProjectMember } from '@/lib/api/projects';
 import { useAuth } from '@/context/AuthContext';
 
@@ -58,6 +60,24 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
   const [submittingComment, setSubmittingComment] = useState(false);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [isEditorFocused, setIsEditorFocused] = useState(false);
+  
+  // AI Summary State
+  const [summary, setSummary] = useState<ThreadSummary | null>(null);
+  const [summarizing, setSummarizing] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+
+  const handleSummarize = async (force = false) => {
+    setSummarizing(true);
+    setSummaryError(null);
+    try {
+      const result = await summarizeIssue(issue.project_id, issue.key, force);
+      setSummary(result);
+    } catch (err: any) {
+      setSummaryError('Failed to generate AI summary. Please try again.');
+    } finally {
+      setSummarizing(false);
+    }
+  };
   
   const [quickData, setQuickData] = useState({
     status: '',
@@ -201,7 +221,31 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
             </section>
             <div className="h-px bg-border-glow/50" />
             <section className="space-y-8">
-              <div className="flex items-center gap-2 text-brand-primary"><History size={18} /><h4 className="text-sm font-bold uppercase tracking-widest">Activity</h4></div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-brand-primary"><History size={18} /><h4 className="text-sm font-bold uppercase tracking-widest">Activity</h4></div>
+                {!summary && !summarizing && (
+                  <button
+                    onClick={() => handleSummarize()}
+                    className="flex items-center text-[10px] font-bold text-brand-primary hover:text-brand-primary/80 bg-brand-primary/5 px-3 py-1.5 rounded-xl border border-brand-primary/10 transition-all hover:shadow-[0_0_10px_rgba(var(--brand-primary-rgb),0.1)]"
+                  >
+                    <Sparkles className="w-3 h-3 mr-1.5" />
+                    SUMMARIZE THREAD
+                  </button>
+                )}
+              </div>
+
+              {summaryError && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-2xl text-[11px] font-bold uppercase tracking-wider">
+                  {summaryError}
+                </div>
+              )}
+
+              <SummaryCard 
+                summary={summary} 
+                loading={summarizing} 
+                onRefresh={() => handleSummarize(true)} 
+              />
+
               <div className="space-y-10">
                 {loading ? <div className="flex items-center justify-center h-20 opacity-40"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div></div> : activityEntities.length === 0 ? <div className="text-center py-12 text-foreground/30 bg-foreground/[0.02] rounded-3xl border border-dashed border-border-glow"><p className="font-medium italic">No activity yet.</p></div> : 
                   activityEntities.map((entity) => (
