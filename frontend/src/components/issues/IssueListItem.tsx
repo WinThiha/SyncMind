@@ -12,6 +12,7 @@ interface Issue {
   status: string;
   priority: string;
   comments_count?: number;
+  similarity?: number;
 }
 
 interface IssueListItemProps {
@@ -52,6 +53,11 @@ export const IssueListItem: React.FC<IssueListItemProps> = ({ issue, onClick }) 
             <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${priorityColors[issue.priority] || priorityColors.low}`}>
               {issue.priority}
             </span>
+            {issue.similarity !== undefined && (
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
+                {Math.round(issue.similarity * 100)}% Match
+              </span>
+            )}
           </div>
         </div>
       </div>

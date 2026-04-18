@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getIssues, Issue } from '@/lib/api/issues';
+import { getIssues, Issue, getSimilarIssues } from '@/lib/api/issues';
 import { IssueListItem } from './IssueListItem';
 import { IssueDetailView } from './IssueDetailView';
 import { IssueSkeleton } from './IssueSkeleton';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Filter, RotateCcw, Search, ChevronDown } from 'lucide-react';
+import { Filter, RotateCcw, Search, ChevronDown, Sparkles } from 'lucide-react';
 
 interface IssueListProps {
   projectId: number | string;
@@ -23,6 +23,9 @@ export default function IssueList({ projectId }: IssueListProps) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isAISearchEnabled, setIsAISearchEnabled] = useState(false);
+  const [isSearchingAI, setIsSearchingAI] = useState(false);
+  const [aiSearchResults, setAISearchResults] = useState<Issue[]>([]);
 
   useEffect(() => {
     async function loadIssues() {
@@ -40,15 +43,52 @@ export default function IssueList({ projectId }: IssueListProps) {
   }, [projectId]);
 
   useEffect(() => {
-    let filtered = issues;
-    if (statusFilter !== 'all') filtered = filtered.filter(i => i.status === statusFilter);
-    if (priorityFilter !== 'all') filtered = filtered.filter(i => i.priority === priorityFilter);
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(i => i.summary.toLowerCase().includes(query) || i.key.toLowerCase().includes(query));
+    if (isAISearchEnabled) {
+      if (searchQuery.trim().length < 3) {
+        setAISearchResults([]);
+        setFilteredIssues([]);
+        return;
+      }
+
+      const timer = setTimeout(async () => {
+        setIsSearchingAI(true);
+        try {
+          const results = await getSimilarIssues(projectId, searchQuery);
+          // Only show results with similarity > 0.3 as per design
+          const validatedResults = results
+            .filter(r => r.similarity > 0.3)
+            .map(r => ({
+              ...r,
+              // Map Similarity results to Issue interface if needed
+              // The API already returns fields matching Issue interface
+            } as unknown as Issue));
+          
+          setAISearchResults(validatedResults);
+          
+          // Still apply status/priority filters to AI results
+          let filtered = validatedResults;
+          if (statusFilter !== 'all') filtered = filtered.filter(i => i.status === statusFilter);
+          if (priorityFilter !== 'all') filtered = filtered.filter(i => i.priority === priorityFilter);
+          setFilteredIssues(filtered);
+        } catch (err) {
+          console.error('AI Search failed', err);
+        } finally {
+          setIsSearchingAI(false);
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    } else {
+      let filtered = issues;
+      if (statusFilter !== 'all') filtered = filtered.filter(i => i.status === statusFilter);
+      if (priorityFilter !== 'all') filtered = filtered.filter(i => i.priority === priorityFilter);
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(i => i.summary.toLowerCase().includes(query) || i.key.toLowerCase().includes(query));
+      }
+      setFilteredIssues(filtered);
     }
-    setFilteredIssues(filtered);
-  }, [statusFilter, priorityFilter, searchQuery, issues]);
+  }, [statusFilter, priorityFilter, searchQuery, issues, isAISearchEnabled, projectId]);
 
   if (loading) {
     return (
@@ -67,11 +107,18 @@ export default function IssueList({ projectId }: IssueListProps) {
           <Search size={18} className="text-foreground/30 group-focus-within:text-brand-primary transition-colors" />
           <input 
             type="text" 
-            placeholder="Search issues by key or summary..." 
+            placeholder={isAISearchEnabled ? "Search with AI..." : "Search issues by key or summary..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="bg-transparent border-none outline-none text-sm w-full placeholder:text-foreground/30 font-medium"
           />
+          <button 
+            onClick={() => setIsAISearchEnabled(!isAISearchEnabled)}
+            className={`p-2 rounded-xl transition-all ${isAISearchEnabled ? 'bg-brand-primary/20 text-brand-primary shadow-[0_0_15px_rgba(var(--brand-primary-rgb),0.3)]' : 'text-foreground/30 hover:text-brand-primary hover:bg-foreground/5'}`}
+            title={isAISearchEnabled ? "Switch to Keyword Search" : "Switch to AI Search"}
+          >
+            <Sparkles size={18} className={isAISearchEnabled ? "animate-pulse" : ""} />
+          </button>
         </div>
 
         <div className="flex items-center gap-6">
@@ -118,10 +165,21 @@ export default function IssueList({ projectId }: IssueListProps) {
       </GlassCard>
 
       <div className="space-y-4">
-        {filteredIssues.length === 0 ? (
+        {isSearchingAI ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => <IssueSkeleton key={i} />)}
+            <div className="text-center text-foreground/30 text-xs animate-pulse font-bold uppercase tracking-widest">AI is searching for similar issues...</div>
+          </div>
+        ) : filteredIssues.length === 0 ? (
           <GlassCard className="text-center py-20 text-foreground/30 border-dashed">
             <Filter size={48} className="mx-auto mb-4 opacity-10" />
-            <p className="font-bold uppercase tracking-widest text-xs">No issues found matching your filters</p>
+            <p className="font-bold uppercase tracking-widest text-xs">
+              {isAISearchEnabled 
+                ? searchQuery.trim().length < 3 
+                  ? "Enter at least 3 characters to start AI search" 
+                  : "AI couldn't find any relevant issues" 
+                : "No issues found matching your filters"}
+            </p>
           </GlassCard>
         ) : (
           filteredIssues.map((issue) => (
@@ -135,7 +193,8 @@ export default function IssueList({ projectId }: IssueListProps) {
                 title: issue.summary,
                 status: issue.status,
                 priority: issue.priority,
-                comments_count: 0
+                comments_count: 0,
+                similarity: issue.similarity
               }} 
               onClick={() => setSelectedIssue(issue)}
             />
