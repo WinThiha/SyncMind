@@ -35,3 +35,17 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+
+# Android
+.gradle/
+local.properties
+android/.gradle/
+android/local.properties
+android/app/build/
+android/build/
+android/captures/
+android/.idea/
+android/*.iml
+android/.cxx/
+android/.externalNativeBuild/
+
