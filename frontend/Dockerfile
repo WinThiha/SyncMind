@@ -1,22 +1,18 @@
 FROM node:20-alpine
 
-# Set the working directory
+RUN apk add --no-cache su-exec
+
 WORKDIR /app
 
-# Ensure the node user owns the app directory and created subdirectories
-# This is crucial for named volumes to inherit the correct permissions
-RUN chown -R node:node /app
-
-# Switch to the node user for all subsequent operations
-USER node
-
-# Install dependencies first (layer cache)
-COPY --chown=node:node package.json package-lock.json ./
+COPY package.json package-lock.json ./
 RUN npm install
 
-# Copy source with correct ownership
-COPY --chown=node:node . .
+COPY . .
+
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 3000
 
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["npm", "run", "dev"]
