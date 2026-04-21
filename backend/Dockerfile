@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     unzip \
+    gosu \
     && docker-php-ext-install pdo pdo_pgsql pgsql pdo_sqlite zip bcmath \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
