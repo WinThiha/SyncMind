@@ -19,6 +19,7 @@ class AuthRepository @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 val body = response.body()!!
                 tokenManager.saveToken(body.token)
+                tokenManager.saveUser(body.user)
                 NetworkResult.Success(body)
             } else {
                 NetworkResult.Error(response.message(), response.code())
@@ -33,6 +34,7 @@ class AuthRepository @Inject constructor(
             val response = apiService.logout()
             if (response.isSuccessful) {
                 tokenManager.deleteToken()
+                tokenManager.deleteUser()
                 NetworkResult.Success(Unit)
             } else {
                 NetworkResult.Error(response.message(), response.code())

@@ -3,7 +3,10 @@ package com.syncmind.android.data
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.syncmind.android.data.model.User
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,7 +38,26 @@ class TokenManager @Inject constructor(
         sharedPreferences.edit().remove(KEY_TOKEN).apply()
     }
 
+    fun saveUser(user: User) {
+        val json = Json.encodeToString(user)
+        sharedPreferences.edit().putString(KEY_USER, json).apply()
+    }
+
+    fun getUser(): User? {
+        val json = sharedPreferences.getString(KEY_USER, null) ?: return null
+        return try {
+            Json.decodeFromString<User>(json)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun deleteUser() {
+        sharedPreferences.edit().remove(KEY_USER).apply()
+    }
+
     companion object {
         private const val KEY_TOKEN = "auth_token"
+        private const val KEY_USER = "user_data"
     }
 }

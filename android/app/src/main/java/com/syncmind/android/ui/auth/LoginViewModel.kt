@@ -42,7 +42,11 @@ class LoginViewModel @Inject constructor(
         _loginState.value = NetworkResult.Loading
         viewModelScope.launch {
             val result = authRepository.login(
-                LoginRequest(email = _email.value, password = _password.value)
+                LoginRequest(
+                    email = _email.value,
+                    password = _password.value,
+                    device_name = android.os.Build.MODEL
+                )
             )
             when (result) {
                 is NetworkResult.Success -> {
