@@ -101,11 +101,18 @@ class GoogleAuthController extends Controller
         );
 
         Auth::login($user, true);
-        $request->session()->regenerate();
+        
+        $token = null;
+        if ($request->has('device_name')) {
+            $token = $user->createToken($request->device_name)->plainTextToken;
+        } else {
+            $request->session()->regenerate();
+        }
 
         return response()->json([
             'message' => 'Login successful',
             'user' => $user,
+            'token' => $token,
         ]);
     }
 }
