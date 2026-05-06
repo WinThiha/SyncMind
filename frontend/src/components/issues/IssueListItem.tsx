@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { FAST_SPRING } from '@/lib/animations';
-import { Clock, MessageSquare, Tag } from 'lucide-react';
+import { Clock, MessageSquare, Calendar } from 'lucide-react';
 
 interface Issue {
   id: number;
@@ -13,6 +13,7 @@ interface Issue {
   priority: string;
   comments_count?: number;
   similarity?: number;
+  due_date?: string | null;
 }
 
 interface IssueListItemProps {
@@ -63,6 +64,12 @@ export const IssueListItem: React.FC<IssueListItemProps> = ({ issue, onClick }) 
       </div>
 
       <div className="flex items-center gap-4 text-foreground/40 text-sm">
+        {issue.due_date && (
+          <div className={`flex items-center gap-1 text-xs font-semibold ${new Date(issue.due_date) < new Date() ? 'text-red-400' : 'text-foreground/40'}`}>
+            <Calendar size={12} />
+            <span>{new Date(issue.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+          </div>
+        )}
         <div className="flex items-center gap-1">
           <MessageSquare size={14} />
           <span>{issue.comments_count || 0}</span>

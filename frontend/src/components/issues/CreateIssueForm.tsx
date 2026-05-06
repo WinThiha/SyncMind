@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createIssue } from '@/lib/api/issues';
 import { suggestIssueFields, getSimilarIssues, SimilarIssue } from '@/lib/api/issues';
 import { getProject, getProjectMembers, ProjectMember } from '@/lib/api/projects';
+import { getMilestones, type Milestone } from '@/lib/api/milestones';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import MarkdownEditor from '../shared/MarkdownEditor';
@@ -16,7 +17,9 @@ import {
   AlertCircle,
   Clock,
   User,
-  Sparkles
+  Sparkles,
+  Calendar,
+  Flag,
 } from 'lucide-react';
 
 interface CreateIssueFormProps {
@@ -34,12 +37,15 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
     assignee_id: '',
     estimated_hours: '',
     status: 'open',
+    due_date: '',
+    milestone_id: '',
   });
 
   // Track which fields have been manually touched by the user
   const touchedFields = useRef<Set<string>>(new Set());
 
   const [members, setMembers] = useState<ProjectMember[]>([]);
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -52,12 +58,14 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
   useEffect(() => {
     async function loadData() {
       try {
-        const [projectData, membersData] = await Promise.all([
+        const [projectData, membersData, milestonesData] = await Promise.all([
           getProject(projectId),
-          getProjectMembers(projectId)
+          getProjectMembers(projectId),
+          getMilestones(projectId),
         ]);
         setProject(projectData);
         setMembers(membersData);
+        setMilestones(milestonesData);
         if (projectData.issue_types?.length > 0) {
           setFormData(prev => ({ ...prev, issue_type: projectData.issue_types[0] }));
         }
@@ -100,7 +108,9 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
       await createIssue(projectId, {
         ...formData,
         assignee_id: formData.assignee_id ? parseInt(formData.assignee_id) : undefined,
-        estimated_hours: formData.estimated_hours ? parseFloat(formData.estimated_hours) : undefined
+        estimated_hours: formData.estimated_hours ? parseFloat(formData.estimated_hours) : undefined,
+        milestone_id: formData.milestone_id ? parseInt(formData.milestone_id) : undefined,
+        due_date: formData.due_date || undefined,
       });
       onSuccess();
     } catch (err: any) {
@@ -364,6 +374,43 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               </div>
             )}
           </div>
+        </div>
+
+        {/* Schedule */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-foreground/40 uppercase tracking-wider">
+              <Calendar size={12} />
+              Due Date
+            </label>
+            <input
+              type="date"
+              name="due_date"
+              value={formData.due_date}
+              onChange={(e) => setFormData(prev => ({ ...prev, due_date: e.target.value }))}
+              className="w-full px-4 py-3 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+            />
+          </div>
+
+          {milestones.length > 0 && (
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-xs font-bold text-foreground/40 uppercase tracking-wider">
+                <Flag size={12} />
+                Milestone
+              </label>
+              <select
+                name="milestone_id"
+                value={formData.milestone_id}
+                onChange={(e) => setFormData(prev => ({ ...prev, milestone_id: e.target.value }))}
+                className="w-full px-4 py-3 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+              >
+                <option value="">No milestone</option>
+                {milestones.filter(m => m.status !== 'closed').map((m) => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {/* Actions */}

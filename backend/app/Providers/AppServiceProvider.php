@@ -4,12 +4,14 @@ namespace App\Providers;
 
 use App\Models\Comment;
 use App\Models\Issue;
+use App\Models\Milestone;
 use App\Models\Project;
 use App\Models\User;
 use App\Observers\CommentObserver;
 use App\Observers\IssueObserver;
 use App\Observers\UserObserver;
 use App\Policies\IssuePolicy;
+use App\Policies\MilestonePolicy;
 use App\Policies\ProjectPolicy;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -44,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
         // Register Policies
         Gate::policy(Project::class, ProjectPolicy::class);
         Gate::policy(Issue::class, IssuePolicy::class);
+        Gate::policy(Milestone::class, MilestonePolicy::class);
 
         // Register Observers
         User::observe(UserObserver::class);

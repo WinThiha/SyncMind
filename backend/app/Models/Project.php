@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
 {
@@ -15,16 +16,14 @@ class Project extends Model
         'icon',
         'issue_types',
         'categories',
-        'milestones',
         'versions',
         'creator_id',
     ];
 
     protected $casts = [
         'issue_types' => 'array',
-        'categories' => 'array',
-        'milestones' => 'array',
-        'versions' => 'array',
+        'categories'  => 'array',
+        'versions'    => 'array',
     ];
 
     public function getRouteKeyName()
@@ -47,5 +46,10 @@ class Project extends Model
     public function issues()
     {
         return $this->hasMany(Issue::class);
+    }
+
+    public function milestones()
+    {
+        return $this->hasMany(Milestone::class);
     }
 }

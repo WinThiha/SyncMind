@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\AIIssueController;
+use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\UserSettingsController;
@@ -24,6 +25,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('projects/{project}/transfer', [ProjectController::class, 'transferOwnership']);
     Route::apiResource('projects.members', \App\Http\Controllers\ProjectMemberController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::apiResource('projects.issues', IssueController::class);
+    Route::apiResource('projects.milestones', MilestoneController::class);
     Route::post('projects/{project}/issues/{issue_key}/comments', [\App\Http\Controllers\CommentController::class, 'store']);
     Route::post('projects/{project}/issues/{issue_key}/ai/summarize', [AIIssueController::class, 'summarize']);
     Route::post('projects/{project}/ai/suggest-issue', [AIIssueController::class, 'suggest']);
