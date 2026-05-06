@@ -13,6 +13,8 @@ export interface Issue {
   estimated_hours: number | null;
   actual_hours: number | null;
   assignee_id: number | null;
+  milestone_id: number | null;
+  due_date: string | null;
   creator_id: number;
   created_at: string;
   updated_at: string;

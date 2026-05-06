@@ -25,22 +25,26 @@ class Issue extends Model
         'assignee_id',
         'creator_id',
         'category',
-        'milestone',
+        'milestone_id',
+        'due_date',
         'version',
         'embedding',
     ];
 
     protected $casts = [
         'estimated_hours' => 'float',
-        'actual_hours' => 'float',
+        'actual_hours'    => 'float',
+        'due_date'        => 'date:Y-m-d',
     ];
 
-    /**
-     * Get the project that owns the issue.
-     */
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function milestone(): BelongsTo
+    {
+        return $this->belongsTo(Milestone::class);
     }
 
     /**

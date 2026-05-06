@@ -127,12 +127,17 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
           <p className="text-sm text-foreground/60">Documentation (Soon).</p>
         </GlassCard>
 
-        <GlassCard className="p-6 opacity-40 cursor-not-allowed grayscale">
-          <div className="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center text-yellow-500 mb-4">
+        <GlassCard
+          glow
+          whileHover={{ y: -4 }}
+          onClick={() => router.push(`/projects/${unwrappedParams.id}/milestones`)}
+          className="p-6 cursor-pointer group"
+        >
+          <div className="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center text-yellow-500 mb-4 group-hover:bg-yellow-500 group-hover:text-white transition-colors duration-300">
             <BarChart2 size={24} />
           </div>
-          <h3 className="font-bold text-lg mb-1">Timeline</h3>
-          <p className="text-sm text-foreground/60">Visualization (Soon).</p>
+          <h3 className="font-bold text-lg mb-1">Milestones</h3>
+          <p className="text-sm text-foreground/60">Track schedule and progress.</p>
         </GlassCard>
       </div>
 

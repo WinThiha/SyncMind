@@ -31,8 +31,6 @@ class UpdateProjectRequest extends FormRequest
             'issue_types.*' => ['required', 'string', 'max:50'],
             'categories' => ['nullable', 'array'],
             'categories.*' => ['string', 'max:50'],
-            'milestones' => ['nullable', 'array'],
-            'milestones.*' => ['string', 'max:50'],
             'versions' => ['nullable', 'array'],
             'versions.*' => ['string', 'max:50'],
         ];

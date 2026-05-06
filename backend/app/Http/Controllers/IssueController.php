@@ -56,9 +56,10 @@ class IssueController extends Controller
             'estimated_hours' => 'nullable|numeric|min:0|max:9999',
             'actual_hours' => 'nullable|numeric|min:0|max:9999',
             'assignee_id' => 'nullable|exists:users,id',
-            'category' => 'nullable|string|max:255',
-            'milestone' => 'nullable|string|max:255',
-            'version' => 'nullable|string|max:255',
+            'category'     => 'nullable|string|max:255',
+            'milestone_id' => 'nullable|integer|exists:milestones,id',
+            'due_date'     => 'nullable|date',
+            'version'      => 'nullable|string|max:255',
         ]);
 
         $validated['creator_id'] = Auth::id();
@@ -106,9 +107,10 @@ class IssueController extends Controller
             'estimated_hours' => 'nullable|numeric|min:0|max:9999',
             'actual_hours' => 'nullable|numeric|min:0|max:9999',
             'assignee_id' => 'nullable|exists:users,id',
-            'category' => 'nullable|string|max:255',
-            'milestone' => 'nullable|string|max:255',
-            'version' => 'nullable|string|max:255',
+            'category'     => 'nullable|string|max:255',
+            'milestone_id' => 'nullable|integer|exists:milestones,id',
+            'due_date'     => 'nullable|date',
+            'version'      => 'nullable|string|max:255',
         ]);
 
         $issue->update($validated);
