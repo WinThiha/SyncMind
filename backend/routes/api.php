@@ -9,6 +9,7 @@ use App\Http\Controllers\AIIssueController;
 use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\IssueController;
+use App\Http\Controllers\UserSettingsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    Route::get('/user/settings', [UserSettingsController::class, 'show']);
+    Route::put('/user/settings', [UserSettingsController::class, 'update']);
+    Route::put('/user/settings/password', [UserSettingsController::class, 'updatePassword'])->middleware('throttle:password-update');
 
     Route::apiResource('projects', ProjectController::class);
     Route::post('projects/{project}/transfer', [ProjectController::class, 'transferOwnership']);

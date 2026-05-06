@@ -20,6 +20,10 @@ class RegistrationTest extends TestCase
         ]);
 
         $response->assertStatus(201);
+        $response->assertJsonPath('user.email', 'test@example.com');
+        $response->assertJsonPath('token', null);
+
+        $this->assertAuthenticated('web');
         $this->assertDatabaseHas('users', [
             'name' => 'Test User',
             'email' => 'test@example.com',

@@ -46,13 +46,18 @@ class RegisterController extends Controller
             $user->markEmailAsVerified();
         }
 
-        Auth::login($user);
+        Auth::login($user, false);
+
+        if ($request->hasSession()) {
+            $request->session()->regenerate();
+        }
 
         event(new Registered($user));
 
         return response()->json([
             'message' => 'User registered successfully.',
             'user' => $user,
+            'token' => null,
         ], 201);
     }
 }
