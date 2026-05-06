@@ -4,6 +4,17 @@ delivery:
     - antigravity
     - gemini # (optional)
 
+context: |
+  Test execution policy:
+  - Prefer Docker test runs.
+  - Always clear Laravel config cache before any Laravel test command.
+  - Backend full/filtered test commands:
+    1) docker compose exec backend php artisan config:clear
+    2) docker compose exec backend sh -lc 'APP_ENV=testing DB_CONNECTION=pgsql DB_HOST=db DB_DATABASE=syncmind_test DB_USERNAME=syncmind DB_PASSWORD=secret php artisan test'
+    3) For filtered runs, append --filter=<TestName> to the php artisan test command in step 2.
+  - Frontend test command:
+    docker compose exec frontend npm run test
+
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.
