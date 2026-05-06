@@ -6,6 +6,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isProtectedPage =
     pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/settings') ||
     pathname.startsWith('/projects');
 
   if (isProtectedPage && !hasSession) {
@@ -16,5 +17,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/projects/:path*'],
+  matcher: ['/dashboard/:path*', '/settings/:path*', '/projects/:path*'],
 };

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, Sun, Moon, LogOut, ChevronDown } from 'lucide-react';
+import Link from 'next/link';
+import { Search, Sun, Moon, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
@@ -141,6 +142,17 @@ export const Topbar: React.FC = () => {
                 </div>
 
                 <div className="p-1.5">
+                  <Link
+                    href="/settings"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground/70 hover:bg-foreground/5 hover:text-foreground transition-colors"
+                  >
+                    <Settings size={16} className="text-foreground/40" />
+                    Settings
+                  </Link>
+
+                  <div className="my-1 border-t border-border-glow" />
+
                   <button
                     onClick={() => { setDropdownOpen(false); logout(); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-500/8 transition-colors"

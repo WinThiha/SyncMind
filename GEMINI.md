@@ -28,6 +28,22 @@ tests/
 
 npm test; npm run lint
 
+## Test & Lint Execution Rules
+
+- Temporary safety note (2026-05-06): a prior Docker Laravel test run bypassed expected safety assumptions and may have touched local DB context. Treat Docker Laravel test execution as cautionary until strict guard hardening is implemented.
+- Prefer Docker execution for frontend and backend commands.
+- Frontend npm commands should run in the frontend container:
+  - `docker compose exec frontend npm run lint`
+  - `docker compose exec frontend npm run test`
+- Backend Laravel tests must clear config cache first and inject testing DB env vars in Docker:
+  - `docker compose exec backend php artisan config:clear`
+  - `docker compose exec backend sh -lc 'APP_ENV=testing DB_CONNECTION=pgsql DB_HOST=db DB_DATABASE=syncmind_test DB_USERNAME=syncmind DB_PASSWORD=secret php artisan test'`
+- Reason: the repository safety guard (`backend/tests/TestCase.php`) blocks tests when resolved env is not testing or DB name is not a test DB. Container defaults are often `APP_ENV=local` and `DB_DATABASE=syncmind`.
+
+Pending hardening:
+- Enforce exact test DB allowlist and explicit `APP_ENV=testing` in `backend/tests/TestCase.php`.
+- Add mandatory runtime preflight output (`app.env`, default connection, resolved database name) before test commands.
+
 ## Docker Support
 
 The project includes a `docker-compose.yml` file to spin up the entire stack:

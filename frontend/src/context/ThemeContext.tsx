@@ -1,12 +1,17 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+
+type ThemeMode = 'light' | 'dark';
+type ThemePreference = ThemeMode | 'system';
 
 interface ThemeContextValue {
-  theme: 'light' | 'dark';
+  theme: ThemeMode;
   isDarkMode: boolean;
   toggleTheme: () => void;
-  setTheme: (theme: 'light' | 'dark') => void;
+  setTheme: (theme: ThemeMode) => void;
+  applySavedThemePreference: (preference: ThemePreference | null) => void;
+  clearThemeOverride: () => void;
   performancePriority: boolean;
   setPerformancePriority: (priority: boolean) => void;
 }
@@ -14,31 +19,52 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 const THEME_STORAGE_KEY = 'syncmind-theme';
+const THEME_OVERRIDE_STORAGE_KEY = 'syncmind-theme-override';
 const PERFORMANCE_STORAGE_KEY = 'syncmind-performance';
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<'light' | 'dark'>('light');
+  const [theme, setThemeState] = useState<ThemeMode>('light');
+  const [savedThemePreference, setSavedThemePreference] = useState<ThemePreference>('system');
+  const [localThemeOverride, setLocalThemeOverride] = useState<ThemeMode | null>(null);
+  const [systemTheme, setSystemTheme] = useState<ThemeMode>('light');
   const [performancePriority, setPerformancePriorityState] = useState<boolean>(false);
 
   useEffect(() => {
-    // Initial sync from localStorage and system preference
-    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY) as 'light' | 'dark' | null;
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    const initialTheme = storedTheme || (systemPrefersDark ? 'dark' : 'light');
-    setThemeState(initialTheme);
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const resolvedSystemTheme: ThemeMode = media.matches ? 'dark' : 'light';
+    setSystemTheme(resolvedSystemTheme);
+
+    const storedOverride = localStorage.getItem(THEME_OVERRIDE_STORAGE_KEY);
+    const legacyStoredTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    const initialOverride = (storedOverride === 'light' || storedOverride === 'dark')
+      ? storedOverride
+      : (legacyStoredTheme === 'light' || legacyStoredTheme === 'dark' ? legacyStoredTheme : null);
+
+    setLocalThemeOverride(initialOverride);
+    setThemeState(initialOverride ?? resolvedSystemTheme);
 
     const storedPerformance = localStorage.getItem(PERFORMANCE_STORAGE_KEY);
-    // Auto-detect performance if not stored (e.g., low hardware concurrency)
-    const initialPerformance = storedPerformance 
-      ? storedPerformance === 'true' 
+    const initialPerformance = storedPerformance
+      ? storedPerformance === 'true'
       : (navigator.hardwareConcurrency !== undefined && navigator.hardwareConcurrency < 4);
-    
     setPerformancePriorityState(initialPerformance);
+
+    const onSystemThemeChange = (event: MediaQueryListEvent) => {
+      setSystemTheme(event.matches ? 'dark' : 'light');
+    };
+    media.addEventListener('change', onSystemThemeChange);
+
+    return () => {
+      media.removeEventListener('change', onSystemThemeChange);
+    };
   }, []);
 
   useEffect(() => {
-    // Apply theme to document
+    const resolvedTheme = localThemeOverride ?? (savedThemePreference === 'system' ? systemTheme : savedThemePreference);
+    setThemeState((prev) => (prev === resolvedTheme ? prev : resolvedTheme));
+  }, [localThemeOverride, savedThemePreference, systemTheme]);
+
+  useEffect(() => {
     const root = window.document.documentElement;
     if (theme === 'dark') {
       root.classList.add('dark');
@@ -46,7 +72,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       root.classList.remove('dark');
     }
     localStorage.setItem(THEME_STORAGE_KEY, theme);
-  }, [theme]);
+    if (localThemeOverride) {
+      localStorage.setItem(THEME_OVERRIDE_STORAGE_KEY, localThemeOverride);
+    } else {
+      localStorage.removeItem(THEME_OVERRIDE_STORAGE_KEY);
+    }
+  }, [theme, localThemeOverride]);
 
   useEffect(() => {
     // Apply performance attribute to document
@@ -55,17 +86,30 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem(PERFORMANCE_STORAGE_KEY, String(performancePriority));
   }, [performancePriority]);
 
-  const toggleTheme = () => {
-    setThemeState((prev) => (prev === 'light' ? 'dark' : 'light'));
-  };
+  const toggleTheme = useCallback(() => {
+    setLocalThemeOverride((prev) => {
+      if (prev) {
+        return prev === 'light' ? 'dark' : 'light';
+      }
+      return theme === 'light' ? 'dark' : 'light';
+    });
+  }, [theme]);
 
-  const setTheme = (newTheme: 'light' | 'dark') => {
-    setThemeState(newTheme);
-  };
+  const setTheme = useCallback((newTheme: ThemeMode) => {
+    setLocalThemeOverride(newTheme);
+  }, []);
 
-  const setPerformancePriority = (priority: boolean) => {
+  const applySavedThemePreference = useCallback((preference: ThemePreference | null) => {
+    setSavedThemePreference(preference ?? 'system');
+  }, []);
+
+  const clearThemeOverride = useCallback(() => {
+    setLocalThemeOverride(null);
+  }, []);
+
+  const setPerformancePriority = useCallback((priority: boolean) => {
     setPerformancePriorityState(priority);
-  };
+  }, []);
 
   return (
     <ThemeContext.Provider
@@ -74,6 +118,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         isDarkMode: theme === 'dark',
         toggleTheme,
         setTheme,
+        applySavedThemePreference,
+        clearThemeOverride,
         performancePriority,
         setPerformancePriority,
       }}

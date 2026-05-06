@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { ThemePreferenceSync } from "@/components/theme/ThemePreferenceSync";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +41,7 @@ export default function RootLayout({
         <ThemeProvider>
           <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
             <AuthProvider>
+              <ThemePreferenceSync />
               {children}
             </AuthProvider>
           </GoogleOAuthProvider>

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
+  Settings,
   HelpCircle,
   LogOut,
   ChevronRight,
@@ -16,6 +17,7 @@ import { useSidebar } from '@/context/SidebarContext';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+  { icon: Settings, label: 'Settings', href: '/settings' },
   { icon: HelpCircle, label: 'Help', href: '/help' },
 ];
 

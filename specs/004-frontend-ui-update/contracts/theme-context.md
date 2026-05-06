@@ -24,7 +24,12 @@ interface ThemeContextValue {
 - **`onToggle`**: Update `localStorage` and apply the `.dark` class to the `document.documentElement`.
 - **`onPerformanceChange`**: Update `localStorage` and set a `data-performance` attribute on the root element.
 
-## 3. Storage Keys
+## 3. Settings Integration Rules
+
+- Settings page data loading MUST NOT override the active theme with a fallback value when no explicit user theme has been saved server-side.
+- Theme changes from Settings MUST only be applied globally after an explicit user save action.
+
+## 4. Storage Keys
 
 - `syncmind-theme`: `"light" | "dark"`
 - `syncmind-performance`: `"true" | "false"`

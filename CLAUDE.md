@@ -14,6 +14,29 @@ The two apps run as separate processes and communicate over HTTP. The frontend s
 
 All backend commands must be run from `backend/`, all frontend commands from `frontend/`.
 
+### Docker-First Test Execution
+
+When Docker services are available, always run tests inside containers instead of the host environment.
+
+> Temporary safety note (2026-05-06): a prior Docker Laravel test execution bypassed expected guard assumptions and may have affected local DB context. Keep Docker Laravel test runs in a caution state until strict guard hardening is added in code.
+
+```bash
+# Frontend tests
+docker compose exec frontend npm run test
+
+# Backend tests
+docker compose exec backend php artisan config:clear
+docker compose exec backend sh -lc 'APP_ENV=testing DB_CONNECTION=pgsql DB_HOST=db DB_DATABASE=syncmind_test DB_USERNAME=syncmind DB_PASSWORD=secret php artisan test'
+```
+
+Important: this repository has a runtime safety guard in `backend/tests/TestCase.php` that blocks tests when Laravel resolves `APP_ENV=local` or a non-test DB name. In this Docker setup, container defaults are typically `APP_ENV=local` and `DB_DATABASE=syncmind`, so injecting testing env vars inline is required for safe execution.
+
+Pending hardening:
+- Require exact DB allowlist match (for example `syncmind_test`) in `backend/tests/TestCase.php`.
+- Require explicit testing env match and preflight output of resolved runtime env + DB before any test run.
+
+Only fall back to host commands if containers are unavailable.
+
 ### Backend (Laravel)
 
 ```bash
@@ -23,12 +46,15 @@ cd backend
 php artisan serve
 
 # Run all tests
+php artisan config:clear
 php artisan test
 
 # Run a single test file
+php artisan config:clear
 php artisan test tests/Feature/Auth/LoginTest.php
 
 # Run a single test method
+php artisan config:clear
 php artisan test --filter test_user_can_login
 
 # Run linter (Laravel Pint)

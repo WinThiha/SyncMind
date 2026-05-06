@@ -32,6 +32,8 @@ class GoogleLoginTest extends TestCase
         ]);
 
         $response->assertStatus(200);
+        $response->assertJsonPath('user.email', $user->email);
+        $response->assertJsonPath('token', null);
         $this->assertAuthenticatedAs($user);
     }
 
@@ -55,6 +57,8 @@ class GoogleLoginTest extends TestCase
         ]);
 
         $response->assertStatus(200);
+        $response->assertJsonPath('user.email', $user->email);
+        $response->assertJsonPath('token', null);
         $this->assertAuthenticatedAs($user);
     }
 
