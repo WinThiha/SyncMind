@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -22,8 +22,8 @@ class ProjectCreationTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-                 ->assertJsonPath('data.name', 'Test Project')
-                 ->assertJsonPath('data.key', 'TEST');
+            ->assertJsonPath('data.name', 'Test Project')
+            ->assertJsonPath('data.key', 'TEST');
 
         $this->assertDatabaseHas('projects', [
             'key' => 'TEST',
@@ -53,9 +53,9 @@ class ProjectCreationTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['key']);
+            ->assertJsonValidationErrors(['key']);
     }
-    
+
     public function test_project_key_must_be_uppercase_alpha()
     {
         $user = User::factory()->create();
@@ -67,6 +67,6 @@ class ProjectCreationTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['key']);
+            ->assertJsonValidationErrors(['key']);
     }
 }

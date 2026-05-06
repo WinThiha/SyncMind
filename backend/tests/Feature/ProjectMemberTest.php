@@ -21,14 +21,14 @@ class ProjectMemberTest extends TestCase
 
         $response = $this->actingAs($creator)->postJson("/api/projects/{$project->id}/members", [
             'email' => $userToAdd->email,
-            'role' => 'normal'
+            'role' => 'normal',
         ]);
 
         $response->assertStatus(201);
         $this->assertDatabaseHas('project_members', [
             'project_id' => $project->id,
             'user_id' => $userToAdd->id,
-            'role' => 'normal'
+            'role' => 'normal',
         ]);
     }
 
@@ -44,7 +44,7 @@ class ProjectMemberTest extends TestCase
 
         $response = $this->actingAs($normalMember)->postJson("/api/projects/{$project->id}/members", [
             'email' => $userToAdd->email,
-            'role' => 'normal'
+            'role' => 'normal',
         ]);
 
         $response->assertStatus(403);
@@ -60,14 +60,14 @@ class ProjectMemberTest extends TestCase
         $project->members()->attach($member->id, ['role' => 'normal']);
 
         $response = $this->actingAs($creator)->putJson("/api/projects/{$project->id}/members/{$member->id}", [
-            'role' => 'admin'
+            'role' => 'admin',
         ]);
 
         $response->assertStatus(200);
         $this->assertDatabaseHas('project_members', [
             'project_id' => $project->id,
             'user_id' => $member->id,
-            'role' => 'admin'
+            'role' => 'admin',
         ]);
     }
 
@@ -85,7 +85,7 @@ class ProjectMemberTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseMissing('project_members', [
             'project_id' => $project->id,
-            'user_id' => $member->id
+            'user_id' => $member->id,
         ]);
     }
 
@@ -103,7 +103,7 @@ class ProjectMemberTest extends TestCase
         $response->assertStatus(422);
         $this->assertDatabaseHas('project_members', [
             'project_id' => $project->id,
-            'user_id' => $creator->id
+            'user_id' => $creator->id,
         ]);
     }
 }

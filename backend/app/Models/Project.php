@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
 {
@@ -22,8 +21,8 @@ class Project extends Model
 
     protected $casts = [
         'issue_types' => 'array',
-        'categories'  => 'array',
-        'versions'    => 'array',
+        'categories' => 'array',
+        'versions' => 'array',
     ];
 
     public function getRouteKeyName()
@@ -39,8 +38,8 @@ class Project extends Model
     public function members()
     {
         return $this->belongsToMany(User::class, 'project_members')
-                    ->withPivot('role')
-                    ->withTimestamps();
+            ->withPivot('role')
+            ->withTimestamps();
     }
 
     public function issues()

@@ -29,10 +29,10 @@ class ProjectViewTest extends TestCase
         $response = $this->actingAs($user)->getJson('/api/projects');
 
         $response->assertStatus(200)
-                 ->assertJsonCount(2, 'data')
-                 ->assertJsonFragment(['name' => 'Project 1'])
-                 ->assertJsonFragment(['name' => 'Project 2'])
-                 ->assertJsonMissing(['name' => 'Project 3']);
+            ->assertJsonCount(2, 'data')
+            ->assertJsonFragment(['name' => 'Project 1'])
+            ->assertJsonFragment(['name' => 'Project 2'])
+            ->assertJsonMissing(['name' => 'Project 3']);
     }
 
     public function test_user_cannot_view_project_they_are_not_involved_in()
@@ -47,7 +47,7 @@ class ProjectViewTest extends TestCase
 
         $response->assertStatus(403);
     }
-    
+
     public function test_user_can_view_project_they_are_involved_in()
     {
         $user = User::factory()->create();
@@ -58,6 +58,6 @@ class ProjectViewTest extends TestCase
         $response = $this->actingAs($user)->getJson("/api/projects/{$project->id}");
 
         $response->assertStatus(200)
-                 ->assertJsonPath('data.id', $project->id);
+            ->assertJsonPath('data.id', $project->id);
     }
 }

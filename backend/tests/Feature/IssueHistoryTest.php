@@ -3,9 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\Issue;
+use App\Models\IssueHistory;
 use App\Models\Project;
 use App\Models\User;
-use App\Models\IssueHistory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -21,12 +21,12 @@ class IssueHistoryTest extends TestCase
 
         $issue = Issue::factory()->create([
             'project_id' => $project->id,
-            'status' => 'open'
+            'status' => 'open',
         ]);
 
         $response = $this->actingAs($admin)
             ->putJson("/api/projects/{$project->id}/issues/{$issue->full_key}", [
-                'status' => 'in_progress'
+                'status' => 'in_progress',
             ]);
 
         $response->assertStatus(200);
@@ -36,7 +36,7 @@ class IssueHistoryTest extends TestCase
             'user_id' => $admin->id,
             'field' => 'status',
             'old_value' => 'open',
-            'new_value' => 'in_progress'
+            'new_value' => 'in_progress',
         ]);
     }
 
@@ -49,13 +49,13 @@ class IssueHistoryTest extends TestCase
         $issue = Issue::factory()->create([
             'project_id' => $project->id,
             'summary' => 'Old Summary',
-            'priority' => 'normal'
+            'priority' => 'normal',
         ]);
 
         $response = $this->actingAs($admin)
             ->putJson("/api/projects/{$project->id}/issues/{$issue->full_key}", [
                 'summary' => 'New Summary',
-                'priority' => 'high'
+                'priority' => 'high',
             ]);
 
         $response->assertStatus(200);
@@ -70,14 +70,14 @@ class IssueHistoryTest extends TestCase
         $project->members()->attach($admin->id, ['role' => 'admin']);
 
         $issue = Issue::factory()->create(['project_id' => $project->id]);
-        
+
         // Create some history
         IssueHistory::create([
             'issue_id' => $issue->id,
             'user_id' => $admin->id,
             'field' => 'status',
             'old_value' => 'open',
-            'new_value' => 'in_progress'
+            'new_value' => 'in_progress',
         ]);
 
         $response = $this->actingAs($admin)
@@ -87,9 +87,9 @@ class IssueHistoryTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     'history' => [
-                        '*' => ['field', 'old_value', 'new_value', 'user']
-                    ]
-                ]
+                        '*' => ['field', 'old_value', 'new_value', 'user'],
+                    ],
+                ],
             ]);
     }
 }

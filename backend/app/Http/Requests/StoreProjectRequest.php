@@ -33,7 +33,7 @@ class StoreProjectRequest extends FormRequest
             'versions.*' => ['string', 'max:50'],
         ];
     }
-    
+
     public function messages(): array
     {
         return [

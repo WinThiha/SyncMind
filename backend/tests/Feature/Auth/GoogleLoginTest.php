@@ -18,7 +18,7 @@ class GoogleLoginTest extends TestCase
             'email' => 'test@example.com',
         ]);
 
-        $abstractUser = new SocialiteUser();
+        $abstractUser = new SocialiteUser;
         $abstractUser->id = '12345';
         $abstractUser->email = 'test@example.com';
         $abstractUser->name = 'Google User';
@@ -41,7 +41,7 @@ class GoogleLoginTest extends TestCase
             'email' => 'test@example.com',
         ]);
 
-        $abstractUser = new SocialiteUser();
+        $abstractUser = new SocialiteUser;
         $abstractUser->id = '12345';
         $abstractUser->email = 'test@example.com';
         $abstractUser->name = 'Google User';
@@ -60,7 +60,7 @@ class GoogleLoginTest extends TestCase
 
     public function test_google_callback_returns_error_if_user_not_found(): void
     {
-        $abstractUser = new SocialiteUser();
+        $abstractUser = new SocialiteUser;
         $abstractUser->id = '12345';
         $abstractUser->email = 'new@example.com';
         $abstractUser->name = 'New User';

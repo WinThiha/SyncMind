@@ -33,8 +33,8 @@ class Issue extends Model
 
     protected $casts = [
         'estimated_hours' => 'float',
-        'actual_hours'    => 'float',
-        'due_date'        => 'date:Y-m-d',
+        'actual_hours' => 'float',
+        'due_date' => 'date:Y-m-d',
     ];
 
     public function project(): BelongsTo
@@ -84,6 +84,6 @@ class Issue extends Model
      */
     public function getFullKeyAttribute(): string
     {
-        return ($this->project->key ?? 'UNK') . '-' . $this->key_number;
+        return ($this->project->key ?? 'UNK').'-'.$this->key_number;
     }
 }

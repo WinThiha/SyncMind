@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\MemberAddedMail;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class ProjectMemberController extends Controller
 {
@@ -15,7 +17,7 @@ class ProjectMemberController extends Controller
         }
 
         return response()->json([
-            'data' => $project->members()->select('users.id', 'name', 'email')->withPivot('role')->get()
+            'data' => $project->members()->select('users.id', 'name', 'email')->withPivot('role')->get(),
         ]);
     }
 
@@ -26,11 +28,16 @@ class ProjectMemberController extends Controller
         }
 
         $validated = $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'role' => 'required|in:admin,normal'
+            'email' => 'required|email',
+            'role' => 'required|in:admin,normal',
         ]);
 
         $userToAdd = User::where('email', $validated['email'])->first();
+
+        if (! $userToAdd) {
+            // Delegate to invitation flow
+            return app(ProjectInvitationController::class)->store($request, $project);
+        }
 
         if ($project->members()->where('user_id', $userToAdd->id)->exists()) {
             return response()->json(['message' => 'User is already a member of this project.'], 422);
@@ -38,9 +45,12 @@ class ProjectMemberController extends Controller
 
         $project->members()->attach($userToAdd->id, ['role' => $validated['role']]);
 
+        Mail::to($userToAdd->email)->queue(new MemberAddedMail($userToAdd, $project, $request->user()));
+
         return response()->json([
             'message' => 'Member added successfully.',
-            'data' => $userToAdd
+            'data' => $userToAdd,
+            'type' => 'added',
         ], 201);
     }
 
@@ -51,7 +61,7 @@ class ProjectMemberController extends Controller
         }
 
         $validated = $request->validate([
-            'role' => 'required|in:admin,normal'
+            'role' => 'required|in:admin,normal',
         ]);
 
         if ($project->creator_id == $userId && $validated['role'] !== 'admin') {

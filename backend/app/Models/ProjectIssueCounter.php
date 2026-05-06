@@ -11,6 +11,7 @@ class ProjectIssueCounter extends Model
     use HasFactory;
 
     protected $primaryKey = 'project_id';
+
     public $incrementing = false;
 
     protected $fillable = [

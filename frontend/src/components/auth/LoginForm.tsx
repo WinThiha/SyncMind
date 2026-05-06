@@ -2,16 +2,19 @@
 
 import { useState } from 'react';
 import api from '@/lib/axios';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import GoogleLoginButton from './GoogleLoginButton';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { Mail, Lock, LogIn } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Suspense } from 'react';
 
-export default function LoginForm() {
+function LoginFormContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { refreshUser } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -31,7 +34,9 @@ export default function LoginForm() {
             const response = await api.post('/api/auth/login', { email, password, remember });
             await refreshUser();
             setMessage(response.data.message);
-            router.push('/dashboard');
+            const pendingToken = sessionStorage.getItem('pendingInviteToken');
+            const redirect = searchParams.get('redirect');
+            router.push(pendingToken ? `/invitations/${pendingToken}` : (redirect || '/dashboard'));
         } catch (error: any) {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors);
@@ -101,17 +106,25 @@ export default function LoginForm() {
                     {errors.password && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1 uppercase">{errors.password[0]}</p>}
                 </div>
 
-                <div className="flex items-center ml-1">
-                    <input
-                        id="remember"
-                        type="checkbox"
-                        checked={remember}
-                        onChange={(e) => setRemember(e.target.checked)}
-                        className="h-4 w-4 text-brand-primary border-border-glow rounded transition-colors bg-foreground/5"
-                    />
-                    <label htmlFor="remember" className="ml-2 block text-xs font-bold text-foreground/40 uppercase tracking-wider cursor-pointer">
-                        Keep me logged in
-                    </label>
+                <div className="flex items-center justify-between ml-1">
+                    <div className="flex items-center">
+                        <input
+                            id="remember"
+                            type="checkbox"
+                            checked={remember}
+                            onChange={(e) => setRemember(e.target.checked)}
+                            className="h-4 w-4 text-brand-primary border-border-glow rounded transition-colors bg-foreground/5"
+                        />
+                        <label htmlFor="remember" className="ml-2 block text-xs font-bold text-foreground/40 uppercase tracking-wider cursor-pointer">
+                            Keep me logged in
+                        </label>
+                    </div>
+                    <Link
+                        href="/forgot-password"
+                        className="text-xs font-bold text-brand-primary hover:text-brand-secondary transition-colors underline-offset-4 hover:underline"
+                    >
+                        Forgot password?
+                    </Link>
                 </div>
 
                 <GlassButton
@@ -124,5 +137,13 @@ export default function LoginForm() {
                 </GlassButton>
             </form>
         </GlassCard>
+    );
+}
+
+export default function LoginForm() {
+    return (
+        <Suspense fallback={<div className="text-center p-10 bg-background/50 rounded-2xl animate-pulse font-bold text-foreground/30">LOADING FORM...</div>}>
+            <LoginFormContent />
+        </Suspense>
     );
 }

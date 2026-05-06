@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
-use App\Services\AIIssueSuggestionService;
 use App\Services\AIIssueSearchService;
+use App\Services\AIIssueSuggestionService;
 use App\Services\AIThreadSummarizationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -74,7 +74,7 @@ class AIIssueController extends Controller
         $cacheKey = "issue_{$issue->id}_summary";
         $force = $request->boolean('force', false);
 
-        if (!$force && $cached = Cache::get($cacheKey)) {
+        if (! $force && $cached = Cache::get($cacheKey)) {
             return response()->json(['data' => $cached, 'cached' => true]);
         }
 

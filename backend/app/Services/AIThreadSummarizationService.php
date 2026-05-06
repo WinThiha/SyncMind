@@ -53,20 +53,20 @@ class AIThreadSummarizationService
     public function summarize(Issue $issue): array
     {
         $events = $this->aggregateTimeline($issue);
-        
+
         if (empty($events)) {
             return [
                 'summary' => 'No activity recorded for this issue yet.',
                 'decisions' => [],
                 'consensus' => 'N/A',
-                'action_items' => []
+                'action_items' => [],
             ];
         }
 
         // Limit to last 50 events for context efficiency
         $events = array_slice($events, -50);
 
-        $timelineText = "";
+        $timelineText = '';
         foreach ($events as $event) {
             $time = $event['created_at']->format('Y-m-d H:i');
             if ($event['type'] === 'comment') {
@@ -76,7 +76,7 @@ class AIThreadSummarizationService
             }
         }
 
-        $systemPrompt = <<<PROMPT
+        $systemPrompt = <<<'PROMPT'
 You are an expert project management assistant. Analyze the following timeline of an issue (including comments and field changes) and provide a structured summary.
 
 Focus on:
@@ -122,6 +122,7 @@ PROMPT;
         }
 
         $raw = $response->choices[0]->message->content ?? '{}';
+
         return $this->parseJson($raw);
     }
 
@@ -149,7 +150,7 @@ PROMPT;
             'summary' => 'Failed to parse AI response.',
             'decisions' => [],
             'consensus' => 'Unknown',
-            'action_items' => []
+            'action_items' => [],
         ];
     }
 }

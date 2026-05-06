@@ -36,7 +36,7 @@ class IssueController extends Controller
         return response()->json([
             'data' => $issues->map(function ($issue) {
                 return $this->formatIssue($issue);
-            })
+            }),
         ]);
     }
 
@@ -56,10 +56,10 @@ class IssueController extends Controller
             'estimated_hours' => 'nullable|numeric|min:0|max:9999',
             'actual_hours' => 'nullable|numeric|min:0|max:9999',
             'assignee_id' => 'nullable|exists:users,id',
-            'category'     => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:255',
             'milestone_id' => 'nullable|integer|exists:milestones,id',
-            'due_date'     => 'nullable|date',
-            'version'      => 'nullable|string|max:255',
+            'due_date' => 'nullable|date',
+            'version' => 'nullable|string|max:255',
         ]);
 
         $validated['creator_id'] = Auth::id();
@@ -69,7 +69,7 @@ class IssueController extends Controller
         $issue = $this->issueService->createIssue($project, $validated);
 
         return response()->json([
-            'data' => $this->formatIssue($issue)
+            'data' => $this->formatIssue($issue),
         ], 201);
     }
 
@@ -79,13 +79,13 @@ class IssueController extends Controller
     public function show(Project $project, string $key): JsonResponse
     {
         $issue = $this->findIssueByKey($project, $key);
-        
+
         $this->authorize('view', $issue);
 
         $issue->load(['assignee', 'creator', 'comments.user', 'history.user']);
 
         return response()->json([
-            'data' => $this->formatIssue($issue)
+            'data' => $this->formatIssue($issue),
         ]);
     }
 
@@ -107,16 +107,16 @@ class IssueController extends Controller
             'estimated_hours' => 'nullable|numeric|min:0|max:9999',
             'actual_hours' => 'nullable|numeric|min:0|max:9999',
             'assignee_id' => 'nullable|exists:users,id',
-            'category'     => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:255',
             'milestone_id' => 'nullable|integer|exists:milestones,id',
-            'due_date'     => 'nullable|date',
-            'version'      => 'nullable|string|max:255',
+            'due_date' => 'nullable|date',
+            'version' => 'nullable|string|max:255',
         ]);
 
         $issue->update($validated);
 
         return response()->json([
-            'data' => $this->formatIssue($issue->fresh(['assignee', 'creator']))
+            'data' => $this->formatIssue($issue->fresh(['assignee', 'creator'])),
         ]);
     }
 
@@ -155,6 +155,7 @@ class IssueController extends Controller
     {
         $data = $issue->toArray();
         $data['key'] = $issue->full_key;
+
         return $data;
     }
 }

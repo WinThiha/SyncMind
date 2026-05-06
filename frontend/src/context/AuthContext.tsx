@@ -8,7 +8,9 @@ interface User {
     id: number;
     name: string;
     email: string;
+    position: string | null;
     email_verified_at: string | null;
+    avatar?: string;
 }
 
 interface AuthContextType {

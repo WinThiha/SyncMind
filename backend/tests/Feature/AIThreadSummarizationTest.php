@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Comment;
 use App\Models\Issue;
 use App\Models\Project;
 use App\Models\User;
-use App\Models\Comment;
 use App\Services\AIThreadSummarizationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -40,7 +40,7 @@ class AIThreadSummarizationTest extends TestCase
             'summary' => 'This is a test summary.',
             'decisions' => ['Decision 1'],
             'consensus' => 'Agreement reached',
-            'action_items' => ['Task 1']
+            'action_items' => ['Task 1'],
         ];
 
         $this->mock(AIThreadSummarizationService::class, function ($mock) use ($fakeSummary) {
@@ -52,7 +52,7 @@ class AIThreadSummarizationTest extends TestCase
             ->assertStatus(200)
             ->assertJson([
                 'data' => $fakeSummary,
-                'cached' => false
+                'cached' => false,
             ]);
 
         $this->assertTrue(Cache::has("issue_{$issue->id}_summary"));
@@ -79,7 +79,7 @@ class AIThreadSummarizationTest extends TestCase
             ->assertStatus(200)
             ->assertJson([
                 'data' => $cachedData,
-                'cached' => true
+                'cached' => true,
             ]);
     }
 
@@ -94,7 +94,7 @@ class AIThreadSummarizationTest extends TestCase
         Comment::create([
             'issue_id' => $issue->id,
             'user_id' => $user->id,
-            'content' => 'New comment'
+            'content' => 'New comment',
         ]);
 
         $this->assertFalse(Cache::has("issue_{$issue->id}_summary"));

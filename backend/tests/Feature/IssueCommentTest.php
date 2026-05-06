@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Mail\IssueCommentNotification;
-use App\Models\Comment;
 use App\Models\Issue;
 use App\Models\Project;
 use App\Models\User;
@@ -25,14 +24,14 @@ class IssueCommentTest extends TestCase
 
         $response = $this->actingAs($member)
             ->postJson("/api/projects/{$project->id}/issues/{$issue->full_key}/comments", [
-                'content' => 'My first comment'
+                'content' => 'My first comment',
             ]);
 
         $response->assertStatus(201);
         $this->assertDatabaseHas('issue_comments', [
             'issue_id' => $issue->id,
             'user_id' => $member->id,
-            'content' => 'My first comment'
+            'content' => 'My first comment',
         ]);
     }
 
@@ -48,17 +47,17 @@ class IssueCommentTest extends TestCase
 
         $issue = Issue::factory()->create([
             'project_id' => $project->id,
-            'creator_id' => $creator->id
+            'creator_id' => $creator->id,
         ]);
 
         $response = $this->actingAs($member)
             ->postJson("/api/projects/{$project->id}/issues/{$issue->full_key}/comments", [
                 'content' => 'Notify you!',
-                'notify_emails' => true
+                'notify_emails' => true,
             ]);
 
         $response->assertStatus(201);
-        
+
         Mail::assertQueued(IssueCommentNotification::class, function ($mail) use ($creator) {
             return $mail->hasTo($creator->email);
         });
@@ -72,7 +71,7 @@ class IssueCommentTest extends TestCase
 
         $response = $this->actingAs($user)
             ->postJson("/api/projects/{$project->id}/issues/{$issue->full_key}/comments", [
-                'content' => 'Intruder'
+                'content' => 'Intruder',
             ]);
 
         $response->assertStatus(403);

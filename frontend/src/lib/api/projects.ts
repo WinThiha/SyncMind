@@ -67,3 +67,27 @@ export const updateProjectMemberRole = async (projectId: number | string, userId
   const response = await api.put(`/api/projects/${projectId}/members/${userId}`, { role });
   return response.data;
 };
+
+export interface ProjectInvitation {
+  id: number;
+  email: string;
+  role: string;
+  expires_at: string;
+  created_at: string;
+  inviter?: { id: number; name: string };
+}
+
+export const getProjectInvitations = async (projectId: number | string): Promise<ProjectInvitation[]> => {
+  const response = await api.get(`/api/projects/${projectId}/invitations`);
+  return response.data.data;
+};
+
+export const createProjectInvitation = async (projectId: number | string, data: { email: string; role: string }) => {
+  const response = await api.post(`/api/projects/${projectId}/members`, data);
+  return response.data;
+};
+
+export const cancelProjectInvitation = async (projectId: number | string, invitationId: number | string) => {
+  const response = await api.delete(`/api/projects/${projectId}/invitations/${invitationId}`);
+  return response.data;
+};

@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use App\Models\Comment;
-use App\Models\Issue;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -16,6 +15,7 @@ class IssueCommentNotification extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public $comment;
+
     public $issue;
 
     /**

@@ -13,6 +13,7 @@ use App\Observers\UserObserver;
 use App\Policies\IssuePolicy;
 use App\Policies\MilestonePolicy;
 use App\Policies\ProjectPolicy;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -59,6 +60,12 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('auth', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
+        });
+
+        ResetPassword::createUrlUsing(function ($notifiable, string $token) {
+            $frontendUrl = config('app.frontend_url') ?? 'http://localhost:3000';
+
+            return $frontendUrl.'/reset-password?token='.$token.'&email='.urlencode($notifiable->getEmailForPasswordReset());
         });
 
         VerifyEmail::createUrlUsing(function ($notifiable) {

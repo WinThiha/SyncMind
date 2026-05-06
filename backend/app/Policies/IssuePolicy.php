@@ -30,6 +30,7 @@ class IssuePolicy
     public function create(User $user, Project $project): bool
     {
         $member = $project->members()->where('user_id', $user->id)->first();
+
         return $member && ($member->pivot->role === 'admin' || $project->creator_id === $user->id);
     }
 
@@ -40,7 +41,7 @@ class IssuePolicy
     {
         $project = $issue->project;
         $member = $project->members()->where('user_id', $user->id)->first();
-        
+
         // Admin or project creator can always update
         if ($member && ($member->pivot->role === 'admin' || $project->creator_id === $user->id)) {
             return true;
@@ -57,6 +58,7 @@ class IssuePolicy
     {
         $project = $issue->project;
         $member = $project->members()->where('user_id', $user->id)->first();
+
         return $member && ($member->pivot->role === 'admin' || $project->creator_id === $user->id);
     }
 
@@ -67,6 +69,7 @@ class IssuePolicy
     {
         $project = $issue->project;
         $member = $project->members()->where('user_id', $user->id)->first();
+
         return $member && ($member->pivot->role === 'admin' || $project->creator_id === $user->id);
     }
 
@@ -77,6 +80,7 @@ class IssuePolicy
     {
         $project = $issue->project;
         $member = $project->members()->where('user_id', $user->id)->first();
+
         return $member && ($member->pivot->role === 'admin' || $project->creator_id === $user->id);
     }
 

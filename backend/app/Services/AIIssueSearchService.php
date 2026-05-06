@@ -5,8 +5,6 @@ namespace App\Services;
 use App\Models\Issue;
 use App\Models\Project;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
 
 class AIIssueSearchService
 {
@@ -20,18 +18,18 @@ class AIIssueSearchService
 
         $response = \Illuminate\Support\Facades\Http::withHeaders([
             'x-goog-api-key' => config('openai.api_key'),
-        ])->post($baseUrl . "/models/{$model}:embedContent", [
+        ])->post($baseUrl."/models/{$model}:embedContent", [
             'model' => "models/{$model}",
             'content' => [
                 'parts' => [
-                    ['text' => $text]
-                ]
+                    ['text' => $text],
+                ],
             ],
             'outputDimensionality' => config('openai.vector.output_dimensionality'),
         ])->throw()->json();
 
         $embedding = $response['embedding']['values'];
-        $vectorString = '[' . implode(',', $embedding) . ']';
+        $vectorString = '['.implode(',', $embedding).']';
 
         // Use cosine distance (<=>) for similarity search
         // Higher similarity = lower distance
@@ -49,6 +47,7 @@ class AIIssueSearchService
                 $issue->similarity = round(1 - $issue->distance, 4);
                 unset($issue->distance);
                 unset($issue->embedding);
+
                 return $issue;
             });
     }

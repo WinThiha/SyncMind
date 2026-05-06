@@ -18,8 +18,8 @@ export default function DashboardPage() {
         <div className="flex flex-col">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome back, {user.name.split(' ')[0]}! 👋</h1>
-                    <p className="text-foreground/60">Here's what's happening with your projects today.</p>
+                    <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome back, {user.name.split(' ')[0]}</h1>
+                    <p className="text-foreground/55">Here&apos;s what&apos;s happening with your projects today.</p>
                 </div>
                 
                 <GlassButton

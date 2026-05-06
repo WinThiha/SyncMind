@@ -14,20 +14,23 @@ class MilestoneTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private User $member;
+
     private User $outsider;
+
     private Project $project;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->admin    = User::factory()->create();
-        $this->member   = User::factory()->create();
+        $this->admin = User::factory()->create();
+        $this->member = User::factory()->create();
         $this->outsider = User::factory()->create();
 
         $this->project = Project::factory()->create(['creator_id' => $this->admin->id]);
-        $this->project->members()->attach($this->admin->id,  ['role' => 'admin']);
+        $this->project->members()->attach($this->admin->id, ['role' => 'admin']);
         $this->project->members()->attach($this->member->id, ['role' => 'member']);
     }
 
@@ -57,11 +60,11 @@ class MilestoneTest extends TestCase
     {
         $response = $this->actingAs($this->admin)
             ->postJson("/api/projects/{$this->project->id}/milestones", [
-                'name'        => 'v1.0 Launch',
+                'name' => 'v1.0 Launch',
                 'description' => 'First public release',
-                'start_date'  => '2026-05-10',
-                'due_date'    => '2026-06-01',
-                'status'      => 'open',
+                'start_date' => '2026-05-10',
+                'due_date' => '2026-06-01',
+                'status' => 'open',
             ]);
 
         $response->assertStatus(201)
@@ -70,7 +73,7 @@ class MilestoneTest extends TestCase
 
         $this->assertDatabaseHas('milestones', [
             'project_id' => $this->project->id,
-            'name'       => 'v1.0 Launch',
+            'name' => 'v1.0 Launch',
         ]);
     }
 
@@ -85,9 +88,9 @@ class MilestoneTest extends TestCase
     {
         $this->actingAs($this->admin)
             ->postJson("/api/projects/{$this->project->id}/milestones", [
-                'name'       => 'Bad dates',
+                'name' => 'Bad dates',
                 'start_date' => '2026-06-01',
-                'due_date'   => '2026-05-01',
+                'due_date' => '2026-05-01',
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['due_date']);
@@ -99,16 +102,16 @@ class MilestoneTest extends TestCase
     {
         $milestone = Milestone::factory()->create(['project_id' => $this->project->id]);
         Issue::factory()->count(2)->create([
-            'project_id'   => $this->project->id,
+            'project_id' => $this->project->id,
             'milestone_id' => $milestone->id,
-            'status'       => 'open',
-            'creator_id'   => $this->admin->id,
+            'status' => 'open',
+            'creator_id' => $this->admin->id,
         ]);
         Issue::factory()->create([
-            'project_id'   => $this->project->id,
+            'project_id' => $this->project->id,
             'milestone_id' => $milestone->id,
-            'status'       => 'closed',
-            'creator_id'   => $this->admin->id,
+            'status' => 'closed',
+            'creator_id' => $this->admin->id,
         ]);
 
         $response = $this->actingAs($this->member)
@@ -163,9 +166,9 @@ class MilestoneTest extends TestCase
     {
         $milestone = Milestone::factory()->create(['project_id' => $this->project->id]);
         $issue = Issue::factory()->create([
-            'project_id'   => $this->project->id,
+            'project_id' => $this->project->id,
             'milestone_id' => $milestone->id,
-            'creator_id'   => $this->admin->id,
+            'creator_id' => $this->admin->id,
         ]);
 
         $this->actingAs($this->admin)
@@ -183,9 +186,9 @@ class MilestoneTest extends TestCase
 
         $response = $this->actingAs($this->admin)
             ->postJson("/api/projects/{$this->project->id}/issues", [
-                'summary'      => 'Scheduled issue',
-                'issue_type'   => 'Task',
-                'due_date'     => '2026-05-20',
+                'summary' => 'Scheduled issue',
+                'issue_type' => 'Task',
+                'due_date' => '2026-05-20',
                 'milestone_id' => $milestone->id,
             ]);
 
@@ -200,8 +203,8 @@ class MilestoneTest extends TestCase
     {
         $milestone = Milestone::factory()->create([
             'project_id' => $this->project->id,
-            'due_date'   => now()->subDay()->toDateString(),
-            'status'     => 'open',
+            'due_date' => now()->subDay()->toDateString(),
+            'status' => 'open',
         ]);
 
         $response = $this->actingAs($this->member)
@@ -215,8 +218,8 @@ class MilestoneTest extends TestCase
     {
         $milestone = Milestone::factory()->create([
             'project_id' => $this->project->id,
-            'due_date'   => now()->subDay()->toDateString(),
-            'status'     => 'closed',
+            'due_date' => now()->subDay()->toDateString(),
+            'status' => 'closed',
         ]);
 
         $response = $this->actingAs($this->member)

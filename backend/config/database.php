@@ -10,8 +10,8 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'default' => env('DB_CONNECTION', (defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__')) 
-        ? 'sqlite' 
+    'default' => env('DB_CONNECTION', (defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__'))
+        ? 'sqlite'
         : 'sqlite'),
 
     /*

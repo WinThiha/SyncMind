@@ -25,7 +25,7 @@ class IssueLifecycleTest extends TestCase
                 'description' => 'Test Description',
                 'issue_type' => 'Bug',
                 'priority' => 'high',
-                'estimated_hours' => 10.5
+                'estimated_hours' => 10.5,
             ]);
 
         $response->assertStatus(201)
@@ -35,7 +35,7 @@ class IssueLifecycleTest extends TestCase
         $this->assertDatabaseHas('issues', [
             'project_id' => $project->id,
             'summary' => 'Test Issue',
-            'estimated_hours' => 10.5
+            'estimated_hours' => 10.5,
         ]);
     }
 
@@ -49,14 +49,14 @@ class IssueLifecycleTest extends TestCase
         $this->actingAs($admin)
             ->postJson("/api/projects/{$project->id}/issues", [
                 'summary' => 'First Issue',
-                'issue_type' => 'Task'
+                'issue_type' => 'Task',
             ]);
 
         // Create second issue
         $response = $this->actingAs($admin)
             ->postJson("/api/projects/{$project->id}/issues", [
                 'summary' => 'Second Issue',
-                'issue_type' => 'Bug'
+                'issue_type' => 'Bug',
             ]);
 
         $response->assertStatus(201)
@@ -104,7 +104,7 @@ class IssueLifecycleTest extends TestCase
         $response = $this->actingAs($member)
             ->postJson("/api/projects/{$project->id}/issues", [
                 'summary' => 'Illegal Issue',
-                'issue_type' => 'Task'
+                'issue_type' => 'Task',
             ]);
 
         $response->assertStatus(403);
@@ -136,16 +136,16 @@ class IssueLifecycleTest extends TestCase
         $project->members()->attach($member->id, ['role' => 'member']);
 
         $issue = Issue::factory()->create([
-            'project_id' => $project->id, 
+            'project_id' => $project->id,
             'key_number' => 1,
             'assignee_id' => $member->id,
-            'status' => 'open'
+            'status' => 'open',
         ]);
 
         $response = $this->actingAs($member)
             ->patchJson("/api/projects/{$project->id}/issues/{$project->key}-1", [
                 'status' => 'in_progress',
-                'actual_hours' => 2.5
+                'actual_hours' => 2.5,
             ]);
 
         $response->assertStatus(200)
@@ -155,7 +155,7 @@ class IssueLifecycleTest extends TestCase
         $this->assertDatabaseHas('issues', [
             'id' => $issue->id,
             'status' => 'in_progress',
-            'actual_hours' => 2.5
+            'actual_hours' => 2.5,
         ]);
     }
 }

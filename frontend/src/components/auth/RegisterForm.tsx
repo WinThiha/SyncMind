@@ -33,6 +33,7 @@ function RegisterFormContent() {
         const socialName = searchParams.get('social_name');
         const provider = searchParams.get('social_provider');
         const id = searchParams.get('social_id');
+        const inviteToken = searchParams.get('invite');
 
         if (socialEmail) {
             setEmail(socialEmail);
@@ -40,6 +41,10 @@ function RegisterFormContent() {
             setSocialProvider(provider || '');
             setSocialId(id || '');
             setIsSocial(true);
+        }
+
+        if (inviteToken) {
+            sessionStorage.setItem('pendingInviteToken', inviteToken);
         }
     }, [searchParams]);
 
@@ -56,7 +61,8 @@ function RegisterFormContent() {
             const response = await api.post('/api/auth/register', payload);
             await refreshUser();
             setMessage(response.data.message);
-            router.push('/dashboard');
+            const pendingToken = sessionStorage.getItem('pendingInviteToken');
+            router.push(pendingToken ? `/invitations/${pendingToken}` : '/dashboard');
         } catch (error: any) {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors);

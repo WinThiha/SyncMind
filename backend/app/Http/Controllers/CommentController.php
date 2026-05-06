@@ -27,13 +27,13 @@ class CommentController extends Controller
 
         $validated = $request->validate([
             'content' => 'required|string',
-            'notify_emails' => 'boolean'
+            'notify_emails' => 'boolean',
         ]);
 
         $comment = Comment::create([
             'issue_id' => $issue->id,
             'user_id' => Auth::id(),
-            'content' => $validated['content']
+            'content' => $validated['content'],
         ]);
 
         if ($request->boolean('notify_emails')) {
@@ -43,9 +43,9 @@ class CommentController extends Controller
             if ($issue->assignee) {
                 $recipients->push($issue->assignee);
             }
-            
+
             // Filter out the person who just commented
-            $recipients = $recipients->filter(fn($u) => $u->id !== Auth::id())->unique('id');
+            $recipients = $recipients->filter(fn ($u) => $u->id !== Auth::id())->unique('id');
 
             foreach ($recipients as $recipient) {
                 Mail::to($recipient->email)->send(new IssueCommentNotification($comment));
@@ -53,7 +53,7 @@ class CommentController extends Controller
         }
 
         return response()->json([
-            'data' => $comment->load('user')
+            'data' => $comment->load('user'),
         ], 201);
     }
 

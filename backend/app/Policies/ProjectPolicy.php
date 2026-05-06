@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Project;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ProjectPolicy
 {
@@ -38,6 +37,7 @@ class ProjectPolicy
     public function update(User $user, Project $project): bool
     {
         $member = $project->members()->where('user_id', $user->id)->first();
+
         return $member && ($member->pivot->role === 'admin' || $project->creator_id === $user->id);
     }
 
@@ -64,13 +64,24 @@ class ProjectPolicy
     {
         return $project->creator_id === $user->id;
     }
-    
+
     /**
      * Determine whether the user can manage members of the model.
      */
     public function manageMembers(User $user, Project $project): bool
     {
         $member = $project->members()->where('user_id', $user->id)->first();
+
+        return $member && ($member->pivot->role === 'admin' || $project->creator_id === $user->id);
+    }
+
+    /**
+     * Determine whether the user can manage invitations for the project.
+     */
+    public function manageInvitations(User $user, Project $project): bool
+    {
+        $member = $project->members()->where('user_id', $user->id)->first();
+
         return $member && ($member->pivot->role === 'admin' || $project->creator_id === $user->id);
     }
 }

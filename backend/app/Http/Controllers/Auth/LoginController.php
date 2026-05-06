@@ -55,7 +55,7 @@ class LoginController extends Controller
     {
         $user = Auth::user();
 
-        if ($user && $request->user()->currentAccessToken()) {
+        if ($user && $request->user()->currentAccessToken() instanceof \Laravel\Sanctum\PersonalAccessToken) {
             $request->user()->currentAccessToken()->delete();
         }
 

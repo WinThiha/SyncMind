@@ -29,8 +29,8 @@ return new class extends Migration
 
                 $milestoneId = DB::table('milestones')->insertGetId([
                     'project_id' => $project->id,
-                    'name'       => $name,
-                    'status'     => 'open',
+                    'name' => $name,
+                    'status' => 'open',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -77,7 +77,7 @@ return new class extends Migration
 
         // Restore projects.milestones JSON
         $projectMilestones = DB::table('milestones')
-            ->select('project_id', DB::raw("json_agg(name ORDER BY id) as names"))
+            ->select('project_id', DB::raw('json_agg(name ORDER BY id) as names'))
             ->groupBy('project_id')
             ->get();
 

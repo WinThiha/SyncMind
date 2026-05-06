@@ -2,9 +2,9 @@
 
 namespace App\Observers;
 
+use App\Jobs\GenerateIssueEmbeddingJob;
 use App\Models\Issue;
 use App\Models\IssueHistory;
-use App\Jobs\GenerateIssueEmbeddingJob;
 use Illuminate\Support\Facades\Auth;
 
 class IssueObserver

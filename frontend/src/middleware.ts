@@ -3,10 +3,11 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const hasSession = request.cookies.get('syncmind_session');
-  const isProtectedPage = request.nextUrl.pathname.startsWith('/dashboard');
+  const { pathname } = request.nextUrl;
+  const isProtectedPage =
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/projects');
 
-  // ONLY protect the dashboard. 
-  // If unauthenticated and trying to access dashboard, redirect to login page.
   if (isProtectedPage && !hasSession) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
@@ -15,5 +16,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/dashboard/:path*', '/projects/:path*'],
 };

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Milestone extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'project_id',
         'name',
@@ -21,7 +22,7 @@ class Milestone extends Model
 
     protected $casts = [
         'start_date' => 'date:Y-m-d',
-        'due_date'   => 'date:Y-m-d',
+        'due_date' => 'date:Y-m-d',
     ];
 
     protected $appends = ['progress', 'is_overdue'];
@@ -38,13 +39,13 @@ class Milestone extends Model
 
     public function getProgressAttribute(): array
     {
-        $total     = $this->issues()->count();
+        $total = $this->issues()->count();
         $completed = $this->issues()->whereIn('status', ['resolved', 'closed'])->count();
         $percentage = $total > 0 ? (int) round(($completed / $total) * 100) : 0;
 
         return [
-            'total'      => $total,
-            'completed'  => $completed,
+            'total' => $total,
+            'completed' => $completed,
             'percentage' => $percentage,
         ];
     }

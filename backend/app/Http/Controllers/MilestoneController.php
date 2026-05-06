@@ -26,11 +26,11 @@ class MilestoneController extends Controller
         $this->authorize('create', [Milestone::class, $project]);
 
         $validated = $request->validate([
-            'name'        => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'start_date'  => 'nullable|date',
-            'due_date'    => 'nullable|date|after_or_equal:start_date',
-            'status'      => 'nullable|string|in:open,in_progress,closed',
+            'start_date' => 'nullable|date',
+            'due_date' => 'nullable|date|after_or_equal:start_date',
+            'status' => 'nullable|string|in:open,in_progress,closed',
         ]);
 
         $milestone = $project->milestones()->create($validated);
@@ -52,11 +52,11 @@ class MilestoneController extends Controller
         $this->authorize('update', $milestone);
 
         $validated = $request->validate([
-            'name'        => 'sometimes|required|string|max:255',
+            'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
-            'start_date'  => 'nullable|date',
-            'due_date'    => 'nullable|date|after_or_equal:start_date',
-            'status'      => 'nullable|string|in:open,in_progress,closed',
+            'start_date' => 'nullable|date',
+            'due_date' => 'nullable|date|after_or_equal:start_date',
+            'status' => 'nullable|string|in:open,in_progress,closed',
         ]);
 
         $milestone->update($validated);

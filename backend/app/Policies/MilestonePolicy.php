@@ -21,20 +21,23 @@ class MilestonePolicy
     public function create(User $user, Project $project): bool
     {
         $member = $project->members()->where('user_id', $user->id)->first();
+
         return $member && ($member->pivot->role === 'admin' || $project->creator_id === $user->id);
     }
 
     public function update(User $user, Milestone $milestone): bool
     {
         $project = $milestone->project;
-        $member  = $project->members()->where('user_id', $user->id)->first();
+        $member = $project->members()->where('user_id', $user->id)->first();
+
         return $member && ($member->pivot->role === 'admin' || $project->creator_id === $user->id);
     }
 
     public function delete(User $user, Milestone $milestone): bool
     {
         $project = $milestone->project;
-        $member  = $project->members()->where('user_id', $user->id)->first();
+        $member = $project->members()->where('user_id', $user->id)->first();
+
         return $member && ($member->pivot->role === 'admin' || $project->creator_id === $user->id);
     }
 }

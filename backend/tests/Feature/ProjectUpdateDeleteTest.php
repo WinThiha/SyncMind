@@ -15,15 +15,15 @@ class ProjectUpdateDeleteTest extends TestCase
     {
         $creator = User::factory()->create();
         $project = Project::factory()->create([
-            'creator_id' => $creator->id, 
+            'creator_id' => $creator->id,
             'name' => 'Old Name',
-            'issue_types' => ['Task']
+            'issue_types' => ['Task'],
         ]);
         $project->members()->attach($creator->id, ['role' => 'admin']);
 
         $response = $this->actingAs($creator)->putJson("/api/projects/{$project->id}", [
             'name' => 'New Name',
-            'issue_types' => ['Task', 'Bug']
+            'issue_types' => ['Task', 'Bug'],
         ]);
 
         $response->assertStatus(200);
@@ -53,7 +53,7 @@ class ProjectUpdateDeleteTest extends TestCase
         $project->members()->attach($newOwner->id, ['role' => 'admin']);
 
         $response = $this->actingAs($creator)->postJson("/api/projects/{$project->id}/transfer", [
-            'new_creator_id' => $newOwner->id
+            'new_creator_id' => $newOwner->id,
         ]);
 
         $response->assertStatus(200);

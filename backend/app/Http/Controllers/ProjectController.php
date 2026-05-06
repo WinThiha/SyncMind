@@ -20,7 +20,7 @@ class ProjectController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $projects
+            'data' => $projects,
         ]);
     }
 
@@ -39,7 +39,7 @@ class ProjectController extends Controller
 
             return response()->json([
                 'message' => 'Project created successfully.',
-                'data' => $project->load('creator')
+                'data' => $project->load('creator'),
             ], 201);
         });
     }
@@ -54,7 +54,7 @@ class ProjectController extends Controller
         }
 
         return response()->json([
-            'data' => $project->load('creator', 'members')
+            'data' => $project->load('creator', 'members'),
         ]);
     }
 
@@ -71,7 +71,7 @@ class ProjectController extends Controller
 
         return response()->json([
             'message' => 'Project updated successfully.',
-            'data' => $project
+            'data' => $project,
         ]);
     }
 
@@ -87,10 +87,10 @@ class ProjectController extends Controller
         $project->delete();
 
         return response()->json([
-            'message' => 'Project deleted successfully.'
+            'message' => 'Project deleted successfully.',
         ]);
     }
-    
+
     /**
      * Transfer ownership of the project.
      */
@@ -99,23 +99,23 @@ class ProjectController extends Controller
         if ($request->user()->cannot('delete', $project)) {
             abort(403, 'Only the project creator can transfer ownership.');
         }
-        
+
         $validated = $request->validate([
-            'new_creator_id' => 'required|exists:users,id'
+            'new_creator_id' => 'required|exists:users,id',
         ]);
-        
+
         $newCreatorId = $validated['new_creator_id'];
-        
+
         $member = $project->members()->where('user_id', $newCreatorId)->first();
-        
-        if (!$member || $member->pivot->role !== 'admin') {
+
+        if (! $member || $member->pivot->role !== 'admin') {
             return response()->json(['message' => 'New owner must be an existing admin of the project.'], 422);
         }
 
         $project->update(['creator_id' => $newCreatorId]);
-        
+
         return response()->json([
-            'message' => 'Project ownership transferred successfully.'
+            'message' => 'Project ownership transferred successfully.',
         ]);
     }
 }

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\SocialAccount;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -15,7 +15,6 @@ class GoogleAuthController extends Controller
     /**
      * Handle the callback from Google.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function callback(Request $request)
@@ -28,23 +27,23 @@ class GoogleAuthController extends Controller
                 try {
                     $socialUser = Socialite::driver('google')->userFromToken($request->token);
                 } catch (\Exception $e) {
-                    $response = Http::get("https://www.googleapis.com/oauth2/v3/userinfo", [
-                        'access_token' => $request->token
+                    $response = Http::get('https://www.googleapis.com/oauth2/v3/userinfo', [
+                        'access_token' => $request->token,
                     ]);
 
                     if ($response->successful()) {
                         $data = $response->json();
-                        $socialUser = new \stdClass();
+                        $socialUser = new \stdClass;
                         $socialUser->token = $request->token;
                         $socialUser->id = $data['sub'] ?? null;
                         $socialUser->email = $data['email'] ?? null;
                         $socialUser->name = $data['name'] ?? null;
-                        
-                        $socialUser->getEmail = fn() => $data['email'] ?? null;
-                        $socialUser->getName = fn() => $data['name'] ?? null;
-                        $socialUser->getId = fn() => $data['sub'] ?? null;
+
+                        $socialUser->getEmail = fn () => $data['email'] ?? null;
+                        $socialUser->getName = fn () => $data['name'] ?? null;
+                        $socialUser->getId = fn () => $data['sub'] ?? null;
                     } else {
-                        $errorDetails = 'Google API verification failed: ' . $response->body();
+                        $errorDetails = 'Google API verification failed: '.$response->body();
                     }
                 }
             } else {
@@ -54,10 +53,10 @@ class GoogleAuthController extends Controller
             $errorDetails = $e->getMessage();
         }
 
-        if (!$socialUser || (is_object($socialUser) && method_exists($socialUser, 'getEmail') && !$socialUser->getEmail())) {
+        if (! $socialUser || (is_object($socialUser) && method_exists($socialUser, 'getEmail') && ! $socialUser->getEmail())) {
             return response()->json([
                 'message' => 'Google authentication failed.',
-                'error' => $errorDetails ?: 'Could not retrieve user details.'
+                'error' => $errorDetails ?: 'Could not retrieve user details.',
             ], 401);
         }
 
@@ -65,7 +64,7 @@ class GoogleAuthController extends Controller
         $name = method_exists($socialUser, 'getName') ? $socialUser->getName() : ($socialUser->name ?? null);
         $id = method_exists($socialUser, 'getId') ? $socialUser->getId() : ($socialUser->id ?? null);
 
-        if (!$email) {
+        if (! $email) {
             return response()->json(['message' => 'Email not found in Google response.'], 401);
         }
 
@@ -79,12 +78,12 @@ class GoogleAuthController extends Controller
                     'name' => $name,
                     'provider_id' => $id,
                     'provider_name' => 'google',
-                ]
+                ],
             ], 404);
         }
 
         // AUTO-VERIFY: If the user exists but is not verified, verify them now (FR-004)
-        if (!$user->hasVerifiedEmail()) {
+        if (! $user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
         }
 
@@ -101,7 +100,7 @@ class GoogleAuthController extends Controller
         );
 
         Auth::login($user, true);
-        
+
         $token = null;
         if ($request->has('device_name')) {
             $token = $user->createToken($request->device_name)->plainTextToken;
