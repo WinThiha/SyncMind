@@ -7,6 +7,19 @@ The system MUST render the issue creation forms properly in dark mode, ensuring 
 - **WHEN** user enables dark mode and navigates to the issue creation page
 - **THEN** the Markdown Editor and Assignee select dropdown render with correct contrast
 
+### Requirement: Theme selection persists across navigation
+The system MUST preserve the currently active light/dark theme during route navigation, including when opening Settings.
+
+#### Scenario: User navigates to Settings with unsaved server preference
+- **GIVEN** the user has dark mode active from local preference
+- **AND** the server-side settings record has no explicit saved theme yet
+- **WHEN** the user navigates to `/settings`
+- **THEN** the UI remains in dark mode and does not switch to light mode automatically
+
+#### Scenario: User saves theme preference from Settings
+- **WHEN** the user explicitly saves theme preference in Settings
+- **THEN** the saved preference becomes the active theme for subsequent navigation and sessions
+
 ### Requirement: Collapsible sidebar layout synchronization
 The system SHALL ensure that the Sidebar width, Topbar horizontal offset, and Main Content margin-left are synchronized to exactly 80px (20 units) when the sidebar is in a collapsed state.
 

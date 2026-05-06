@@ -58,6 +58,10 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->ip());
         });
 
+        RateLimiter::for('password-update', function (Request $request) {
+            return Limit::perMinute(5)->by(($request->user()?->id ?: 'guest').'|'.$request->ip());
+        });
+
         VerifyEmail::createUrlUsing(function ($notifiable) {
             $frontendUrl = config('app.frontend_url') ?? 'http://localhost:3000';
 
