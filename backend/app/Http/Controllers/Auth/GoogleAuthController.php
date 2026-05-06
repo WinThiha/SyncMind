@@ -100,13 +100,15 @@ class GoogleAuthController extends Controller
             ]
         );
 
-        Auth::login($user, true);
+        Auth::login($user, false);
         
         $token = null;
         if ($request->has('device_name')) {
             $token = $user->createToken($request->device_name)->plainTextToken;
         } else {
-            $request->session()->regenerate();
+            if ($request->hasSession()) {
+                $request->session()->regenerate();
+            }
         }
 
         return response()->json([
