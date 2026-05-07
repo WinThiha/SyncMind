@@ -28,14 +28,34 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Vector Search Service (Gemini)
+    | Chat Provider
     |--------------------------------------------------------------------------
+    |
+    | Chat-specific provider lane. New AI_CHAT_* keys are preferred and
+    | fallback to legacy AI_* keys to preserve compatibility during migration.
     */
 
-    'vector' => [
-        'base_uri' => env('AI_VECTOR_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta/'),
-        'model' => env('AI_VECTOR_MODEL', 'gemini-embedding-001'),
-        'output_dimensionality' => env('AI_VECTOR_OUTPUT_DIMENSIONALITY', 768),
+    'chat' => [
+        'provider' => env('AI_CHAT_PROVIDER', 'openrouter'),
+        'api_key' => env('AI_CHAT_API_KEY', env('AI_API_KEY', env('OPENAI_API_KEY'))),
+        'base_uri' => env('AI_CHAT_BASE_URL', env('AI_BASE_URL', 'https://openrouter.ai/api/v1')),
+        'model' => env('AI_CHAT_MODEL', env('AI_MODEL', 'gpt-4o-mini')),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Embedding Provider (OpenAI-Compatible)
+    |--------------------------------------------------------------------------
+    |
+    | Dedicated embedding lane with independent credentials and endpoint.
+    | New keys are preferred, then legacy AI keys are used as fallback.
+    */
+
+    'embedding' => [
+        'api_key' => env('AI_EMBEDDING_API_KEY', env('AI_API_KEY', env('OPENAI_API_KEY'))),
+        'base_uri' => env('AI_EMBEDDING_BASE_URL', env('AI_BASE_URL', 'https://api.openai.com/v1')),
+        'model' => env('AI_EMBEDDING_MODEL', env('AI_MODEL', 'text-embedding-3-small')),
+        'dimensions' => env('AI_EMBEDDING_DIMENSIONS', 768),
     ],
 
     /*

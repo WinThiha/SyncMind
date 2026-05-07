@@ -77,6 +77,7 @@ export async function suggestIssueFields(projectId: number | string, summary: st
 export interface SimilarIssue {
   id: number;
   project_id: number;
+  key?: string;
   key_number: number;
   summary: string;
   status: string;

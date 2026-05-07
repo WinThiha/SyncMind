@@ -1,11 +1,4 @@
-## ADDED Requirements
-
-### Requirement: AI Search Toggle
-The issue list interface SHALL provide a toggle mechanism to switch between traditional keyword search and AI-powered semantic search.
-
-#### Scenario: User toggles AI search
-- **WHEN** the user clicks the ✨ (Sparkles) button in the search bar
-- **THEN** the search mode switches to AI Search and the input placeholder updates to "Search with AI..."
+## MODIFIED Requirements
 
 ### Requirement: Semantic Issue Search Execution
 When AI Search mode is active, the system SHALL perform a semantic similarity search using the entire search query and SHALL render results with identifiers that resolve to valid issue detail keys.
@@ -19,10 +12,3 @@ When AI Search mode is active, the system SHALL perform a semantic similarity se
 - **WHEN** the user clicks an item returned from AI search in the issue list
 - **THEN** the frontend SHALL request issue details using a non-empty canonical issue key
 - **AND** the request path SHALL NOT contain `undefined` as the issue key segment
-
-### Requirement: Similarity Score Display
-Issues returned via AI Search SHALL display their semantic similarity score to provide context on the match quality.
-
-#### Scenario: Displaying search results
-- **WHEN** AI search results are displayed in the list
-- **THEN** each item SHALL show a similarity percentage (e.g., "85% match") based on the similarity score returned by the API

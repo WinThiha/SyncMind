@@ -13,19 +13,39 @@ interface IssueListProps {
   projectId: number | string;
 }
 
+type IssueListEntry = Partial<Issue> & {
+  id: number;
+  project_id: number;
+  summary: string;
+  status: string;
+  priority: string;
+  key?: string;
+  key_number?: number;
+  full_key?: string;
+  similarity?: number;
+};
+
 export default function IssueList({ projectId }: IssueListProps) {
   const [issues, setIssues] = useState<Issue[]>([]);
-  const [filteredIssues, setFilteredIssues] = useState<Issue[]>([]);
+  const [filteredIssues, setFilteredIssues] = useState<IssueListEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
+  const [selectedIssue, setSelectedIssue] = useState<IssueListEntry | null>(null);
 
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAISearchEnabled, setIsAISearchEnabled] = useState(false);
   const [isSearchingAI, setIsSearchingAI] = useState(false);
-  const [aiSearchResults, setAISearchResults] = useState<Issue[]>([]);
+  const [aiSearchResults, setAISearchResults] = useState<IssueListEntry[]>([]);
+
+  const resolveIssueKey = (issue: IssueListEntry): string | null => {
+    if (issue.full_key) return issue.full_key;
+    if (issue.key) return issue.key;
+    if (issue.key_number !== undefined && issue.key_number !== null) return String(issue.key_number);
+
+    return null;
+  };
 
   useEffect(() => {
     async function loadIssues() {
@@ -57,11 +77,18 @@ export default function IssueList({ projectId }: IssueListProps) {
           // Only show results with similarity > 0.3 as per design
           const validatedResults = results
             .filter(r => r.similarity > 0.3)
-            .map(r => ({
-              ...r,
-              // Map Similarity results to Issue interface if needed
-              // The API already returns fields matching Issue interface
-            } as unknown as Issue));
+            .map((r): IssueListEntry => ({
+              id: r.id,
+              project_id: r.project_id,
+              key: r.key,
+              key_number: r.key_number,
+              summary: r.summary,
+              description: null,
+              status: r.status,
+              priority: r.priority,
+              created_at: '',
+              similarity: r.similarity,
+            }));
           
           setAISearchResults(validatedResults);
           
@@ -196,7 +223,15 @@ export default function IssueList({ projectId }: IssueListProps) {
                 comments_count: 0,
                 similarity: issue.similarity
               }} 
-              onClick={() => setSelectedIssue(issue)}
+              onClick={() => {
+                const key = resolveIssueKey(issue);
+                if (!key) return;
+
+                setSelectedIssue({
+                  ...issue,
+                  key,
+                });
+              }}
             />
           ))
         )}
@@ -208,13 +243,13 @@ export default function IssueList({ projectId }: IssueListProps) {
             issue={{
               id: selectedIssue.id,
               project_id: selectedIssue.project_id,
-              key: selectedIssue.full_key || selectedIssue.key,
+              key: resolveIssueKey(selectedIssue) || '',
               title: selectedIssue.summary,
               description: selectedIssue.description || '',
               status: selectedIssue.status,
               priority: selectedIssue.priority,
               assigned_to: selectedIssue.assignee,
-              created_at: selectedIssue.created_at
+              created_at: selectedIssue.created_at || new Date(0).toISOString()
             }}
             onClose={() => setSelectedIssue(null)}
           />
