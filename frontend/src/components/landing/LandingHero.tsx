@@ -1,20 +1,21 @@
 'use client';
 
 import { ArrowRight, Sparkles, Search, GitBranch, Users } from 'lucide-react';
+import { useLocale } from '@/context/LocaleContext';
 import { LandingButtonLink } from './LandingButtonLink';
 
 interface LandingHeroProps {
   isAuthenticated: boolean;
 }
 
-const capabilityChips = [
-  { icon: GitBranch, label: 'Project workflows' },
-  { icon: Search, label: 'Semantic search' },
-  { icon: Sparkles, label: 'AI issue drafting' },
-  { icon: Users, label: 'Member roles' },
-];
-
 export function LandingHero({ isAuthenticated }: LandingHeroProps) {
+  const { t } = useLocale();
+  const capabilityChips = [
+    { icon: GitBranch, label: t('landing.hero.chip.1') },
+    { icon: Search, label: t('landing.hero.chip.2') },
+    { icon: Sparkles, label: t('landing.hero.chip.3') },
+    { icon: Users, label: t('landing.hero.chip.4') },
+  ];
   return (
     <section className="landing-section relative overflow-hidden px-4 pb-8 pt-28 sm:px-6 sm:pt-32 lg:px-8 lg:pt-36">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
@@ -22,22 +23,22 @@ export function LandingHero({ isAuthenticated }: LandingHeroProps) {
         {/* Left — text content */}
         <div className="relative z-10">
           <span className="landing-kicker mb-5 inline-flex rounded-full border border-brand-primary/20 bg-brand-primary/10 px-4 py-2 text-brand-primary text-xs sm:text-sm">
-            Built for project and issue flow
+            {t('landing.hero.kicker')}
           </span>
           <h1 className="text-4xl font-black tracking-tight text-foreground sm:text-5xl lg:text-6xl xl:text-7xl">
-            Keep projects, issues, and AI assistance in one focused workspace.
+            {t('landing.hero.headline')}
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-foreground/60 sm:mt-6 sm:text-lg">
-            SyncMind helps teams organize projects, triage issues, search with natural language, and move faster with AI-assisted issue setup and suggestions.
+            {t('landing.hero.description')}
           </p>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:mt-8">
             <LandingButtonLink href={isAuthenticated ? '/dashboard' : '/register'} size="lg" className="w-full sm:w-auto justify-center">
-              {isAuthenticated ? 'Go to dashboard' : 'Create account'}
+              {isAuthenticated ? t('landing.hero.ctaDashboard') : t('landing.hero.ctaRegister')}
               <ArrowRight size={18} />
             </LandingButtonLink>
             <LandingButtonLink href="#capabilities" variant="secondary" size="lg" className="w-full sm:w-auto justify-center">
-              Explore capabilities
+              {t('landing.hero.exploreCapabilities')}
             </LandingButtonLink>
           </div>
 
@@ -49,7 +50,7 @@ export function LandingHero({ isAuthenticated }: LandingHeroProps) {
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-semibold text-foreground leading-tight sm:text-sm">{chip.label}</div>
-                  <div className="text-[10px] text-foreground/45 hidden sm:block">Available now</div>
+                  <div className="text-[10px] text-foreground/45 hidden sm:block">{t('landing.hero.availableNow')}</div>
                 </div>
               </div>
             ))}

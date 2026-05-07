@@ -13,6 +13,7 @@ import {
 } from '@/lib/api/projects';
 import { AxiosError } from 'axios';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { Users, Mail, Shield, UserMinus, UserPlus, ShieldAlert, Clock, X, CheckCircle, Pencil } from 'lucide-react';
@@ -37,6 +38,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { user } = useAuth();
+  const { t } = useLocale();
 
   const isAdmin = userRole === 'admin';
 
@@ -50,7 +52,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
           setInvitations(invitesData);
         }
       } catch {
-        setError('Failed to load members');
+        setError(t('projects.members.loadError'));
       } finally {
         setLoading(false);
       }
@@ -71,31 +73,31 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
       });
       if (result.type === 'invited') {
         setInvitations(prev => [...prev, result.data]);
-        setSuccessMessage(`Invitation sent to ${email}`);
+        setSuccessMessage(t('projects.members.inviteSent', { email }));
       } else {
         const data = await getProjectMembers(projectId);
         setMembers(data);
-        setSuccessMessage(`${result.data?.name || email} added to the project`);
+        setSuccessMessage(t('projects.members.addedSuccess', { name: result.data?.name || email }));
       }
       setEmail('');
       setPosition('');
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
-      setError(axiosError.response?.data?.message || 'Failed to add member');
+      setError(axiosError.response?.data?.message || t('projects.members.addError'));
     } finally {
       setAdding(false);
     }
   };
 
   const handleRemoveMember = async (userId: number) => {
-    if (confirm('Are you sure you want to remove this member?')) {
+    if (confirm(t('projects.members.confirmRemove'))) {
       setError(null);
       try {
         await removeProjectMember(projectId, userId);
         setMembers(members.filter(m => m.id !== userId));
       } catch (err) {
         const axiosError = err as AxiosError<{ message?: string }>;
-        setError(axiosError.response?.data?.message || 'Failed to remove member');
+        setError(axiosError.response?.data?.message || t('projects.members.removeError'));
       }
     }
   };
@@ -118,7 +120,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
       }));
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
-      setError(axiosError.response?.data?.message || 'Failed to update member');
+      setError(axiosError.response?.data?.message || t('projects.members.updateError'));
     } finally {
       setUpdatingId(null);
     }
@@ -131,7 +133,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
       setInvitations(prev => prev.filter(inv => inv.id !== invitationId));
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
-      setError(axiosError.response?.data?.message || 'Failed to cancel invitation');
+      setError(axiosError.response?.data?.message || t('projects.members.cancelInviteError'));
     }
   };
 
@@ -141,7 +143,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
     <GlassCard className="p-5 sm:p-8">
       <div className="flex items-center gap-2 mb-6 sm:mb-8 text-brand-primary">
         <Users size={20} />
-        <h2 className="text-lg sm:text-xl font-bold uppercase tracking-widest">Project Members</h2>
+        <h2 className="text-lg sm:text-xl font-bold uppercase tracking-widest">{t('projects.members.title')}</h2>
       </div>
 
       <AnimatePresence>
@@ -205,8 +207,8 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
                         position: mPosition || null,
                       })}
                     >
-                      <option value="normal">NORMAL</option>
-                      <option value="admin">ADMIN</option>
+                      <option value="normal">{t('projects.members.roleNormal')}</option>
+                      <option value="admin">{t('projects.members.roleAdmin')}</option>
                     </select>
                     <Shield size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground/30 pointer-events-none" />
                   </div>
@@ -222,7 +224,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
                   <div className="flex items-center gap-1.5">
                     <input
                       type="text"
-                      placeholder="Position"
+                      placeholder={t('projects.members.positionFieldPlaceholder')}
                       className="bg-background border border-border-glow rounded-xl px-3 py-1.5 text-[10px] font-bold outline-none w-36"
                       defaultValue={mPosition}
                       readOnly={!isPositionEditable}
@@ -246,7 +248,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
                         type="button"
                         onClick={() => setEditingCreatorPositionId(member.id)}
                         className="p-1.5 text-foreground/40 hover:text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-all"
-                        title="Edit creator position"
+                        title={t('projects.members.editCreatorTitle')}
                       >
                         <Pencil size={14} />
                       </button>
@@ -254,7 +256,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
                   </div>
                 ) : (
                   <span className="text-[10px] px-2.5 py-1 rounded-lg font-bold uppercase tracking-wider bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
-                    {mPosition || 'NO POSITION'}
+                    {mPosition || t('projects.members.noPosition')}
                   </span>
                 )}
 
@@ -262,7 +264,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
                   <button
                     onClick={() => handleRemoveMember(member.id)}
                     className="p-2 text-red-500/40 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
-                    title="Remove Member"
+                    title={t('projects.members.removeTitle')}
                   >
                     <UserMinus size={18} />
                   </button>
@@ -277,7 +279,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
         <div className="mb-8">
           <div className="flex items-center gap-2 text-foreground/40 mb-4">
             <Clock size={16} />
-            <h3 className="text-xs font-bold uppercase tracking-widest">Pending Invitations</h3>
+            <h3 className="text-xs font-bold uppercase tracking-widest">{t('projects.members.pendingTitle')}</h3>
           </div>
           <ul className="space-y-3">
             {invitations.map(inv => (
@@ -292,7 +294,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
                   <div className="min-w-0">
                     <p className="text-sm font-bold truncate text-foreground/70">{inv.email}</p>
                     <p className="text-[10px] text-foreground/30 font-medium">
-                      Expires {new Date(inv.expires_at).toLocaleDateString()}
+                      {t('invitations.invite.fieldExpires')} {new Date(inv.expires_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -308,7 +310,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
                   <button
                     onClick={() => handleCancelInvitation(inv.id)}
                     className="p-1.5 text-foreground/30 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                    title="Cancel invitation"
+                    title={t('projects.members.cancelTitle')}
                   >
                     <X size={14} />
                   </button>
@@ -323,7 +325,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
         <form onSubmit={handleAddMember} className="space-y-6 pt-8 border-t border-border-glow/50">
           <div className="flex items-center gap-2 text-foreground/40 mb-4">
             <UserPlus size={16} />
-            <h3 className="text-xs font-bold uppercase tracking-widest">Add or Invite Member</h3>
+            <h3 className="text-xs font-bold uppercase tracking-widest">{t('projects.members.addTitle')}</h3>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -331,7 +333,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
               <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/30" />
               <input
                 type="email"
-                placeholder="Email address (existing user or invite new)"
+                placeholder={t('projects.members.emailPlaceholder')}
                 required
                 className="w-full bg-foreground/5 border border-border-glow rounded-xl pl-12 pr-4 py-3 text-sm font-medium outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all"
                 value={email}
@@ -346,22 +348,22 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
                   value={role}
                   onChange={e => setRole(e.target.value)}
                 >
-                  <option value="normal" className="bg-background text-foreground">NORMAL USER</option>
-                  <option value="admin" className="bg-background text-foreground">ADMINISTRATOR</option>
+                  <option value="normal" className="bg-background text-foreground">{t('projects.members.roleOptionNormal')}</option>
+                  <option value="admin" className="bg-background text-foreground">{t('projects.members.roleOptionAdmin')}</option>
                 </select>
                 <ShieldAlert size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/30 pointer-events-none" />
               </div>
 
               <input
                 type="text"
-                placeholder="Position (optional)"
+                placeholder={t('projects.members.positionPlaceholder')}
                 className="bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 text-xs font-bold outline-none min-w-[200px] flex-1"
                 value={position}
                 onChange={e => setPosition(e.target.value)}
               />
 
               <GlassButton type="submit" disabled={adding} className="px-10">
-                {adding ? 'SENDING...' : 'ADD / INVITE'}
+                {adding ? t('projects.members.sending') : t('projects.members.addButton')}
               </GlassButton>
             </div>
           </div>

@@ -2,18 +2,19 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Sun, Moon, Settings, LogOut, ChevronDown, Menu } from 'lucide-react';
-import { useTheme } from '@/hooks/useTheme';
+import { Search, Settings, LogOut, ChevronDown, Menu } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { useModifierKey } from '@/hooks/useModifierKey';
+import { useLocale } from '@/context/LocaleContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ToolbarPreferences } from '@/components/toolbar/ToolbarPreferences';
 
 export const Topbar: React.FC = () => {
-  const { isDarkMode, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const { collapsed, mobileOpen, setMobileOpen } = useSidebar();
   const { modKey, isMac } = useModifierKey();
+  const { t } = useLocale();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -60,7 +61,7 @@ export const Topbar: React.FC = () => {
       {/* Mobile hamburger — opens sidebar overlay */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        aria-label="Open navigation"
+        aria-label={t('nav.topbar.openNav')}
         className="lg:hidden shrink-0 p-2 rounded-lg hover:bg-foreground/8 transition-colors text-foreground/50 hover:text-foreground"
       >
         <Menu size={18} />
@@ -73,7 +74,7 @@ export const Topbar: React.FC = () => {
           ref={searchRef}
           id="topbar-search"
           type="text"
-          placeholder="Search..."
+          placeholder={t('nav.topbar.search')}
           className="bg-transparent border-none outline-none text-sm w-full min-w-0 placeholder:text-foreground/35 font-medium"
         />
         <kbd className="hidden md:flex items-center gap-0.5 px-1.5 py-0.5 bg-foreground/8 border border-foreground/10 rounded text-[10px] font-mono text-foreground/35 shrink-0 whitespace-nowrap">
@@ -82,17 +83,8 @@ export const Topbar: React.FC = () => {
       </div>
 
       {/* Right actions */}
-      <div className="ml-auto flex items-center gap-1 shrink-0">
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-          className="p-2 rounded-lg hover:bg-foreground/8 transition-colors text-foreground/50 hover:text-foreground"
-        >
-          {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
-
-        <div className="w-px h-6 bg-border-glow mx-1" />
+      <div className="ml-auto flex items-center gap-2 shrink-0">
+        <ToolbarPreferences className="hidden md:flex" />
 
         {/* Avatar + Dropdown */}
         <div className="relative" ref={dropdownRef}>
@@ -106,7 +98,7 @@ export const Topbar: React.FC = () => {
               {initials}
             </div>
             <div className="hidden sm:block text-left leading-tight">
-              <p className="text-sm font-semibold text-foreground truncate max-w-[100px]">{user?.name ?? 'User'}</p>
+              <p className="text-sm font-semibold text-foreground truncate max-w-[100px]">{user?.name ?? t('common.user')}</p>
               {user?.position && (
                 <p className="text-[11px] text-foreground/40 truncate max-w-[100px]">{user.position}</p>
               )}
@@ -145,7 +137,7 @@ export const Topbar: React.FC = () => {
                     className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground/70 hover:bg-foreground/5 hover:text-foreground transition-colors"
                   >
                     <Settings size={16} className="text-foreground/40" />
-                    Settings
+                    {t('nav.topbar.settings')}
                   </Link>
 
                   <div className="my-1 border-t border-border-glow" />
@@ -155,7 +147,7 @@ export const Topbar: React.FC = () => {
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-500/8 transition-colors"
                   >
                     <LogOut size={16} />
-                    Sign out
+                    {t('nav.topbar.signOut')}
                   </button>
                 </div>
               </motion.div>

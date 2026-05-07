@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useLocale } from '@/context/LocaleContext';
 import { createIssue } from '@/lib/api/issues';
 import { suggestIssueFields, getSimilarIssues, SimilarIssue } from '@/lib/api/issues';
 import { getProject, getProjectMembers, ProjectMember } from '@/lib/api/projects';
@@ -29,6 +30,7 @@ interface CreateIssueFormProps {
 }
 
 export default function CreateIssueForm({ projectId, onSuccess, onCancel }: CreateIssueFormProps) {
+  const { t } = useLocale();
   const [formData, setFormData] = useState({
     summary: '',
     description: '',
@@ -114,7 +116,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
       });
       onSuccess();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create issue');
+      setError(err.response?.data?.message || t('issues.create.error'));
     } finally {
       setLoading(false);
     }
@@ -146,7 +148,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
 
   const getMemberName = (memberId: number): string => {
     const member = members.find(m => m.id === memberId);
-    return member?.name ?? 'Unknown Member';
+    return member?.name ?? t('common.user');
   };
 
   const handleDescriptionChange = (value: string) => {
@@ -158,7 +160,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
 
   const handleAISuggest = async () => {
     if (!formData.summary.trim()) {
-      setAiError('Please enter a summary first.');
+      setAiError(t('issues.create.aiError'));
       return;
     }
     setAiLoading(true);
@@ -185,7 +187,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
       });
       setAssigneeSuggestions(suggestions.assignee_suggestions || []);
     } catch (err: any) {
-      setAiError(err.response?.data?.message || 'AI suggestion failed. Please try again.');
+      setAiError(err.response?.data?.message || t('issues.create.aiSuggestFailed'));
     } finally {
       setAiLoading(false);
     }
@@ -213,7 +215,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
           <div className="flex items-center justify-between ml-1">
             <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider">
               <Type size={16} className="text-brand-primary" />
-              Summary
+              {t('issues.create.summary')}
             </label>
             <button
               type="button"
@@ -222,14 +224,14 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Sparkles size={13} className={aiLoading ? 'animate-spin' : ''} />
-              {aiLoading ? 'Thinking…' : 'Auto-fill with AI'}
+              {aiLoading ? t('issues.create.aiThinking') : t('issues.create.aiSuggest')}
             </button>
           </div>
           <input
             type="text"
             name="summary"
             required
-            placeholder="What needs to be done?"
+            placeholder={t('issues.create.summaryPlaceholder')}
             className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-medium text-lg"
             value={formData.summary}
             onChange={handleSummaryChange}
@@ -242,7 +244,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
                 exit={{ opacity: 0 }}
                 className="text-[10px] font-bold text-brand-primary/60 uppercase tracking-widest mt-2 ml-1"
               >
-                Checking for duplicates…
+                {t('issues.create.checkingDuplicates')}
               </motion.p>
             )}
           </AnimatePresence>
@@ -256,13 +258,13 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider ml-1">
             <AlignLeft size={16} className="text-brand-primary" />
-            Description
+            {t('issues.create.description')}
           </label>
           <div className={`rounded-xl overflow-hidden border border-border-glow bg-foreground/[0.02] ${shimmer}`}>
             <MarkdownEditor
               value={formData.description}
               onChange={handleDescriptionChange}
-              placeholder="Provide more details..."
+              placeholder={t('issues.create.descriptionPlaceholder')}
               rows={8}
             />
           </div>
@@ -273,7 +275,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider ml-1">
               <Layers size={16} className="text-brand-primary" />
-              Type
+              {t('issues.create.type')}
             </label>
             <select
               name="issue_type"
@@ -286,9 +288,9 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
                 <option key={type} value={type} className="bg-background text-foreground">{type}</option>
               )) || (
                 <>
-                  <option value="Task" className="bg-background text-foreground">Task</option>
-                  <option value="Bug" className="bg-background text-foreground">Bug</option>
-                  <option value="Request" className="bg-background text-foreground">Request</option>
+                  <option value="Task" className="bg-background text-foreground">{t('issues.create.fallbackTask')}</option>
+                  <option value="Bug" className="bg-background text-foreground">{t('issues.create.fallbackBug')}</option>
+                  <option value="Request" className="bg-background text-foreground">{t('issues.create.fallbackRequest')}</option>
                 </>
               )}
             </select>
@@ -297,7 +299,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider ml-1">
               <AlertCircle size={16} className="text-brand-primary" />
-              Priority
+              {t('issues.create.priority')}
             </label>
             <select
               name="priority"
@@ -306,22 +308,22 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               disabled={aiLoading}
               className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
             >
-              <option value="low" className="bg-background text-foreground">Low</option>
-              <option value="normal" className="bg-background text-foreground">Normal</option>
-              <option value="high" className="bg-background text-foreground">High</option>
+              <option value="low" className="bg-background text-foreground">{t('issues.create.priorityLow')}</option>
+              <option value="normal" className="bg-background text-foreground">{t('issues.create.priorityNormal')}</option>
+              <option value="high" className="bg-background text-foreground">{t('issues.create.priorityHigh')}</option>
             </select>
           </div>
 
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider ml-1">
               <Clock size={16} className="text-brand-primary" />
-              Estimate (hrs)
+              {t('issues.create.estimate')}
             </label>
             <input
               type="number"
               step="0.5"
               name="estimated_hours"
-              placeholder="e.g. 8"
+              placeholder={t('issues.create.estimatePlaceholder')}
               disabled={aiLoading}
               className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold ${shimmer}`}
               value={formData.estimated_hours}
@@ -335,7 +337,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider ml-1">
               <User size={16} className="text-brand-primary" />
-              Assignee
+              {t('issues.create.assignee')}
             </label>
             <select
               name="assignee_id"
@@ -344,14 +346,14 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               disabled={aiLoading}
               className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
             >
-              <option value="" className="bg-background text-foreground">Unassigned</option>
+              <option value="" className="bg-background text-foreground">{t('issues.create.unassigned')}</option>
               {members.map((member) => (
                 <option key={member.id} value={member.id} className="bg-background text-foreground">{member.name}</option>
               ))}
             </select>
             {assigneeSuggestions.length > 0 && (
               <div className="mt-3 space-y-2">
-                <p className="text-xs font-semibold text-foreground/40 uppercase tracking-wider">AI Suggestions</p>
+                <p className="text-xs font-semibold text-foreground/40 uppercase tracking-wider">{t('issues.create.aiSuggestions')}</p>
                 {assigneeSuggestions.map((suggestion, index) => (
                   <div
                     key={index}
@@ -367,7 +369,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
                       className="shrink-0 flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 transition-colors"
                     >
                       <User size={12} />
-                      Assign
+                      {t('issues.create.assign')}
                     </button>
                   </div>
                 ))}
@@ -381,7 +383,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-xs font-bold text-foreground/40 uppercase tracking-wider">
               <Calendar size={12} />
-              Due Date
+              {t('issues.create.dueDate')}
             </label>
             <input
               type="date"
@@ -396,7 +398,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-xs font-bold text-foreground/40 uppercase tracking-wider">
                 <Flag size={12} />
-                Milestone
+                {t('issues.create.milestone')}
               </label>
               <select
                 name="milestone_id"
@@ -404,7 +406,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
                 onChange={(e) => setFormData(prev => ({ ...prev, milestone_id: e.target.value }))}
                 className="w-full px-4 py-3 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
               >
-                <option value="">No milestone</option>
+                <option value="">{t('issues.create.noMilestone')}</option>
                 {milestones.filter(m => m.status !== 'closed').map((m) => (
                   <option key={m.id} value={m.id}>{m.name}</option>
                 ))}
@@ -421,14 +423,14 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
             onClick={onCancel}
             className="px-8"
           >
-            Cancel
+            {t('issues.create.cancel')}
           </GlassButton>
           <GlassButton
             type="submit"
             disabled={loading || aiLoading}
             className="px-10"
           >
-            {loading ? 'Creating...' : 'Create Issue'}
+            {loading ? t('issues.create.creating') : t('issues.create.submit')}
           </GlassButton>
         </div>
       </form>

@@ -5,6 +5,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { createMilestone, type CreateMilestoneData } from '@/lib/api/milestones';
 import { Flag, X } from 'lucide-react';
+import { useLocale } from '@/context/LocaleContext';
 
 interface CreateMilestoneFormProps {
   projectId: number | string;
@@ -13,6 +14,7 @@ interface CreateMilestoneFormProps {
 }
 
 export function CreateMilestoneForm({ projectId, onSuccess, onCancel }: CreateMilestoneFormProps) {
+  const { t } = useLocale();
   const [form, setForm] = useState<CreateMilestoneData>({
     name: '',
     description: '',
@@ -38,7 +40,7 @@ export function CreateMilestoneForm({ projectId, onSuccess, onCancel }: CreateMi
       await createMilestone(projectId, payload);
       onSuccess();
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Failed to create milestone.');
+      setError(err?.response?.data?.message ?? t('milestones.create.error'));
     } finally {
       setLoading(false);
     }
@@ -49,7 +51,7 @@ export function CreateMilestoneForm({ projectId, onSuccess, onCancel }: CreateMi
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold flex items-center gap-2">
           <Flag size={20} className="text-brand-primary" />
-          New Milestone
+          {t('milestones.create.heading')}
         </h2>
         <button onClick={onCancel} className="p-2 rounded-lg hover:bg-foreground/5 text-foreground/40 hover:text-foreground transition-colors">
           <X size={18} />
@@ -62,23 +64,23 @@ export function CreateMilestoneForm({ projectId, onSuccess, onCancel }: CreateMi
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">Name *</label>
+          <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('milestones.form.nameLabel')}</label>
           <input
             type="text"
             required
             value={form.name}
             onChange={(e) => set('name', e.target.value)}
-            placeholder="e.g. v1.0 Launch"
+            placeholder={t('milestones.create.namePlaceholder')}
             className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
           />
         </div>
 
         <div>
-          <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">Description</label>
+          <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('milestones.form.descLabel')}</label>
           <textarea
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
-            placeholder="Optional description"
+            placeholder={t('milestones.form.descPlaceholder')}
             rows={2}
             className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors resize-none"
           />
@@ -86,7 +88,7 @@ export function CreateMilestoneForm({ projectId, onSuccess, onCancel }: CreateMi
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">Start Date</label>
+            <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('milestones.form.startDateLabel')}</label>
             <input
               type="date"
               value={form.start_date}
@@ -95,7 +97,7 @@ export function CreateMilestoneForm({ projectId, onSuccess, onCancel }: CreateMi
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">Due Date</label>
+            <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('milestones.form.dueDateLabel')}</label>
             <input
               type="date"
               value={form.due_date}
@@ -107,24 +109,24 @@ export function CreateMilestoneForm({ projectId, onSuccess, onCancel }: CreateMi
         </div>
 
         <div>
-          <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">Status</label>
+          <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('milestones.form.statusLabel')}</label>
           <select
             value={form.status}
             onChange={(e) => set('status', e.target.value)}
             className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
           >
-            <option value="open">Open</option>
-            <option value="in_progress">In Progress</option>
-            <option value="closed">Closed</option>
+            <option value="open">{t('milestones.status.open')}</option>
+            <option value="in_progress">{t('milestones.status.inProgress')}</option>
+            <option value="closed">{t('milestones.status.closed')}</option>
           </select>
         </div>
 
         <div className="flex gap-3 pt-2">
           <GlassButton type="submit" disabled={loading} className="flex-1">
-            {loading ? 'Creating…' : 'Create Milestone'}
+            {loading ? t('milestones.create.submitting') : t('milestones.create.submit')}
           </GlassButton>
           <GlassButton type="button" variant="secondary" onClick={onCancel}>
-            Cancel
+            {t('common.cancel')}
           </GlassButton>
         </div>
       </form>

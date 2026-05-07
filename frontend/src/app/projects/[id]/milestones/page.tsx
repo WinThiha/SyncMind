@@ -13,6 +13,7 @@ import { EditMilestoneForm } from '@/components/milestones/EditMilestoneForm';
 import { getMilestones, type Milestone } from '@/lib/api/milestones';
 import { getProject, type Project } from '@/lib/api/projects';
 import { BASE_SPRING } from '@/lib/animations';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function MilestonesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = React.use(params);
@@ -23,6 +24,7 @@ export default function MilestonesPage({ params }: { params: Promise<{ id: strin
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [editing, setEditing] = useState<Milestone | null>(null);
+  const { t } = useLocale();
 
   async function load() {
     try {
@@ -66,14 +68,14 @@ export default function MilestonesPage({ params }: { params: Promise<{ id: strin
           </motion.button>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Milestones</h1>
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('milestones.page.title')}</h1>
               {project?.key && (
                 <span className="bg-brand-primary/10 text-brand-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border border-brand-primary/20 shrink-0">
                   {project.key}
                 </span>
               )}
             </div>
-            <p className="text-foreground/60 text-sm mt-0.5">{milestones.length} milestone{milestones.length !== 1 ? 's' : ''}</p>
+            <p className="text-foreground/60 text-sm mt-0.5">{t(milestones.length === 1 ? 'milestones.page.countSingular' : 'milestones.page.countPlural', { count: milestones.length })}</p>
           </div>
         </div>
         <GlassButton
@@ -81,8 +83,8 @@ export default function MilestonesPage({ params }: { params: Promise<{ id: strin
           className="self-start sm:self-auto shrink-0 flex items-center gap-2"
         >
           <Plus size={16} />
-          <span className="hidden sm:inline">New Milestone</span>
-          <span className="sm:hidden">New</span>
+          <span className="hidden sm:inline">{t('milestones.page.newButton')}</span>
+          <span className="sm:hidden">{t('milestones.page.newButtonShort')}</span>
         </GlassButton>
       </div>
 
@@ -129,13 +131,13 @@ export default function MilestonesPage({ params }: { params: Promise<{ id: strin
       {milestones.length === 0 ? (
         <GlassCard className="p-10 sm:p-16 flex flex-col items-center text-center">
           <Flag size={40} className="text-foreground/20 mb-4" />
-          <h3 className="font-bold text-lg mb-2">No milestones yet</h3>
+          <h3 className="font-bold text-lg mb-2">{t('milestones.page.emptyTitle')}</h3>
           <p className="text-sm text-foreground/50 max-w-sm">
-            Create milestones to track progress toward your project goals.
+            {t('milestones.page.emptyDesc')}
           </p>
           <GlassButton onClick={() => setShowCreate(true)} className="mt-6 flex items-center gap-2">
             <Plus size={16} />
-            Create First Milestone
+            {t('milestones.page.createFirst')}
           </GlassButton>
         </GlassCard>
       ) : (
@@ -145,7 +147,7 @@ export default function MilestonesPage({ params }: { params: Promise<{ id: strin
             <GlassCard className="p-6 mb-8">
               <h2 className="text-sm font-bold text-foreground/40 uppercase tracking-wider flex items-center gap-2 mb-4">
                 <CalendarRange size={14} />
-                Timeline
+                {t('milestones.page.timelineSection')}
               </h2>
               <MilestoneTimeline
                 milestones={milestones}
@@ -156,7 +158,7 @@ export default function MilestonesPage({ params }: { params: Promise<{ id: strin
 
           {/* In Progress */}
           {inProgress.length > 0 && (
-            <Section title="In Progress" count={inProgress.length}>
+            <Section title={t('milestones.section.inProgress')} count={inProgress.length}>
               {inProgress.map((m) => (
                 <MilestoneCard
                   key={m.id}
@@ -170,7 +172,7 @@ export default function MilestonesPage({ params }: { params: Promise<{ id: strin
 
           {/* Open */}
           {open.length > 0 && (
-            <Section title="Open" count={open.length}>
+            <Section title={t('milestones.section.open')} count={open.length}>
               {open.map((m) => (
                 <MilestoneCard
                   key={m.id}
@@ -184,7 +186,7 @@ export default function MilestonesPage({ params }: { params: Promise<{ id: strin
 
           {/* Closed */}
           {closed.length > 0 && (
-            <Section title="Closed" count={closed.length}>
+            <Section title={t('milestones.section.closed')} count={closed.length}>
               {closed.map((m) => (
                 <MilestoneCard
                   key={m.id}

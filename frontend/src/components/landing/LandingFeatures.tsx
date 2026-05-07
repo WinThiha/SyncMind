@@ -1,49 +1,30 @@
 'use client';
 
 import { BrainCircuit, GitBranch, Search, Sparkles, Users } from 'lucide-react';
+import { useLocale } from '@/context/LocaleContext';
 import { GlassCard } from '@/components/ui/GlassCard';
 
-const features = [
-  {
-    icon: Sparkles,
-    title: 'AI-assisted issue creation',
-    description: 'Draft richer issue descriptions and metadata faster with AI assistance that fits into the existing create flow.',
-  },
-  {
-    icon: Search,
-    title: 'Semantic issue search',
-    description: 'Find work by natural-language context instead of relying only on exact issue keys or rigid filters.',
-  },
-  {
-    icon: GitBranch,
-    title: 'Project and issue workflows',
-    description: 'Keep projects, roles, comments, history, and issue lifecycle actions in a single operational surface.',
-  },
-  {
-    icon: Users,
-    title: 'Member-aware collaboration',
-    description: 'Project admins can manage members and assign work with clear, role-based boundaries.',
-  },
-  {
-    icon: BrainCircuit,
-    title: 'Duplicate detection',
-    description: 'Surface similar issues early so teams avoid filing redundant work and can reuse existing context.',
-  },
-];
-
 export function LandingFeatures() {
+  const { t } = useLocale();
+  const features = [
+    { icon: Sparkles, title: t('landing.features.1.title'), description: t('landing.features.1.description') },
+    { icon: Search, title: t('landing.features.2.title'), description: t('landing.features.2.description') },
+    { icon: GitBranch, title: t('landing.features.3.title'), description: t('landing.features.3.description') },
+    { icon: Users, title: t('landing.features.4.title'), description: t('landing.features.4.description') },
+    { icon: BrainCircuit, title: t('landing.features.5.title'), description: t('landing.features.5.description') },
+  ];
   return (
     <section id="capabilities" className="landing-section px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <div className="landing-kicker text-brand-primary">Capabilities</div>
+            <div className="landing-kicker text-brand-primary">{t('landing.features.sectionKicker')}</div>
             <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-              Everything on the landing page maps to something the product already does.
+              {t('landing.features.sectionHeadline')}
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-6 text-foreground/55 md:text-right">
-            These sections only reference implemented SyncMind workflows — no placeholder marketing claims.
+            {t('landing.features.sectionDescription')}
           </p>
         </div>
 

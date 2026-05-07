@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocale } from '@/context/LocaleContext';
 import { getIssue, updateIssue } from '@/lib/api/issues';
 import { getProject, getProjectMembers, ProjectMember } from '@/lib/api/projects';
 import { getMilestones, type Milestone } from '@/lib/api/milestones';
@@ -95,6 +96,7 @@ function EditSkeleton() {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProps) {
+  const { t } = useLocale();
   const [formData, setFormData] = useState({
     summary: '',
     description: '',
@@ -141,7 +143,7 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
           milestone_id: issueData.milestone_id?.toString() || '',
         });
       } catch {
-        setError('Failed to load issue data.');
+        setError(t('issues.edit.loadError'));
       } finally {
         setLoading(false);
       }
@@ -169,7 +171,7 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
       });
       router.push(`/projects/${projectId}/issues`);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update issue.');
+      setError(err.response?.data?.message || t('issues.edit.error'));
     } finally {
       setSaving(false);
     }
@@ -190,12 +192,12 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
         </motion.button>
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Edit Issue</h1>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('issues.edit.title')}</h1>
             <span className="bg-brand-primary/10 text-brand-primary text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-widest border border-brand-primary/20 shrink-0">
               {issueKey}
             </span>
           </div>
-          <p className="text-foreground/50 text-sm mt-0.5">Update issue properties and time tracking.</p>
+          <p className="text-foreground/50 text-sm mt-0.5">{t('issues.edit.subtitle')}</p>
         </div>
       </div>
 
@@ -219,26 +221,26 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
 
           {/* ── Summary ── */}
           <div>
-            <FieldLabel icon={Type}>Summary</FieldLabel>
+            <FieldLabel icon={Type}>{t('issues.create.summary')}</FieldLabel>
             <input
               type="text"
               name="summary"
               required
               value={formData.summary}
               onChange={handleChange}
-              placeholder="Brief description of the issue"
+              placeholder={t('issues.edit.summaryPlaceholder')}
               className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30 transition-all font-semibold text-base placeholder:text-foreground/25 placeholder:font-normal"
             />
           </div>
 
           {/* ── Description ── */}
           <div>
-            <FieldLabel icon={AlignLeft}>Description</FieldLabel>
+            <FieldLabel icon={AlignLeft}>{t('issues.create.description')}</FieldLabel>
             <div className="rounded-xl overflow-hidden border border-border-glow bg-foreground/[0.02] min-h-[180px]">
               <MarkdownEditor
                 value={formData.description}
                 onChange={(v) => setFormData((prev) => ({ ...prev, description: v }))}
-                placeholder="Provide more details, steps to reproduce, acceptance criteria..."
+                placeholder={t('issues.edit.descriptionPlaceholder')}
                 rows={8}
               />
             </div>
@@ -249,33 +251,33 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
 
           {/* ── Classification: Type · Priority · Status ── */}
           <div>
-            <p className="text-[10px] font-bold text-foreground/25 uppercase tracking-widest mb-4">Classification</p>
+            <p className="text-[10px] font-bold text-foreground/25 uppercase tracking-widest mb-4">{t('issues.edit.classification')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
               <div>
-                <FieldLabel icon={Layers}>Type</FieldLabel>
+                <FieldLabel icon={Layers}>{t('issues.create.type')}</FieldLabel>
                 <SelectField name="issue_type" value={formData.issue_type} onChange={handleChange}>
                   {project?.issue_types?.map((type: string) => (
                     <option key={type} value={type}>{type}</option>
-                  )) ?? <option value="Task">Task</option>}
+                  )) ?? <option value="Task">{t('issues.create.fallbackTask')}</option>}
                 </SelectField>
               </div>
 
               <div>
-                <FieldLabel icon={AlertCircle}>Priority</FieldLabel>
+                <FieldLabel icon={AlertCircle}>{t('issues.create.priority')}</FieldLabel>
                 <SelectField name="priority" value={formData.priority} onChange={handleChange}>
-                  <option value="low">Low</option>
-                  <option value="normal">Normal</option>
-                  <option value="high">High</option>
+                  <option value="low">{t('issues.search.priorityLow')}</option>
+                  <option value="normal">{t('issues.search.priorityNormal')}</option>
+                  <option value="high">{t('issues.search.priorityHigh')}</option>
                 </SelectField>
               </div>
 
               <div>
-                <FieldLabel icon={CheckCircle2}>Status</FieldLabel>
+                <FieldLabel icon={CheckCircle2}>{t('issues.edit.status')}</FieldLabel>
                 <SelectField name="status" value={formData.status} onChange={handleChange}>
-                  <option value="open">Open</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="closed">Closed</option>
+                  <option value="open">{t('issues.search.statusOpen')}</option>
+                  <option value="in_progress">{t('issues.search.statusInProgress')}</option>
+                  <option value="resolved">{t('issues.search.statusResolved')}</option>
+                  <option value="closed">{t('issues.search.statusClosed')}</option>
                 </SelectField>
               </div>
             </div>
@@ -283,10 +285,10 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
 
           {/* ── Schedule: Due Date · Milestone ── */}
           <div>
-            <p className="text-[10px] font-bold text-foreground/25 uppercase tracking-widest mb-4">Schedule</p>
+            <p className="text-[10px] font-bold text-foreground/25 uppercase tracking-widest mb-4">{t('issues.edit.schedule')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               <div>
-                <FieldLabel icon={Calendar}>Due Date</FieldLabel>
+                <FieldLabel icon={Calendar}>{t('issues.create.dueDate')}</FieldLabel>
                 <input
                   type="date"
                   name="due_date"
@@ -297,9 +299,9 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
               </div>
 
               <div>
-                <FieldLabel icon={Flag}>Milestone</FieldLabel>
+                <FieldLabel icon={Flag}>{t('issues.create.milestone')}</FieldLabel>
                 <SelectField name="milestone_id" value={formData.milestone_id} onChange={handleChange}>
-                  <option value="">No milestone</option>
+                  <option value="">{t('issues.create.noMilestone')}</option>
                   {milestones
                     .filter((m) => m.status !== 'closed' || formData.milestone_id === m.id.toString())
                     .map((m) => (
@@ -310,7 +312,7 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
                 </SelectField>
                 {milestones.length === 0 && (
                   <p className="text-[10px] text-foreground/30 mt-1.5 ml-0.5">
-                    No milestones yet — create one from the Milestones page.
+                    {t('issues.edit.noMilestones')}
                   </p>
                 )}
               </div>
@@ -319,12 +321,12 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
 
           {/* ── Assignment & Time tracking ── */}
           <div>
-            <p className="text-[10px] font-bold text-foreground/25 uppercase tracking-widest mb-4">Assignment & Time</p>
+            <p className="text-[10px] font-bold text-foreground/25 uppercase tracking-widest mb-4">{t('issues.edit.assignmentAndTime')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
               <div>
-                <FieldLabel icon={User}>Assignee</FieldLabel>
+                <FieldLabel icon={User}>{t('issues.create.assignee')}</FieldLabel>
                 <SelectField name="assignee_id" value={formData.assignee_id} onChange={handleChange}>
-                  <option value="">Unassigned</option>
+                  <option value="">{t('issues.create.unassigned')}</option>
                   {members.map((m) => (
                     <option key={m.id} value={m.id}>{m.name}</option>
                   ))}
@@ -332,13 +334,13 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
               </div>
 
               <div>
-                <FieldLabel icon={Clock}>Estimate (hrs)</FieldLabel>
+                <FieldLabel icon={Clock}>{t('issues.create.estimate')}</FieldLabel>
                 <input
                   type="number"
                   step="0.5"
                   min="0"
                   name="estimated_hours"
-                  placeholder="e.g. 8"
+                  placeholder={t('issues.edit.estimatePlaceholder')}
                   value={formData.estimated_hours}
                   onChange={handleChange}
                   className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30 transition-all font-semibold text-sm placeholder:text-foreground/25 placeholder:font-normal"
@@ -346,13 +348,13 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
               </div>
 
               <div>
-                <FieldLabel icon={HistoryIcon}>Actual (hrs)</FieldLabel>
+                <FieldLabel icon={HistoryIcon}>{t('issues.edit.actualHours')}</FieldLabel>
                 <input
                   type="number"
                   step="0.5"
                   min="0"
                   name="actual_hours"
-                  placeholder="e.g. 4.5"
+                  placeholder={t('issues.edit.actualPlaceholder')}
                   value={formData.actual_hours}
                   onChange={handleChange}
                   className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30 transition-all font-semibold text-sm placeholder:text-foreground/25 placeholder:font-normal"
@@ -369,14 +371,14 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
               onClick={() => router.back()}
               className="w-full sm:w-auto"
             >
-              Cancel
+              {t('common.cancel')}
             </GlassButton>
             <GlassButton
               type="submit"
               disabled={saving}
               className="w-full sm:w-auto min-w-[130px]"
             >
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? t('issues.edit.saving') : t('issues.edit.saveChanges')}
             </GlassButton>
           </div>
         </form>

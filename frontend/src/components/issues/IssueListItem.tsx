@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useLocale } from '@/context/LocaleContext';
 import { motion } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { FAST_SPRING } from '@/lib/animations';
@@ -34,6 +35,7 @@ const priorityColors: Record<string, string> = {
 };
 
 export const IssueListItem: React.FC<IssueListItemProps> = ({ issue, onClick }) => {
+  const { t } = useLocale();
   return (
     <GlassCard
       glow
@@ -75,7 +77,7 @@ export const IssueListItem: React.FC<IssueListItemProps> = ({ issue, onClick }) 
             </span>
             {issue.similarity !== undefined && (
               <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
-                {Math.round(issue.similarity * 100)}% match
+                {Math.round(issue.similarity * 100)}% {t('issues.search.match')}
               </span>
             )}
             {/* Due date — mobile only */}

@@ -8,6 +8,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { Settings, Trash2, UserPlus, AlertTriangle, Save, FolderEdit, ListTree, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLocale } from '@/context/LocaleContext';
 
 interface ProjectSettingsProps {
   project: Project;
@@ -16,6 +17,7 @@ interface ProjectSettingsProps {
 }
 
 export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectSettingsProps) {
+  const { t } = useLocale();
   const [name, setName] = useState(project.name);
   const [issueTypes, setIssueTypes] = useState(project.issue_types.join(', '));
   const [loading, setLoading] = useState(false);
@@ -39,20 +41,20 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
       onUpdate(updated);
       setError(null);
     } catch (err) {
-      setError('Failed to update project');
+      setError(t('projects.settings.updateError'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (confirm('Are you sure you want to completely delete this project? This action cannot be undone.')) {
+    if (confirm(t('projects.settings.confirmDelete'))) {
       try {
         await deleteProject(project.id);
         router.push('/dashboard');
       } catch (err) {
         const axiosError = err as AxiosError<{ message?: string }>;
-        setError(axiosError.response?.data?.message || 'Failed to delete project');
+        setError(axiosError.response?.data?.message || t('projects.settings.deleteError'));
       }
     }
   };
@@ -70,13 +72,13 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
 
   const handleTransfer = async () => {
     if (!transferUserId) return;
-    if (confirm('Are you sure you want to transfer ownership? You will lose creator privileges.')) {
+    if (confirm(t('projects.settings.confirmTransfer'))) {
       try {
         await transferOwnership(project.id, transferUserId);
         router.push('/dashboard');
       } catch (err) {
         const axiosError = err as AxiosError<{ message?: string }>;
-        setTransferError(axiosError.response?.data?.message || 'Failed to transfer ownership');
+        setTransferError(axiosError.response?.data?.message || t('projects.settings.transferError'));
       }
     }
   };
@@ -86,7 +88,7 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
       <GlassCard className="p-8">
         <div className="flex items-center gap-2 mb-8 text-brand-primary">
           <Settings size={20} />
-          <h2 className="text-xl font-bold uppercase tracking-widest">Project Settings</h2>
+          <h2 className="text-xl font-bold uppercase tracking-widest">{t('projects.settings.title')}</h2>
         </div>
         
         {error && (
@@ -97,10 +99,10 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
 
         <form onSubmit={handleUpdate} className="space-y-6">
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-bold text-foreground/40 uppercase tracking-widest ml-1">
-              <FolderEdit size={14} />
-              Project Name
-            </label>
+              <label className="flex items-center gap-2 text-xs font-bold text-foreground/40 uppercase tracking-widest ml-1">
+                <FolderEdit size={14} />
+                {t('projects.settings.nameLabel')}
+              </label>
             <input
               type="text"
               required
@@ -111,10 +113,10 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-bold text-foreground/40 uppercase tracking-widest ml-1">
-              <ListTree size={14} />
-              Issue Types
-            </label>
+              <label className="flex items-center gap-2 text-xs font-bold text-foreground/40 uppercase tracking-widest ml-1">
+                <ListTree size={14} />
+                {t('projects.settings.typesLabel')}
+              </label>
             <input
               type="text"
               required
@@ -122,7 +124,7 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
               value={issueTypes}
               onChange={(e) => setIssueTypes(e.target.value)}
             />
-            <p className="text-[10px] text-foreground/30 font-medium ml-1">Comma separated list of allowed issue types.</p>
+            <p className="text-[10px] text-foreground/30 font-medium ml-1">{t('projects.settings.typesHint')}</p>
           </div>
 
           <div className="pt-4 border-t border-border-glow/50 flex justify-end">
@@ -132,7 +134,7 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
               className="px-8"
             >
               <Save size={16} />
-              {loading ? 'SAVING...' : 'SAVE CHANGES'}
+              {loading ? t('projects.settings.saving') : t('projects.settings.saveChanges')}
             </GlassButton>
           </div>
         </form>
@@ -142,17 +144,17 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
         <GlassCard className="p-8 border-red-500/20">
           <div className="flex items-center gap-2 mb-8 text-red-500">
             <AlertTriangle size={20} />
-            <h2 className="text-xl font-bold uppercase tracking-widest">Danger Zone</h2>
+            <h2 className="text-xl font-bold uppercase tracking-widest">{t('projects.settings.dangerZone')}</h2>
           </div>
           
           <div className="space-y-10">
             <div className="p-6 bg-red-500/[0.02] border border-red-500/10 rounded-2xl space-y-6">
               <div>
-                <h3 className="text-sm font-bold flex items-center gap-2 mb-1">
-                  <UserPlus size={16} className="text-orange-500" />
-                  Transfer Ownership
-                </h3>
-                <p className="text-xs text-foreground/40 font-medium">Transfer this project to another administrator.</p>
+                  <h3 className="text-sm font-bold flex items-center gap-2 mb-1">
+                    <UserPlus size={16} className="text-orange-500" />
+                    {t('projects.settings.transferTitle')}
+                  </h3>
+                  <p className="text-xs text-foreground/40 font-medium">{t('projects.settings.transferDesc')}</p>
               </div>
               
               {transferError && <div className="text-red-500 text-xs font-bold">{transferError}</div>}
@@ -165,7 +167,7 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
                     onFocus={loadMembers}
                     onChange={(e) => setTransferUserId(e.target.value)}
                   >
-                    <option value="">Select a member...</option>
+                    <option value="">{t('projects.settings.transferPlaceholder')}</option>
                     {members.map((m) => (
                       <option key={m.id} value={m.id}>{m.name.toUpperCase()} ({m.email})</option>
                     ))}
@@ -177,25 +179,25 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
                   disabled={!transferUserId}
                   className="bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"
                 >
-                  TRANSFER
+                  {t('projects.settings.transferButton')}
                 </GlassButton>
               </div>
             </div>
 
             <div className="p-6 bg-red-500/[0.02] border border-red-500/10 rounded-2xl flex items-center justify-between gap-6">
               <div>
-                <h3 className="text-sm font-bold flex items-center gap-2 mb-1 text-red-500">
-                  <Trash2 size={16} />
-                  Delete Project
-                </h3>
-                <p className="text-xs text-foreground/40 font-medium">Permanently remove this project and all data.</p>
+                  <h3 className="text-sm font-bold flex items-center gap-2 mb-1 text-red-500">
+                    <Trash2 size={16} />
+                    {t('projects.settings.delete')}
+                  </h3>
+                  <p className="text-xs text-foreground/40 font-medium">{t('projects.settings.deleteDesc')}</p>
               </div>
               <GlassButton
                 onClick={handleDelete}
                 variant="danger"
                 className="px-6"
               >
-                DELETE
+                {t('projects.settings.deleteButton')}
               </GlassButton>
             </div>
           </div>

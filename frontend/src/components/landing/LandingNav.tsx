@@ -1,23 +1,25 @@
 'use client';
 
 import { useState } from 'react';
+import { useLocale } from '@/context/LocaleContext';
 import Link from 'next/link';
 import { BrainCircuit, LayoutDashboard, LogIn, UserPlus, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LandingButtonLink } from './LandingButtonLink';
+import { ToolbarPreferences } from '@/components/toolbar/ToolbarPreferences';
 
 interface LandingNavProps {
   isAuthenticated: boolean;
   userName?: string | null;
 }
 
-const anchorLinks = [
-  { label: 'Capabilities', href: '#capabilities' },
-  { label: 'Start', href: '#cta' },
-];
-
 export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
+  const { t } = useLocale();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const anchorLinks = [
+    { label: t('landing.nav.capabilities'), href: '#capabilities' },
+    { label: t('landing.nav.start'), href: '#cta' },
+  ];
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
@@ -52,25 +54,29 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
 
           {/* Right actions */}
           <div className="flex items-center gap-2 shrink-0">
+            <div className="hidden sm:block">
+              <ToolbarPreferences />
+            </div>
+
             {isAuthenticated ? (
               <>
                 <span className="hidden md:block text-sm text-foreground/55 font-medium mr-1">
-                  {userName ? `Hi, ${userName.split(' ')[0]}` : 'Signed in'}
+                  {userName ? t('landing.nav.greeting', { name: userName.split(' ')[0] }) : t('landing.nav.signedIn')}
                 </span>
                 <LandingButtonLink href="/dashboard" variant="primary" size="sm">
                   <LayoutDashboard size={16} />
-                  <span className="hidden sm:inline">Dashboard</span>
+                  <span className="hidden sm:inline">{t('landing.nav.dashboard')}</span>
                 </LandingButtonLink>
               </>
             ) : (
               <>
                 <LandingButtonLink href="/login" variant="ghost" size="sm" className="hidden sm:inline-flex">
                   <LogIn size={16} />
-                  Sign in
+                  {t('landing.nav.signIn')}
                 </LandingButtonLink>
                 <LandingButtonLink href="/register" variant="primary" size="sm">
                   <UserPlus size={16} />
-                  <span className="hidden sm:inline">Get started</span>
+                  <span className="hidden sm:inline">{t('landing.nav.getStarted')}</span>
                 </LandingButtonLink>
               </>
             )}
@@ -78,7 +84,7 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
             {/* Hamburger — hidden on md+ */}
             <button
               onClick={() => setMobileOpen((v) => !v)}
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-label={mobileOpen ? t('landing.nav.closeMenu') : t('landing.nav.openMenu')}
               className="md:hidden p-2 rounded-xl text-foreground/55 hover:bg-foreground/5 hover:text-foreground transition-colors"
             >
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
@@ -115,7 +121,7 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
                     className="rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground/65 hover:bg-foreground/5 hover:text-foreground transition-colors flex items-center gap-2"
                   >
                     <LogIn size={16} />
-                    Sign in
+                    {t('landing.nav.signIn')}
                   </Link>
                 )}
                 {isAuthenticated && (
@@ -125,7 +131,7 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
                     className="rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground/65 hover:bg-foreground/5 hover:text-foreground transition-colors flex items-center gap-2"
                   >
                     <LayoutDashboard size={16} />
-                    Go to Dashboard
+                    {t('landing.nav.goToDashboard')}
                   </Link>
                 )}
               </div>
