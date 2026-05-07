@@ -28,6 +28,7 @@ class ProjectInvitationAcceptController extends Controller
                 'project_id' => $invitation->project_id,
                 'project_name' => $invitation->project->name,
                 'role' => $invitation->role,
+                'position' => $invitation->position,
                 'inviter_name' => $invitation->inviter?->name,
                 'expires_at' => $invitation->expires_at,
             ],
@@ -60,7 +61,10 @@ class ProjectInvitationAcceptController extends Controller
             ]);
         }
 
-        $project->members()->attach($user->id, ['role' => $invitation->role]);
+        $project->members()->attach($user->id, [
+            'role' => $invitation->role,
+            'position' => $invitation->position,
+        ]);
         $invitation->update(['accepted_at' => now()]);
 
         return response()->json([

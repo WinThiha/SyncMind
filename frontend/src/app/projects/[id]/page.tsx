@@ -168,7 +168,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             </div>
           </GlassCard>
 
-          <MemberManagement projectId={project.id} userRole={userRole === 'creator' ? 'admin' : userRole} />
+          <MemberManagement
+            projectId={project.id}
+            creatorId={project.creator_id}
+            userRole={userRole === 'creator' ? 'admin' : userRole}
+          />
         </div>
 
         <div className="space-y-8">
