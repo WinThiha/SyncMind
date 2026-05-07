@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { BrainCircuit, LayoutDashboard, LogIn, UserPlus, Menu, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { BrainCircuit, LayoutDashboard, LogIn, UserPlus } from 'lucide-react';
 import { LandingButtonLink } from './LandingButtonLink';
 
 interface LandingNavProps {
@@ -11,13 +9,7 @@ interface LandingNavProps {
   userName?: string | null;
 }
 
-const anchorLinks = [
-  { label: 'Capabilities', href: '#capabilities' },
-  { label: 'Start', href: '#cta' },
-];
-
 export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
@@ -37,19 +29,6 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
             </div>
           </Link>
 
-          {/* Centre anchor links — desktop only */}
-          <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
-            {anchorLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="rounded-full px-4 py-2 text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-foreground/5 transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
           {/* Right actions */}
           <div className="flex items-center gap-2 shrink-0">
             {isAuthenticated ? (
@@ -59,79 +38,24 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
                 </span>
                 <LandingButtonLink href="/dashboard" variant="primary" size="sm">
                   <LayoutDashboard size={16} />
-                  <span className="hidden sm:inline">Dashboard</span>
+                  Dashboard
                 </LandingButtonLink>
               </>
             ) : (
               <>
-                <LandingButtonLink href="/login" variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <LandingButtonLink href="/login" variant="ghost" size="sm">
                   <LogIn size={16} />
                   Sign in
                 </LandingButtonLink>
                 <LandingButtonLink href="/register" variant="primary" size="sm">
                   <UserPlus size={16} />
-                  <span className="hidden sm:inline">Get started</span>
+                  Get started
                 </LandingButtonLink>
               </>
             )}
 
-            {/* Hamburger — hidden on md+ */}
-            <button
-              onClick={() => setMobileOpen((v) => !v)}
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-              className="md:hidden p-2 rounded-xl text-foreground/55 hover:bg-foreground/5 hover:text-foreground transition-colors"
-            >
-              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
           </div>
         </div>
-
-        {/* Mobile dropdown — animated */}
-        <AnimatePresence>
-          {mobileOpen && (
-            <motion.div
-              key="mobile-menu"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: 'easeInOut' }}
-              className="md:hidden overflow-hidden border-t border-border-glow/30"
-            >
-              <div className="px-3 py-3 flex flex-col gap-0.5">
-                {anchorLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground/65 hover:bg-foreground/5 hover:text-foreground transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                {!isAuthenticated && (
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground/65 hover:bg-foreground/5 hover:text-foreground transition-colors flex items-center gap-2"
-                  >
-                    <LogIn size={16} />
-                    Sign in
-                  </Link>
-                )}
-                {isAuthenticated && (
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground/65 hover:bg-foreground/5 hover:text-foreground transition-colors flex items-center gap-2"
-                  >
-                    <LayoutDashboard size={16} />
-                    Go to Dashboard
-                  </Link>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
       </div>
     </header>
