@@ -1,5 +1,6 @@
 'use client';
 
+import { useLocale } from '@/context/LocaleContext';
 import { SimilarIssue } from '@/lib/api/issues';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, ExternalLink } from 'lucide-react';
@@ -11,6 +12,7 @@ interface SimilarIssuesCardProps {
 }
 
 export function SimilarIssuesCard({ issues, projectKey = 'PROJ' }: SimilarIssuesCardProps) {
+  const { t } = useLocale();
   if (issues.length === 0) return null;
 
   return (
@@ -24,7 +26,7 @@ export function SimilarIssuesCard({ issues, projectKey = 'PROJ' }: SimilarIssues
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle size={16} className="text-amber-500" />
           <h4 className="text-sm font-bold text-amber-500 uppercase tracking-wider">
-            Possible Duplicates ({issues.length})
+            {t('issues.search.possibleDuplicates', { count: issues.length })}
           </h4>
         </div>
 
@@ -43,7 +45,7 @@ export function SimilarIssuesCard({ issues, projectKey = 'PROJ' }: SimilarIssues
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-tight ${
                       issue.similarity > 0.9 ? 'bg-amber-500/20 text-amber-500' : 'bg-white/10 text-foreground/40'
                     }`}>
-                      {Math.round(issue.similarity * 100)}% Match
+                      {Math.round(issue.similarity * 100)}% {t('issues.search.match')}
                     </span>
                   </div>
                   <p className="text-sm font-medium text-foreground group-hover:text-amber-200 transition-colors line-clamp-1">

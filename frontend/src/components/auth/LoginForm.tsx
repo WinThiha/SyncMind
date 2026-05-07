@@ -5,6 +5,7 @@ import api from '@/lib/axios';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 import GoogleLoginButton from './GoogleLoginButton';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
@@ -16,6 +17,7 @@ function LoginFormContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { refreshUser } = useAuth();
+    const { t } = useLocale();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [remember, setRemember] = useState(false);
@@ -41,7 +43,7 @@ function LoginFormContent() {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors);
             } else {
-                setMessage('An unexpected error occurred. Please try again.');
+                setMessage(t('auth.login.errorGeneric'));
             }
         } finally {
             setLoading(false);
@@ -50,7 +52,7 @@ function LoginFormContent() {
 
     return (
         <GlassCard className="p-10 shadow-2xl border-border-glow/50">
-            <h2 className="text-2xl font-black text-center mb-8 tracking-tight">Login to your account</h2>
+            <h2 className="text-2xl font-black text-center mb-8 tracking-tight">{t('auth.login.title')}</h2>
 
             <GoogleLoginButton />
 
@@ -59,7 +61,7 @@ function LoginFormContent() {
                     <div className="w-full border-t border-border-glow"></div>
                 </div>
                 <div className="relative flex justify-center text-xs font-bold uppercase tracking-widest">
-                    <span className="px-4 bg-background text-foreground/30">Or email</span>
+                    <span className="px-4 bg-background text-foreground/30">{t('auth.login.orEmail')}</span>
                 </div>
             </div>
 
@@ -77,14 +79,14 @@ function LoginFormContent() {
                 <div className="space-y-2">
                     <label className="flex items-center gap-2 text-[10px] font-bold text-foreground/40 uppercase tracking-widest ml-1">
                         <Mail size={14} className="text-brand-primary" />
-                        Email Address
+                        {t('auth.login.emailLabel')}
                     </label>
                     <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        placeholder="you@example.com"
+                        placeholder={t('auth.login.emailPlaceholder')}
                         className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium"
                     />
                     {errors.email && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1 uppercase">{errors.email[0]}</p>}
@@ -93,14 +95,14 @@ function LoginFormContent() {
                 <div className="space-y-2">
                     <label className="flex items-center gap-2 text-[10px] font-bold text-foreground/40 uppercase tracking-widest ml-1">
                         <Lock size={14} className="text-brand-primary" />
-                        Password
+                        {t('auth.login.passwordLabel')}
                     </label>
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        placeholder="••••••••"
+                        placeholder={t('auth.login.passwordPlaceholder')}
                         className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium"
                     />
                     {errors.password && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1 uppercase">{errors.password[0]}</p>}
@@ -116,14 +118,14 @@ function LoginFormContent() {
                             className="h-4 w-4 text-brand-primary border-border-glow rounded transition-colors bg-foreground/5"
                         />
                         <label htmlFor="remember" className="ml-2 block text-xs font-bold text-foreground/40 uppercase tracking-wider cursor-pointer">
-                            Keep me logged in
+                            {t('auth.login.rememberMe')}
                         </label>
                     </div>
                     <Link
                         href="/forgot-password"
                         className="text-xs font-bold text-brand-primary hover:text-brand-secondary transition-colors underline-offset-4 hover:underline"
                     >
-                        Forgot password?
+                        {t('auth.login.forgotPassword')}
                     </Link>
                 </div>
 
@@ -133,7 +135,7 @@ function LoginFormContent() {
                     className="w-full py-4"
                 >
                     <LogIn size={18} />
-                    {loading ? 'AUTHENTICATING...' : 'LOG IN'}
+                    {loading ? t('auth.login.submitting') : t('auth.login.submit')}
                 </GlassButton>
             </form>
         </GlassCard>

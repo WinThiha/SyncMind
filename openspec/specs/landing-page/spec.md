@@ -69,3 +69,48 @@ The system MUST preserve a usable and visually coherent landing-page layout on m
 - **WHEN** the homepage is rendered on a wide viewport
 - **THEN** major sections use multi-column layouts or richer visual composition without hiding key content or actions
 
+### Requirement: Public landing header exposes locale and theme controls
+The system MUST render locale and theme controls in the public landing header.
+
+#### Scenario: Visitor opens the home page
+- **WHEN** a visitor loads `/`
+- **THEN** the header shows locale and theme controls near the acquisition actions
+
+#### Scenario: Visitor interacts with the landing header on mobile
+- **WHEN** the landing page is rendered on a narrow viewport
+- **THEN** the locale and theme controls remain usable without obscuring the brand or primary CTA buttons
+
+### Requirement: Landing header controls remain aligned with implemented destinations
+The system MUST keep the public header focused on implemented navigation and preference actions.
+
+#### Scenario: Signed-out visitor uses landing navigation
+- **WHEN** a signed-out visitor interacts with the landing header
+- **THEN** the header still targets only implemented routes and in-page anchors while also exposing locale and theme controls
+
+#### Scenario: Signed-in user uses landing navigation
+- **WHEN** an authenticated user views the landing header
+- **THEN** the header still highlights the dashboard path while also exposing locale and theme controls
+
+### Requirement: Landing page renders all real UI strings via the locale-aware catalog
+The system SHALL replace every hardcoded English user-facing string in the landing page navigation, hero, features, CTA, and footer with a translation key lookup. Decorative demo content inside the mock dashboard panel MAY remain in English.
+
+#### Scenario: Landing navigation labels are localized
+- **WHEN** the active locale is non-English
+- **THEN** landing page navigation links (Capabilities, Start), auth buttons (Sign in, Get started, Dashboard), and mobile menu labels render in the selected locale
+
+#### Scenario: Landing hero content is localized
+- **WHEN** the active locale is non-English
+- **THEN** the hero kicker, headline, description, primary CTA button, and secondary CTA button render in the selected locale
+
+#### Scenario: Landing feature grid is localized
+- **WHEN** the active locale is non-English
+- **THEN** feature titles and descriptions in the capabilities grid render in the selected locale
+
+#### Scenario: Landing CTA section is localized
+- **WHEN** the active locale is non-English
+- **THEN** the CTA kicker, headline, description, and action buttons render in the selected locale
+
+#### Scenario: Landing footer is localized
+- **WHEN** the active locale is non-English
+- **THEN** footer navigation links, tagline, support buttons, and copyright line render in the selected locale
+

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Added to Project</title>
+    <title>{{ __('mail.member_added.title') }}</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 40px 16px; }
         .container { max-width: 560px; margin: 0 auto; background: #1e293b; border-radius: 16px; border: 1px solid #334155; overflow: hidden; }
@@ -23,17 +23,17 @@
             <h1>SyncMind</h1>
         </div>
         <div class="body">
-            <p>Hi {{ $invitee->name }},</p>
+            <p>{{ __('mail.common.greeting_name', ['name' => $invitee->name]) }}</p>
             <p>
-                <strong>{{ $addedBy->name }}</strong> has added you to
-                <strong>{{ $project->name }}</strong> on SyncMind as a
+                <strong>{{ $addedBy->name }}</strong> {{ __('mail.member_added.added_you_to') }}
+                <strong>{{ $project->name }}</strong> {{ __('mail.member_added.as_a') }}
                 <span class="badge">{{ $project->members()->where('user_id', $invitee->id)->first()?->pivot->role ?? 'member' }}</span>
             </p>
-            <p>The project is now available in your dashboard. Click below to go there now.</p>
-            <a href="{{ $projectUrl }}" class="btn">Go to Project</a>
+            <p>{{ __('mail.member_added.cta_intro') }}</p>
+            <a href="{{ $projectUrl }}" class="btn">{{ __('mail.member_added.cta') }}</a>
         </div>
         <div class="footer">
-            &copy; {{ date('Y') }} SyncMind. All rights reserved.
+            {!! __('mail.common.copyright', ['year' => date('Y')]) !!}
         </div>
     </div>
 </body>

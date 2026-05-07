@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\MemberAddedMail;
 use App\Models\Project;
 use App\Models\User;
+use App\Support\LocaleResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -49,7 +50,8 @@ class ProjectMemberController extends Controller
             'position' => $validated['position'] ?? null,
         ]);
 
-        Mail::to($userToAdd->email)->queue(new MemberAddedMail($userToAdd, $project, $request->user()));
+        $locale = app(LocaleResolver::class)->resolveForUser($userToAdd);
+        Mail::to($userToAdd->email)->queue(new MemberAddedMail($userToAdd, $project, $request->user(), $locale));
 
         return response()->json([
             'message' => 'Member added successfully.',

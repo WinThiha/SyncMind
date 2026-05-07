@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Invitation</title>
+    <title>{{ __('mail.project_invitation.title') }}</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 40px 16px; }
         .container { max-width: 560px; margin: 0 auto; background: #1e293b; border-radius: 16px; border: 1px solid #334155; overflow: hidden; }
@@ -24,21 +24,21 @@
             <h1>SyncMind</h1>
         </div>
         <div class="body">
-            <p>Hi there,</p>
+            <p>{{ __('mail.common.greeting_generic') }}</p>
             <p>
-                <strong>{{ $invitation->inviter?->name ?? 'Someone' }}</strong> has invited you to join
-                <strong>{{ $invitation->project->name }}</strong> on SyncMind as a
+                <strong>{{ $invitation->inviter?->name ?? __('mail.common.someone') }}</strong> {{ __('mail.project_invitation.invited_you_to_join') }}
+                <strong>{{ $invitation->project->name }}</strong> {{ __('mail.project_invitation.as_a') }}
                 <span class="badge">{{ $invitation->role }}</span>
             </p>
-            <p>Click the button below to accept the invitation and get started.</p>
-            <a href="{{ $acceptUrl }}" class="btn">Accept Invitation</a>
+            <p>{{ __('mail.project_invitation.cta_intro') }}</p>
+            <a href="{{ $acceptUrl }}" class="btn">{{ __('mail.project_invitation.cta') }}</a>
             <div class="expiry">
-                This invitation expires on {{ $invitation->expires_at->format('F j, Y \a\t g:i A') }}.
+                {{ __('mail.project_invitation.expires_on', ['date' => $invitation->expires_at->format('F j, Y \a\t g:i A')]) }}
             </div>
         </div>
         <div class="footer">
-            If you weren't expecting this invitation, you can safely ignore this email.<br>
-            &copy; {{ date('Y') }} SyncMind. All rights reserved.
+            {{ __('mail.project_invitation.footer_notice') }}<br>
+            {!! __('mail.common.copyright', ['year' => date('Y')]) !!}
         </div>
     </div>
 </body>

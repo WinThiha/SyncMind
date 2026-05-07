@@ -7,11 +7,13 @@ import IssueList from '@/components/issues/IssueList';
 import { motion } from 'framer-motion';
 import { ChevronLeft, Plus } from 'lucide-react';
 import { GlassButton } from '@/components/ui/GlassButton';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function IssueListPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = React.use(params);
   const [project, setProject] = useState<Project | null>(null);
   const router = useRouter();
+  const { t } = useLocale();
 
   useEffect(() => {
     async function loadProject() {
@@ -37,11 +39,11 @@ export default function IssueListPage({ params }: { params: Promise<{ id: string
           </motion.button>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Issues</h1>
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('issues.page.title')}</h1>
               <span className="text-foreground/30 text-sm hidden sm:inline">/</span>
-              <span className="text-foreground/60 text-sm font-bold truncate hidden sm:block">{project?.name || 'Loading...'}</span>
+              <span className="text-foreground/60 text-sm font-bold truncate hidden sm:block">{project?.name || t('projects.list.loading')}</span>
             </div>
-            <p className="text-foreground/60 text-sm mt-0.5">Manage and track your project tasks.</p>
+            <p className="text-foreground/60 text-sm mt-0.5">{t('issues.page.subtitle')}</p>
           </div>
         </div>
 
@@ -50,8 +52,8 @@ export default function IssueListPage({ params }: { params: Promise<{ id: string
           className="self-start sm:self-auto shrink-0"
         >
           <Plus size={18} />
-          <span className="hidden sm:inline">New Issue</span>
-          <span className="sm:hidden">New</span>
+          <span className="hidden sm:inline">{t('issues.page.newIssue')}</span>
+          <span className="sm:hidden">{t('issues.page.new')}</span>
         </GlassButton>
       </div>
 

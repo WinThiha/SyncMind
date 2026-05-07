@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
 import {
   getUserSettings,
@@ -13,6 +13,8 @@ import {
 import { useTheme } from '@/context/ThemeContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
+import { LOCALE_OPTIONS } from '@/lib/i18n/localeOptions';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,21 +37,21 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-const sections = ['Account', 'Security', 'Preferences', 'Notifications'] as const;
+const sections = ['account', 'security', 'preferences', 'notifications'] as const;
 type Section = (typeof sections)[number];
 
 const sectionIcons: Record<Section, React.ElementType> = {
-  Account: User,
-  Security: Lock,
-  Preferences: Sliders,
-  Notifications: Bell,
+  account: User,
+  security: Lock,
+  preferences: Sliders,
+  notifications: Bell,
 };
 
 const defaultSettings: UserSettings = {
   profile: { name: '', email: '' },
   verification: { email_verified: false },
   security: { has_password_credential: true, has_social_login: false },
-  preferences: { theme: 'system', sidebar_collapsed_default: false },
+  preferences: { theme: 'system', sidebar_collapsed_default: false, locale: 'en' },
   notifications: {
     email_mentions: true,
     email_issue_assigned: true,
@@ -58,15 +60,6 @@ const defaultSettings: UserSettings = {
     in_app_issue_assigned: true,
     in_app_comment_replies: true,
   },
-};
-
-const notificationLabels: Record<string, string> = {
-  email_mentions: 'Mentions',
-  email_issue_assigned: 'Issue assigned to you',
-  email_comment_replies: 'Comment replies',
-  in_app_mentions: 'Mentions',
-  in_app_issue_assigned: 'Issue assigned to you',
-  in_app_comment_replies: 'Comment replies',
 };
 
 // ─── Small shared components ──────────────────────────────────────────────────
@@ -155,11 +148,12 @@ function StatusBanner({ type, message, onDismiss }: {
 // ─── Section panels ───────────────────────────────────────────────────────────
 
 function AccountPanel({
-  settings, nameDraft, setNameDraft, onSave, onResend, saving, fieldErrors,
+  settings, nameDraft, setNameDraft, onSave, onResend, saving, fieldErrors, t,
 }: {
   settings: UserSettings; nameDraft: string; setNameDraft: (v: string) => void;
   onSave: () => void; onResend: () => void; saving: boolean;
   fieldErrors: Record<string, string[]>;
+  t: (key: string) => string;
 }) {
   const initials = settings.profile.name
     ? settings.profile.name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
@@ -180,17 +174,17 @@ function AccountPanel({
 
       {/* Name */}
       <div>
-        <FieldLabel>Display name</FieldLabel>
-        <FieldInput value={nameDraft} onChange={setNameDraft} placeholder="Your full name" />
+        <FieldLabel>{t('settings.account.displayName')}</FieldLabel>
+        <FieldInput value={nameDraft} onChange={setNameDraft} placeholder={t('settings.account.displayNamePlaceholder')} />
         <FieldError msg={fieldErrors['profile.name']?.[0]} />
       </div>
 
       {/* Email (read-only) */}
       <div>
-        <FieldLabel>Email address</FieldLabel>
+        <FieldLabel>{t('settings.account.emailAddress')}</FieldLabel>
         <FieldInput value={settings.profile.email} readOnly />
         <p className="text-foreground/35 text-xs mt-1.5 ml-0.5">
-          Email changes are managed through your account provider.
+          {t('settings.account.emailManagedByProvider')}
         </p>
       </div>
 
@@ -206,10 +200,12 @@ function AccountPanel({
             : <ShieldOff size={18} className="text-yellow-500" />}
           <div>
             <p className={`text-sm font-bold ${settings.verification.email_verified ? 'text-green-500' : 'text-yellow-500'}`}>
-              {settings.verification.email_verified ? 'Email verified' : 'Email not verified'}
+              {settings.verification.email_verified
+                ? t('settings.account.emailVerified')
+                : t('settings.account.emailNotVerified')}
             </p>
             {!settings.verification.email_verified && (
-              <p className="text-xs text-foreground/40 mt-0.5">Check your inbox or request a new link.</p>
+              <p className="text-xs text-foreground/40 mt-0.5">{t('settings.account.emailVerificationHint')}</p>
             )}
           </div>
         </div>
@@ -219,14 +215,14 @@ function AccountPanel({
             className="flex items-center gap-1.5 text-xs font-bold text-yellow-500 hover:text-yellow-400 transition-colors"
           >
             <RefreshCw size={13} />
-            Resend
+            {t('settings.account.resendVerification')}
           </button>
         )}
       </div>
 
       <div className="flex justify-end pt-2">
         <GlassButton onClick={onSave} disabled={saving} className="px-8">
-          {saving ? 'Saving...' : 'Save changes'}
+          {saving ? t('settings.actions.saving') : t('settings.actions.saveChanges')}
         </GlassButton>
       </div>
     </div>
@@ -234,13 +230,14 @@ function AccountPanel({
 }
 
 function SecurityPanel({
-  settings, passwordDraft, setPasswordDraft, onSavePassword, saving, fieldErrors,
+  settings, passwordDraft, setPasswordDraft, onSavePassword, saving, fieldErrors, t,
 }: {
   settings: UserSettings;
   passwordDraft: { current_password: string; new_password: string; new_password_confirmation: string };
   setPasswordDraft: (v: typeof passwordDraft) => void;
   onSavePassword: () => void; saving: boolean;
   fieldErrors: Record<string, string[]>;
+  t: (key: string) => string;
 }) {
   return (
     <div className="space-y-6">
@@ -248,11 +245,11 @@ function SecurityPanel({
       <div className="flex items-center gap-3 p-4 rounded-xl border border-border-glow bg-foreground/3">
         <Mail size={18} className="text-foreground/40 shrink-0" />
         <div>
-          <p className="text-sm font-semibold">Social login</p>
+          <p className="text-sm font-semibold">{t('settings.security.socialLogin')}</p>
           <p className="text-xs text-foreground/40 mt-0.5">
             {settings.security.has_social_login
-              ? 'Google account connected.'
-              : 'No social provider connected.'}
+              ? t('settings.security.socialConnected')
+              : t('settings.security.socialNotConnected')}
           </p>
         </div>
         <span className={`ml-auto text-[10px] font-black uppercase px-2.5 py-1 rounded-lg ${
@@ -260,7 +257,7 @@ function SecurityPanel({
             ? 'bg-green-500/10 text-green-500'
             : 'bg-foreground/8 text-foreground/40'
         }`}>
-          {settings.security.has_social_login ? 'Connected' : 'None'}
+          {settings.security.has_social_login ? t('settings.security.connected') : t('settings.security.none')}
         </span>
       </div>
 
@@ -268,11 +265,11 @@ function SecurityPanel({
       {settings.security.has_password_credential ? (
         <div className="space-y-4">
           <p className="text-xs text-foreground/40 leading-relaxed">
-            After a successful change, other active sessions and API tokens will be signed out.
+            {t('settings.security.passwordChangeHint')}
           </p>
 
           <div>
-            <FieldLabel>Current password</FieldLabel>
+            <FieldLabel>{t('settings.security.currentPassword')}</FieldLabel>
             <FieldInput
               type="password"
               value={passwordDraft.current_password}
@@ -284,7 +281,7 @@ function SecurityPanel({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <FieldLabel>New password</FieldLabel>
+              <FieldLabel>{t('settings.security.newPassword')}</FieldLabel>
               <FieldInput
                 type="password"
                 value={passwordDraft.new_password}
@@ -294,7 +291,7 @@ function SecurityPanel({
               <FieldError msg={fieldErrors.new_password?.[0]} />
             </div>
             <div>
-              <FieldLabel>Confirm new password</FieldLabel>
+              <FieldLabel>{t('settings.security.confirmNewPassword')}</FieldLabel>
               <FieldInput
                 type="password"
                 value={passwordDraft.new_password_confirmation}
@@ -306,13 +303,13 @@ function SecurityPanel({
 
           <div className="flex justify-end pt-2">
             <GlassButton onClick={onSavePassword} disabled={saving} className="px-8">
-              {saving ? 'Updating...' : 'Update password'}
+              {saving ? t('settings.actions.updating') : t('settings.actions.updatePassword')}
             </GlassButton>
           </div>
         </div>
       ) : (
         <div className="p-4 rounded-xl border border-border-glow bg-foreground/3 text-sm text-foreground/50">
-          This account has no password — sign in using your social provider.
+          {t('settings.security.noPasswordCredential')}
         </div>
       )}
     </div>
@@ -320,23 +317,23 @@ function SecurityPanel({
 }
 
 function PreferencesPanel({
-  settings, setSettings, onSave, saving,
+  settings, setSettings, onSave, saving, t,
 }: {
   settings: UserSettings;
   setSettings: React.Dispatch<React.SetStateAction<UserSettings>>;
   onSave: () => void; saving: boolean;
+  t: (key: string) => string;
 }) {
   const themes: { value: 'light' | 'dark' | 'system'; label: string; icon: React.ElementType }[] = [
-    { value: 'light', label: 'Light', icon: Sun },
-    { value: 'dark', label: 'Dark', icon: Moon },
-    { value: 'system', label: 'System', icon: Monitor },
+    { value: 'light', label: t('settings.preferences.theme.light'), icon: Sun },
+    { value: 'dark', label: t('settings.preferences.theme.dark'), icon: Moon },
+    { value: 'system', label: t('settings.preferences.theme.system'), icon: Monitor },
   ];
-
   return (
     <div className="space-y-8">
       {/* Theme */}
       <div>
-        <FieldLabel>Appearance</FieldLabel>
+        <FieldLabel>{t('settings.preferences.appearance')}</FieldLabel>
         <div className="grid grid-cols-3 gap-3 mt-2">
           {themes.map(({ value, label, icon: Icon }) => {
             const active = (settings.preferences.theme ?? 'system') === value;
@@ -365,12 +362,12 @@ function PreferencesPanel({
 
       {/* Sidebar */}
       <div>
-        <FieldLabel>Sidebar</FieldLabel>
+        <FieldLabel>{t('settings.preferences.sidebar')}</FieldLabel>
         <div className="flex items-center justify-between p-4 rounded-xl border border-border-glow bg-foreground/3">
           <div>
-            <p className="text-sm font-semibold">Collapse sidebar by default</p>
+            <p className="text-sm font-semibold">{t('settings.preferences.collapseSidebarByDefault')}</p>
             <p className="text-xs text-foreground/40 mt-0.5">
-              Start every session with the sidebar collapsed.
+              {t('settings.preferences.collapseSidebarHint')}
             </p>
           </div>
           <Toggle
@@ -385,9 +382,34 @@ function PreferencesPanel({
         </div>
       </div>
 
+      {/* Language */}
+      <div>
+        <FieldLabel>{t('settings.language')}</FieldLabel>
+        <div className="p-4 rounded-xl border border-border-glow bg-foreground/3 space-y-3">
+          <label htmlFor="language-select" className="text-sm font-semibold">{t('settings.preferredLanguage')}</label>
+          <select
+            id="language-select"
+            value={settings.preferences.locale}
+            onChange={(e) =>
+              setSettings((prev) => ({
+                ...prev,
+                preferences: { ...prev.preferences, locale: e.target.value as UserSettings['preferences']['locale'] },
+              }))
+            }
+            className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 text-sm font-medium text-foreground outline-none transition-all focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30"
+          >
+            {LOCALE_OPTIONS.map((locale) => (
+              <option key={locale.value} value={locale.value} className="bg-background text-foreground">
+                {locale.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div className="flex justify-end">
         <GlassButton onClick={onSave} disabled={saving} className="px-8">
-          {saving ? 'Saving...' : 'Save preferences'}
+          {saving ? t('settings.actions.saving') : t('settings.actions.savePreferences')}
         </GlassButton>
       </div>
     </div>
@@ -395,11 +417,12 @@ function PreferencesPanel({
 }
 
 function NotificationsPanel({
-  settings, setSettings, onSave, saving,
+  settings, setSettings, onSave, saving, t,
 }: {
   settings: UserSettings;
   setSettings: React.Dispatch<React.SetStateAction<UserSettings>>;
   onSave: () => void; saving: boolean;
+  t: (key: string) => string;
 }) {
   const emailKeys = ['email_mentions', 'email_issue_assigned', 'email_comment_replies'] as const;
   const inAppKeys = ['in_app_mentions', 'in_app_issue_assigned', 'in_app_comment_replies'] as const;
@@ -409,7 +432,7 @@ function NotificationsPanel({
     return (
       <div className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
         <span className="text-sm font-medium text-foreground/70">
-          {notificationLabels[notifKey] ?? notifKey}
+          {t(`settings.notifications.${notifKey}`)}
         </span>
         <Toggle
           checked={value}
@@ -430,7 +453,7 @@ function NotificationsPanel({
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Mail size={14} className="text-foreground/40" />
-          <FieldLabel>Email notifications</FieldLabel>
+          <FieldLabel>{t('settings.notifications.emailTitle')}</FieldLabel>
         </div>
         <div className="divide-y divide-border-glow px-1">
           {emailKeys.map((k) => <NotifRow key={k} notifKey={k} />)}
@@ -441,7 +464,7 @@ function NotificationsPanel({
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Bell size={14} className="text-foreground/40" />
-          <FieldLabel>In-app notifications</FieldLabel>
+          <FieldLabel>{t('settings.notifications.inAppTitle')}</FieldLabel>
         </div>
         <div className="divide-y divide-border-glow px-1">
           {inAppKeys.map((k) => <NotifRow key={k} notifKey={k} />)}
@@ -450,7 +473,7 @@ function NotificationsPanel({
 
       <div className="flex justify-end pt-2">
         <GlassButton onClick={onSave} disabled={saving} className="px-8">
-          {saving ? 'Saving...' : 'Save notifications'}
+          {saving ? t('settings.actions.saving') : t('settings.actions.saveNotifications')}
         </GlassButton>
       </div>
     </div>
@@ -460,7 +483,7 @@ function NotificationsPanel({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const [activeSection, setActiveSection] = useState<Section>('Account');
+  const [activeSection, setActiveSection] = useState<Section>('account');
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [nameDraft, setNameDraft] = useState('');
   const [loading, setLoading] = useState(true);
@@ -477,6 +500,7 @@ export default function SettingsPage() {
   const { applySavedThemePreference, clearThemeOverride } = useTheme();
   const { setCollapsed } = useSidebar();
   const { refreshUser } = useAuth();
+  const { t, setLocale } = useLocale();
 
   useEffect(() => {
     async function loadSettings() {
@@ -484,23 +508,19 @@ export default function SettingsPage() {
         const data = await getUserSettings();
         setSettings({
           ...data,
-          preferences: { ...data.preferences, theme: data.preferences.theme ?? 'system' },
+          preferences: { ...data.preferences, theme: data.preferences.theme ?? 'system', locale: data.preferences.locale ?? 'en' },
         });
+        setLocale(data.preferences.locale ?? 'en');
         setNameDraft(data.profile.name);
         setCollapsed(data.preferences.sidebar_collapsed_default);
       } catch {
-        setError('Failed to load settings.');
+        setError(t('settings.errors.loadFailed'));
       } finally {
         setLoading(false);
       }
     }
     loadSettings();
   }, [setCollapsed]);
-
-  const guardrailText = useMemo(
-    () => 'Project members, ownership, issue types, and milestones are managed from each project page.',
-    [],
-  );
 
   const clearFeedback = () => { setMessage(null); setError(null); };
 
@@ -511,6 +531,7 @@ export default function SettingsPage() {
     try {
       const updated = await updateUserSettings(payload);
       setSettings(updated);
+      setLocale(updated.preferences.locale ?? 'en');
       if (updated.preferences.theme) {
         applySavedThemePreference(updated.preferences.theme);
         if (updated.preferences.theme === 'system') clearThemeOverride();
@@ -521,7 +542,7 @@ export default function SettingsPage() {
     } catch (err) {
       const axiosErr = err as AxiosError<{ errors?: Record<string, string[]>; message?: string }>;
       setFieldErrors(axiosErr.response?.data?.errors || {});
-      setError(axiosErr.response?.data?.message || 'Failed to save settings.');
+      setError(axiosErr.response?.data?.message || t('settings.errors.saveFailed'));
       return false;
     } finally {
       setSaving(false);
@@ -529,20 +550,23 @@ export default function SettingsPage() {
   };
 
   const onSaveAccount = async () => {
-    const saved = await save({ profile: { ...settings.profile, name: nameDraft } }, 'Account updated.');
+    const saved = await save({ profile: { ...settings.profile, name: nameDraft } }, t('settings.messages.accountUpdated'));
     if (saved) await refreshUser();
   };
 
-  const onSavePreferences = () => save({ preferences: settings.preferences }, 'Preferences saved.');
-  const onSaveNotifications = () => save({ notifications: settings.notifications }, 'Notification preferences saved.');
+  const onSavePreferences = () => save({ preferences: settings.preferences }, t('settings.messages.preferencesSaved'));
+  const onSaveNotifications = () => save(
+    { notifications: settings.notifications },
+    t('settings.messages.notificationsSaved'),
+  );
 
   const onResendVerification = async () => {
     clearFeedback();
     try {
       await resendVerification();
-      setMessage('Verification email sent — check your inbox.');
+      setMessage(t('settings.messages.verificationSent'));
     } catch {
-      setError('Could not send verification email. Try again later.');
+      setError(t('settings.errors.verificationSendFailed'));
     }
   };
 
@@ -553,11 +577,11 @@ export default function SettingsPage() {
     try {
       await updatePassword(passwordDraft);
       setPasswordDraft({ current_password: '', new_password: '', new_password_confirmation: '' });
-      setMessage('Password updated successfully.');
+      setMessage(t('settings.messages.passwordUpdated'));
     } catch (err) {
       const axiosErr = err as AxiosError<{ errors?: Record<string, string[]>; message?: string }>;
       setFieldErrors(axiosErr.response?.data?.errors || {});
-      setError(axiosErr.response?.data?.message || 'Failed to update password.');
+      setError(axiosErr.response?.data?.message || t('settings.errors.passwordUpdateFailed'));
     } finally {
       setSaving(false);
     }
@@ -567,7 +591,7 @@ export default function SettingsPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-foreground/30 font-bold animate-pulse uppercase tracking-widest text-sm">
-          Loading settings...
+          {t('settings.loading')}
         </div>
       </div>
     );
@@ -583,8 +607,7 @@ export default function SettingsPage() {
           <Sliders size={20} />
         </div>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-          <p className="text-foreground/50 text-sm mt-0.5">{guardrailText}</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('settings.title')}</h1>
         </div>
       </div>
 
@@ -606,7 +629,7 @@ export default function SettingsPage() {
                   }`}
                 >
                   <Icon size={17} className="shrink-0" />
-                  {section}
+                  {t(`settings.sections.${section}`)}
                   {active && (
                     <ChevronRight size={14} className="ml-auto text-brand-primary/60 hidden lg:block" />
                   )}
@@ -624,12 +647,9 @@ export default function SettingsPage() {
               <ActiveIcon size={18} className="text-brand-primary" />
             </div>
             <div>
-              <h2 className="font-bold text-lg">{activeSection}</h2>
+              <h2 className="font-bold text-lg">{t(`settings.sections.${activeSection}`)}</h2>
               <p className="text-xs text-foreground/40">
-                {activeSection === 'Account' && 'Manage your display name and verification status.'}
-                {activeSection === 'Security' && 'Update your password and connected providers.'}
-                {activeSection === 'Preferences' && 'Customize appearance and sidebar behaviour.'}
-                {activeSection === 'Notifications' && 'Choose how you receive updates.'}
+                {t(`settings.subtitles.${activeSection}`)}
               </p>
             </div>
           </div>
@@ -657,7 +677,7 @@ export default function SettingsPage() {
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.15 }}
             >
-              {activeSection === 'Account' && (
+              {activeSection === 'account' && (
                 <AccountPanel
                   settings={settings}
                   nameDraft={nameDraft}
@@ -666,9 +686,10 @@ export default function SettingsPage() {
                   onResend={onResendVerification}
                   saving={saving}
                   fieldErrors={fieldErrors}
+                  t={t}
                 />
               )}
-              {activeSection === 'Security' && (
+              {activeSection === 'security' && (
                 <SecurityPanel
                   settings={settings}
                   passwordDraft={passwordDraft}
@@ -676,22 +697,25 @@ export default function SettingsPage() {
                   onSavePassword={onSavePassword}
                   saving={saving}
                   fieldErrors={fieldErrors}
+                  t={t}
                 />
               )}
-              {activeSection === 'Preferences' && (
+              {activeSection === 'preferences' && (
                 <PreferencesPanel
                   settings={settings}
                   setSettings={setSettings}
                   onSave={onSavePreferences}
                   saving={saving}
+                  t={t}
                 />
               )}
-              {activeSection === 'Notifications' && (
+              {activeSection === 'notifications' && (
                 <NotificationsPanel
                   settings={settings}
                   setSettings={setSettings}
                   onSave={onSaveNotifications}
                   saving={saving}
+                  t={t}
                 />
               )}
             </motion.div>

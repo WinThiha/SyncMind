@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import { useAuth } from '@/context/AuthContext';
+import { useLocale } from '@/context/LocaleContext';
 import { AppLogo } from '@/components/ui/AppLogo';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { CheckCircle, XCircle, Loader2, RefreshCw } from 'lucide-react';
@@ -15,14 +16,15 @@ function VerifyEmailContent() {
     const { user, refreshUser } = useAuth();
     const verifyUrl = searchParams.get('verify_url');
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-    const [message, setMessage] = useState('Verifying your email...');
+    const [message, setMessage] = useState('');
     const [resending, setResending] = useState(false);
     const [resent, setResent] = useState(false);
+    const { t } = useLocale();
 
     useEffect(() => {
         if (!verifyUrl) {
             setStatus('error');
-            setMessage('Invalid verification link. Please request a new one.');
+            setMessage(t('auth.verifyEmail.invalidLink'));
             return;
         }
 
@@ -63,7 +65,7 @@ function VerifyEmailContent() {
         <div className="min-h-screen bg-background flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md text-center mb-10">
                 <AppLogo size="lg" />
-                <p className="text-foreground/40 font-medium mt-3">Email Verification</p>
+                <p className="text-foreground/40 font-medium mt-3">{t('auth.verifyEmail.subtitle')}</p>
             </div>
 
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -78,7 +80,7 @@ function VerifyEmailContent() {
                                 <Loader2 size={28} className="text-brand-primary animate-spin" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-black mb-2">Verifying...</h2>
+                                <h2 className="text-xl font-black mb-2">{t('auth.verifyEmail.verifying')}</h2>
                                 <p className="text-foreground/50 text-sm font-medium">{message}</p>
                             </div>
                         </motion.div>
@@ -94,9 +96,9 @@ function VerifyEmailContent() {
                                 <CheckCircle size={28} className="text-green-500" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-black mb-2">Email verified!</h2>
+                                <h2 className="text-xl font-black mb-2">{t('auth.verifyEmail.successTitle')}</h2>
                                 <p className="text-foreground/50 text-sm font-medium mb-1">{message}</p>
-                                <p className="text-foreground/35 text-xs font-medium">Redirecting you to dashboard...</p>
+                                <p className="text-foreground/35 text-xs font-medium">{t('auth.verifyEmail.successRedirect')}</p>
                             </div>
                         </motion.div>
                     )}
@@ -112,12 +114,12 @@ function VerifyEmailContent() {
                             </div>
 
                             <div>
-                                <h2 className="text-xl font-black mb-2">Verification failed</h2>
+                                <h2 className="text-xl font-black mb-2">{t('auth.verifyEmail.failureTitle')}</h2>
                                 <p className="text-foreground/50 text-sm font-medium mb-1">
-                                    This link is invalid or has expired.
+                                    {t('auth.verifyEmail.failureDescription')}
                                 </p>
                                 <p className="text-foreground/35 text-xs">
-                                    Request a new verification email below.
+                                    {t('auth.verifyEmail.failureHint')}
                                 </p>
                             </div>
 
@@ -130,14 +132,14 @@ function VerifyEmailContent() {
                                         className="w-full py-3 bg-brand-primary text-white rounded-xl font-bold text-sm hover:bg-brand-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
                                     >
                                         <RefreshCw size={16} className={resending ? 'animate-spin' : ''} />
-                                        {resending ? 'Sending...' : 'Resend verification email'}
+                                        {resending ? t('auth.verifyEmail.resending') : t('auth.verifyEmail.resend')}
                                     </button>
                                 )}
 
                                 {resent && (
                                     <div className="w-full py-3 bg-green-500/10 border border-green-500/20 text-green-500 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
                                         <CheckCircle size={16} />
-                                        New link sent — check your inbox
+                                        {t('auth.verifyEmail.resent')}
                                     </div>
                                 )}
 
@@ -146,7 +148,7 @@ function VerifyEmailContent() {
                                         onClick={() => router.push('/login')}
                                         className="w-full py-3 bg-brand-primary text-white rounded-xl font-bold text-sm hover:bg-brand-primary/90 transition-colors"
                                     >
-                                        Log in to resend
+                                        {t('auth.verifyEmail.loginToResend')}
                                     </button>
                                 )}
 
@@ -154,7 +156,7 @@ function VerifyEmailContent() {
                                     onClick={() => router.push('/dashboard')}
                                     className="w-full py-3 bg-foreground/5 text-foreground/60 rounded-xl font-bold text-sm hover:bg-foreground/10 transition-colors"
                                 >
-                                    Go to Dashboard
+                                    {t('auth.verifyEmail.goToDashboard')}
                                 </button>
                             </div>
                         </motion.div>

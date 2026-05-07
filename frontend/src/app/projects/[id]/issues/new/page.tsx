@@ -5,11 +5,13 @@ import { useRouter, useParams } from 'next/navigation';
 import CreateIssueForm from '@/components/issues/CreateIssueForm';
 import { motion } from 'framer-motion';
 import { ChevronLeft } from 'lucide-react';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function NewIssuePage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const { t } = useLocale();
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -22,8 +24,8 @@ export default function NewIssuePage() {
           <ChevronLeft size={24} />
         </motion.button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Create New Issue</h1>
-          <p className="text-foreground/60 text-sm mt-1">Add a new task, bug, or story to your project.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('issues.newPage.title')}</h1>
+          <p className="text-foreground/60 text-sm mt-1">{t('issues.newPage.subtitle')}</p>
         </div>
       </div>
 

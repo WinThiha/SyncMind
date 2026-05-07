@@ -1,5 +1,6 @@
 'use client';
 
+import { useLocale } from '@/context/LocaleContext';
 import { ThreadSummary } from '@/lib/api/issues';
 import Markdown from '../shared/Markdown';
 import { motion } from 'framer-motion';
@@ -12,6 +13,7 @@ interface SummaryCardProps {
 }
 
 export default function SummaryCard({ summary, loading, onRefresh }: SummaryCardProps) {
+  const { t } = useLocale();
   if (!summary && !loading) return null;
 
   return (
@@ -25,13 +27,13 @@ export default function SummaryCard({ summary, loading, onRefresh }: SummaryCard
         <div className="flex justify-between items-center mb-4">
           <h3 className="flex items-center text-foreground font-bold text-lg">
             <Sparkles className="w-5 h-5 mr-2 text-brand-primary" />
-            AI Thread Summary
+            {t('issues.detail.aiThreadSummary')}
           </h3>
           <button
             onClick={onRefresh}
             disabled={loading}
             className="p-1.5 text-brand-primary hover:bg-brand-primary/10 rounded-xl transition-colors disabled:opacity-50"
-            title="Regenerate summary"
+            title={t('issues.detail.regenerateSummary')}
           >
             <RotateCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -42,7 +44,7 @@ export default function SummaryCard({ summary, loading, onRefresh }: SummaryCard
             <div className="inline-block animate-pulse bg-brand-primary/20 h-2 w-32 rounded"></div>
             <div className="animate-pulse bg-brand-primary/10 h-2 w-full rounded"></div>
             <div className="animate-pulse bg-brand-primary/10 h-2 w-3/4 rounded"></div>
-            <p className="text-sm text-brand-primary font-medium">Analyzing discussion and history...</p>
+            <p className="text-sm text-brand-primary font-medium">{t('issues.detail.analyzing')}</p>
           </div>
         ) : summary && (
           <div className="space-y-6">
@@ -55,7 +57,7 @@ export default function SummaryCard({ summary, loading, onRefresh }: SummaryCard
                 <div>
                   <h4 className="flex items-center text-sm font-bold text-green-500 mb-2">
                     <CheckCircle2 className="w-4 h-4 mr-2" />
-                    Decisions
+                    {t('issues.detail.decisions')}
                   </h4>
                   <ul className="space-y-1.5">
                     {summary.decisions.map((d, i) => (
@@ -72,7 +74,7 @@ export default function SummaryCard({ summary, loading, onRefresh }: SummaryCard
                 <div>
                   <h4 className="flex items-center text-sm font-bold text-brand-primary mb-2">
                     <ListTodo className="w-4 h-4 mr-2" />
-                    Action Items
+                    {t('issues.detail.actionItems')}
                   </h4>
                   <ul className="space-y-1.5">
                     {summary.action_items.map((ai, i) => (
@@ -88,7 +90,7 @@ export default function SummaryCard({ summary, loading, onRefresh }: SummaryCard
 
             <div className="pt-4 border-t border-brand-primary/10 flex items-center">
               <MessageSquare className="w-4 h-4 text-brand-primary/50 mr-2" />
-              <span className="text-xs font-bold text-foreground/40 uppercase tracking-wider mr-2">Consensus:</span>
+              <span className="text-xs font-bold text-foreground/40 uppercase tracking-wider mr-2">{t('issues.detail.consensus')}:</span>
               <span className="text-xs text-foreground/70 font-medium">{summary.consensus}</span>
             </div>
           </div>
@@ -96,7 +98,7 @@ export default function SummaryCard({ summary, loading, onRefresh }: SummaryCard
       </div>
       <div className="bg-brand-primary/5 border-t border-brand-primary/10 px-4 py-2 flex justify-between items-center">
         <span className="text-[10px] text-foreground/40 font-medium italic">
-          AI-generated summaries can be inaccurate. Please verify critical decisions.
+          {t('issues.detail.aiDisclaimer')}
         </span>
       </div>
     </motion.div>

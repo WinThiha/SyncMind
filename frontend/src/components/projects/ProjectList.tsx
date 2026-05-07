@@ -5,11 +5,13 @@ import { getProjects, Project } from '@/lib/api/projects';
 import { ProjectCard } from '@/components/dashboard/ProjectCard';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { SkeletonCard } from '@/components/ui/SkeletonCard';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function ProjectList() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useLocale();
 
   useEffect(() => {
     async function loadProjects() {
@@ -17,7 +19,7 @@ export default function ProjectList() {
         const data = await getProjects();
         setProjects(data);
       } catch (err) {
-        setError('Failed to load projects');
+        setError(t('projects.list.error'));
       } finally {
         setLoading(false);
       }
@@ -40,7 +42,7 @@ export default function ProjectList() {
   if (projects.length === 0) {
     return (
       <GlassCard className="text-center py-16 text-foreground/40 mt-4 border-dashed">
-        You are not involved in any projects yet.
+        {t('projects.list.empty')}
       </GlassCard>
     );
   }

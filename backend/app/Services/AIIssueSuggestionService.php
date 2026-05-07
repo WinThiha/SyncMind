@@ -3,11 +3,16 @@
 namespace App\Services;
 
 use App\Models\Project;
+use App\Models\User;
 use App\Services\AI\Contracts\ChatCompletionClient;
+use App\Support\LocaleResolver;
 
 class AIIssueSuggestionService
 {
-    public function __construct(private readonly ChatCompletionClient $chatClient) {}
+    public function __construct(
+        private readonly ChatCompletionClient $chatClient,
+        private readonly LocaleResolver $localeResolver
+    ) {}
 
     /**
      * Suggest issue fields based on a summary and project context.
@@ -16,7 +21,7 @@ class AIIssueSuggestionService
      * Each field is null if the AI could not produce a valid value.
      * assignee_suggestions is an array of {assignee_id, reason} objects, capped at 3 entries.
      */
-    public function suggest(Project $project, string $summary): array
+    public function suggest(Project $project, string $summary, ?User $actor = null): array
     {
         $issueTypes = $project->issue_types ?? ['Task', 'Bug', 'Request'];
         $priorities = ['low', 'normal', 'high'];
@@ -35,9 +40,12 @@ class AIIssueSuggestionService
         $membersJson = json_encode($members, JSON_UNESCAPED_UNICODE);
         $typesJson = json_encode($issueTypes, JSON_UNESCAPED_UNICODE);
         $prioritiesJson = json_encode($priorities);
+        $locale = $this->localeResolver->resolveForUser($actor);
+        $languageLabel = $this->localeResolver->humanLabel($locale);
 
         $systemPrompt = <<<PROMPT
 You are an expert project management assistant. Analyze the given issue summary and suggest appropriate values for the issue fields.
+Output language locale: {$locale} ({$languageLabel}).
 
 Available issue types: {$typesJson}
 Available priorities: {$prioritiesJson}
@@ -45,10 +53,13 @@ Team members: {$membersJson}
 
 Rules:
 - issue_type MUST be one of the available issue types exactly as listed.
+- issue_type is user-defined project data and MUST NOT be translated, normalized, or paraphrased.
 - priority MUST be one of: "low", "normal", "high".
 - assignee_suggestions is an array of up to 3 objects, each with assignee_id (integer, must be one of the team member IDs from the team members list) and reason (string, non-empty explanation for why this person is a good fit for this issue).
 - estimated_hours should be a reasonable estimate in hours (a positive number, e.g. 2, 4, 8), or null if unclear.
 - description should be a concise markdown description expanding on the summary with context, steps, and acceptance criteria where applicable.
+- Localize all human-readable values (description, assignee_suggestions.reason) to the output language locale.
+- Keep JSON keys and machine-constrained values in this schema unchanged.
 
 Respond ONLY with a valid JSON object matching this exact schema:
 {

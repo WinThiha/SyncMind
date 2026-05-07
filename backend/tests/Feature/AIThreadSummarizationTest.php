@@ -108,7 +108,8 @@ class AIThreadSummarizationTest extends TestCase
 
         Cache::put("issue_{$issue->id}_summary", ['data' => 'old']);
 
-        $issue->update(['priority' => 'high']);
+        $nextPriority = $issue->priority === 'high' ? 'normal' : 'high';
+        $issue->update(['priority' => $nextPriority]);
 
         $this->assertFalse(Cache::has("issue_{$issue->id}_summary"));
     }

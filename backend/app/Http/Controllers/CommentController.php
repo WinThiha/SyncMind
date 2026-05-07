@@ -6,6 +6,7 @@ use App\Mail\IssueCommentNotification;
 use App\Models\Comment;
 use App\Models\Issue;
 use App\Models\Project;
+use App\Support\LocaleResolver;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -48,7 +49,8 @@ class CommentController extends Controller
             $recipients = $recipients->filter(fn ($u) => $u->id !== Auth::id())->unique('id');
 
             foreach ($recipients as $recipient) {
-                Mail::to($recipient->email)->send(new IssueCommentNotification($comment));
+                $locale = app(LocaleResolver::class)->resolveForUser($recipient);
+                Mail::to($recipient->email)->send(new IssueCommentNotification($comment, $locale));
             }
         }
 

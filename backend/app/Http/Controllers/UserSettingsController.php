@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\LocaleResolver;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
@@ -11,6 +12,8 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class UserSettingsController extends Controller
 {
+    public function __construct(private readonly LocaleResolver $localeResolver) {}
+
     public function show(Request $request): JsonResponse
     {
         $user = $request->user()->loadMissing('socialAccounts');
@@ -18,6 +21,7 @@ class UserSettingsController extends Controller
 
         $preferences = $settings['preferences'] ?? [];
         $notifications = $settings['notifications'] ?? [];
+        $locale = $this->localeResolver->normalize($preferences['locale'] ?? null);
 
         return response()->json([
             'data' => [
@@ -35,6 +39,7 @@ class UserSettingsController extends Controller
                 'preferences' => [
                     'theme' => $preferences['theme'] ?? null,
                     'sidebar_collapsed_default' => $preferences['sidebar_collapsed_default'] ?? false,
+                    'locale' => $locale,
                 ],
                 'notifications' => [
                     'email_mentions' => $notifications['email_mentions'] ?? true,
@@ -56,6 +61,7 @@ class UserSettingsController extends Controller
             'preferences' => ['sometimes', 'array'],
             'preferences.theme' => ['sometimes', 'in:light,dark,system'],
             'preferences.sidebar_collapsed_default' => ['sometimes', 'boolean'],
+            'preferences.locale' => ['sometimes', 'in:'.implode(',', LocaleResolver::SUPPORTED_LOCALES)],
             'notifications' => ['sometimes', 'array'],
             'notifications.email_mentions' => ['sometimes', 'boolean'],
             'notifications.email_issue_assigned' => ['sometimes', 'boolean'],

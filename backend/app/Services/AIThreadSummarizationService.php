@@ -3,11 +3,16 @@
 namespace App\Services;
 
 use App\Models\Issue;
+use App\Models\User;
 use App\Services\AI\Contracts\ChatCompletionClient;
+use App\Support\LocaleResolver;
 
 class AIThreadSummarizationService
 {
-    public function __construct(private readonly ChatCompletionClient $chatClient) {}
+    public function __construct(
+        private readonly ChatCompletionClient $chatClient,
+        private readonly LocaleResolver $localeResolver
+    ) {}
 
     /**
      * Aggregate comments and history into a single chronological timeline.
@@ -45,9 +50,11 @@ class AIThreadSummarizationService
     /**
      * Generate an AI summary of the issue timeline.
      */
-    public function summarize(Issue $issue): array
+    public function summarize(Issue $issue, ?User $actor = null): array
     {
         $events = $this->aggregateTimeline($issue);
+        $locale = $this->localeResolver->resolveForUser($actor);
+        $languageLabel = $this->localeResolver->humanLabel($locale);
 
         if (empty($events)) {
             return [
@@ -73,6 +80,10 @@ class AIThreadSummarizationService
 
         $systemPrompt = <<<'PROMPT'
 You are an expert project management assistant. Analyze the following timeline of an issue (including comments and field changes) and provide a structured summary.
+PROMPT;
+
+        $localePrompt = <<<PROMPT
+Output language locale: {$locale} ({$languageLabel}).
 
 Focus on:
 1. **Summary**: A high-level overview of the thread's progress.
@@ -84,6 +95,8 @@ Rules:
 - Distinguish between proposed ideas and final decisions.
 - Be concise and professional.
 - Use Markdown for the content where appropriate.
+- Localize human-readable values to the output language locale.
+- Keep JSON keys exactly as: summary, decisions, consensus, action_items.
 
 Respond ONLY with a valid JSON object matching this exact schema:
 {
@@ -93,6 +106,7 @@ Respond ONLY with a valid JSON object matching this exact schema:
   "action_items": ["<string>", ...]
 }
 PROMPT;
+        $systemPrompt .= "\n\n".$localePrompt;
 
         $model = config('openai.chat.model', config('openai.model', 'gpt-4o-mini'));
         $messages = [

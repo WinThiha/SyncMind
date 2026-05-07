@@ -1,62 +1,59 @@
-## MODIFIED Requirements
+## Purpose
+Define UI chrome, component layout, and shared interface conventions for SyncMind surfaces.
+## Requirements
+### Requirement: Localized UI text rendering for V1 surfaces
+The system SHALL render localized UI strings for V1-priority authenticated surfaces based on the saved user locale and MUST fallback to English keys when translations are unavailable.
 
-### Requirement: Issue creation UI handles dark mode correctly
-The system MUST render the issue creation forms properly in dark mode, ensuring text is legible.
+#### Scenario: User with Japanese locale opens settings
+- **WHEN** a user with saved locale `ja-JP` opens `/settings`
+- **THEN** section labels, action labels, status messages, and helper text on V1-priority settings surfaces are rendered in Japanese
 
-#### Scenario: User views the issue creation form in dark mode
-- **WHEN** user enables dark mode and navigates to the issue creation page
-- **THEN** the Markdown Editor and Assignee select dropdown render with correct contrast
+#### Scenario: Translation key missing in selected locale
+- **WHEN** a required UI key is missing in the selected locale catalog
+- **THEN** the system renders the English fallback string for that key
 
-### Requirement: Theme selection persists across navigation
-The system MUST preserve the currently active light/dark theme during route navigation, including when opening Settings.
+### Requirement: Localized UI text rendering for V1 surfaces
+The system SHALL render localized UI strings for V1-priority authenticated surfaces based on the saved user locale and MUST fallback to English keys when translations are unavailable.
 
-#### Scenario: User navigates to Settings with unsaved server preference
-- **GIVEN** the user has dark mode active from local preference
-- **AND** the server-side settings record has no explicit saved theme yet
-- **WHEN** the user navigates to `/settings`
-- **THEN** the UI remains in dark mode and does not switch to light mode automatically
+#### Scenario: User with Japanese locale opens settings
+- **WHEN** a user with saved locale `ja-JP` opens `/settings`
+- **THEN** section labels, action labels, status messages, and helper text on V1-priority settings surfaces are rendered in Japanese
 
-#### Scenario: User saves theme preference from Settings
-- **WHEN** the user explicitly saves theme preference in Settings
-- **THEN** the saved preference becomes the active theme for subsequent navigation and sessions
+#### Scenario: Translation key missing in selected locale
+- **WHEN** a required UI key is missing in the selected locale catalog
+- **THEN** the system renders the English fallback string for that key
 
-### Requirement: Collapsible sidebar layout synchronization
-The system SHALL ensure that the Sidebar width, Topbar horizontal offset, and Main Content margin-left are synchronized to exactly 80px (20 units) when the sidebar is in a collapsed state.
+### Requirement: Users can select locale from preferences UI
+The system SHALL provide a locale selector in user settings preferences and SHALL reflect the saved locale as the selected value.
 
-#### Scenario: User collapses the sidebar
-- **WHEN** the user clicks the sidebar toggle to collapse it
-- **THEN** the Sidebar width transitions to 80px, the Topbar left offset transitions to 80px, and the Main Content margin-left transitions to 80px simultaneously.
+#### Scenario: Locale selector shows saved value
+- **WHEN** a user opens settings with a previously saved locale
+- **THEN** the locale selector displays that locale as the active selection
 
-### Requirement: Sidebar label visibility
-The system SHALL render sidebar menu labels with full opacity (100%) when the sidebar is in the expanded state.
+#### Scenario: Locale update applies on next render cycle
+- **WHEN** a user saves a new locale in preferences
+- **THEN** subsequent UI renders use the newly saved locale without requiring re-authentication
 
-#### Scenario: User expands the sidebar
-- **WHEN** the user clicks the sidebar toggle to expand it
-- **THEN** the menu labels transition from 0% to 100% opacity and become fully visible.
+### Requirement: All V1-priority UI surfaces render via the locale-aware catalog
+The system SHALL replace every hardcoded English user-facing string in the app shell, dashboard, projects, issues, milestones, and help surfaces with a translation key lookup.
 
-### Requirement: Navigation vertical stacking
-The system SHALL maintain a vertical stacking order for navigation items within the sidebar, regardless of whether the sidebar is collapsed or expanded.
+#### Scenario: Sidebar navigation labels are localized
+- **WHEN** the active locale is non-English
+- **THEN** sidebar menu items (Dashboard, Settings, Help, Logout) and tooltips render in the selected locale
 
-#### Scenario: User views collapsed sidebar navigation
-- **WHEN** the sidebar is collapsed
-- **THEN** navigation icons are displayed in a single vertical column.
+#### Scenario: Topbar search placeholder is localized
+- **WHEN** the active locale is non-English
+- **THEN** the topbar search input placeholder renders in the selected locale
 
-### Requirement: Logout button alignment
-The system SHALL ensure the Logout button icon is horizontally centered within the sidebar container when the sidebar is collapsed.
+#### Scenario: Issue creation form labels are localized
+- **WHEN** the active locale is non-English
+- **THEN** issue creation form labels (Summary, Description, Type, Priority, Estimate, Assignee, Due Date, Milestone) and button text render in the selected locale
 
-#### Scenario: User views Logout button in collapsed sidebar
-- **WHEN** the sidebar is collapsed
-- **THEN** the Logout icon is centered within the 80px sidebar width, with no horizontal shift caused by invisible text or spacing.
+#### Scenario: Empty states and error messages are localized
+- **WHEN** a list or page displays an empty state or error message
+- **THEN** the message renders via the translation catalog
 
-## ADDED Requirements
+#### Scenario: No untranslated JSX text nodes remain in covered components
+- **WHEN** covered components are inspected for raw English text nodes
+- **THEN** every user-facing string is produced by a `t(key)` or `t(key, params)` call
 
-### Requirement: Authenticated layout offsets react to sidebar collapsed state
-The Topbar and main content area MUST use dynamic horizontal offsets driven by SidebarContext instead of hardcoded pixel values.
-
-#### Scenario: Topbar uses dynamic left offset
-- **WHEN** the sidebar state changes between collapsed and expanded
-- **THEN** the Topbar's `left` CSS property transitions between `80px` and `256px` respectively
-
-#### Scenario: Main content uses dynamic margin-left
-- **WHEN** the sidebar state changes between collapsed and expanded
-- **THEN** the main content area's `margin-left` CSS property transitions between `80px` and `256px` respectively

@@ -15,17 +15,19 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
+import { useLocale } from '@/context/LocaleContext';
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-  { icon: Settings, label: 'Settings', href: '/settings' },
-  { icon: HelpCircle, label: 'Help', href: '/help' },
+  { icon: LayoutDashboard, key: 'nav.sidebar.dashboard', href: '/dashboard' },
+  { icon: Settings, key: 'nav.sidebar.settings', href: '/settings' },
+  { icon: HelpCircle, key: 'nav.sidebar.help', href: '/help' },
 ];
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { collapsed, toggle, mobileOpen, setMobileOpen } = useSidebar();
+  const { t } = useLocale();
 
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
@@ -59,7 +61,7 @@ export const Sidebar: React.FC = () => {
           <div className="hidden lg:flex items-center justify-center px-4 py-3 mb-2">
             <button
               onClick={toggle}
-              aria-label="Expand sidebar"
+              aria-label={t('nav.sidebar.expand')}
               className="w-9 h-9 bg-brand-primary rounded-xl flex items-center justify-center shrink-0 shadow-md shadow-brand-primary/40 hover:opacity-85 transition-opacity"
             >
               <BrainCircuit size={18} className="text-white" strokeWidth={1.75} />
@@ -86,7 +88,7 @@ export const Sidebar: React.FC = () => {
           <button
             onClick={closeMobile}
             className="lg:hidden shrink-0 p-1.5 rounded-lg hover:bg-foreground/5 transition-colors"
-            aria-label="Close sidebar"
+            aria-label={t('nav.sidebar.close')}
           >
             <X size={18} className="text-foreground/40" />
           </button>
@@ -95,7 +97,7 @@ export const Sidebar: React.FC = () => {
           <button
             onClick={toggle}
             className="hidden lg:block shrink-0 p-1.5 rounded-lg hover:bg-foreground/5 transition-colors"
-            aria-label="Collapse sidebar"
+            aria-label={t('nav.sidebar.collapse')}
           >
             <ChevronRight size={18} className="rotate-180 text-foreground/40" />
           </button>
@@ -131,13 +133,13 @@ export const Sidebar: React.FC = () => {
                     {/* Tooltip: desktop only when collapsed */}
                     {collapsed && (
                       <span className="hidden lg:block absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2.5 py-1 bg-foreground text-background text-xs font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50 shadow-lg">
-                        {item.label}
+                        {t(item.key)}
                       </span>
                     )}
 
                     {/* Text: always on mobile, hidden on desktop when collapsed */}
                     <span className={`text-sm font-medium whitespace-nowrap transition-opacity duration-200 ${collapsed ? 'lg:opacity-0 lg:w-0 lg:overflow-hidden' : 'opacity-100'}`}>
-                      {item.label}
+                      {t(item.key)}
                     </span>
                   </div>
 
@@ -175,12 +177,12 @@ export const Sidebar: React.FC = () => {
 
             {collapsed && (
               <span className="hidden lg:block absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2.5 py-1 bg-foreground text-background text-xs font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50 shadow-lg">
-                Logout
+                {t('nav.sidebar.logout')}
               </span>
             )}
 
             <span className={`text-sm font-medium whitespace-nowrap transition-opacity duration-200 ${collapsed ? 'lg:opacity-0 lg:w-0 lg:overflow-hidden' : 'opacity-100'}`}>
-              Logout
+              {t('nav.sidebar.logout')}
             </span>
           </button>
         </div>

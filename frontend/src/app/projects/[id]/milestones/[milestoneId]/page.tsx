@@ -10,11 +10,12 @@ import { MilestoneProgress } from '@/components/milestones/MilestoneProgress';
 import { EditMilestoneForm } from '@/components/milestones/EditMilestoneForm';
 import { getMilestone, type MilestoneWithIssues } from '@/lib/api/milestones';
 import { FAST_SPRING } from '@/lib/animations';
+import { useLocale } from '@/context/LocaleContext';
 
 const statusConfig = {
-  open: { icon: Circle, label: 'Open', className: 'bg-foreground/10 text-foreground/60' },
-  in_progress: { icon: Clock, label: 'In Progress', className: 'bg-brand-primary/10 text-brand-primary' },
-  closed: { icon: CheckCircle2, label: 'Closed', className: 'bg-green-500/10 text-green-500' },
+  open: { icon: Circle, labelKey: 'milestones.status.open', className: 'bg-foreground/10 text-foreground/60' },
+  in_progress: { icon: Clock, labelKey: 'milestones.status.inProgress', className: 'bg-brand-primary/10 text-brand-primary' },
+  closed: { icon: CheckCircle2, labelKey: 'milestones.status.closed', className: 'bg-green-500/10 text-green-500' },
 };
 
 const issueStatusColors: Record<string, string> = {
@@ -22,6 +23,13 @@ const issueStatusColors: Record<string, string> = {
   in_progress: 'bg-brand-primary/10 text-brand-primary',
   resolved: 'bg-green-500/10 text-green-500',
   closed: 'bg-green-500/10 text-green-500',
+};
+
+const issueStatusLabelKey: Record<string, string> = {
+  open: 'issues.search.statusOpen',
+  in_progress: 'issues.search.statusInProgress',
+  resolved: 'issues.search.statusResolved',
+  closed: 'issues.search.statusClosed',
 };
 
 function formatDate(dateStr: string | null): string {
@@ -40,6 +48,7 @@ export default function MilestoneDetailPage({
   const [milestone, setMilestone] = useState<MilestoneWithIssues | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const { t } = useLocale();
 
   async function load() {
     try {
@@ -93,14 +102,14 @@ export default function MilestoneDetailPage({
           <div>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-3xl font-bold tracking-tight">{milestone.name}</h1>
-              <span className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${status.className}`}>
-                <StatusIcon size={10} />
-                {status.label}
-              </span>
+                <span className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${status.className}`}>
+                  <StatusIcon size={10} />
+                  {t(status.labelKey)}
+                </span>
               {milestone.is_overdue && (
                 <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 border border-red-500/20">
                   <AlertTriangle size={10} />
-                  Overdue
+                  {t('milestones.card.overdue')}
                 </span>
               )}
             </div>
@@ -110,7 +119,7 @@ export default function MilestoneDetailPage({
           </div>
         </div>
         <GlassButton variant="secondary" onClick={() => setEditing(true)}>
-          Edit
+          {t('milestones.card.edit')}
         </GlassButton>
       </div>
 
@@ -118,23 +127,23 @@ export default function MilestoneDetailPage({
       <GlassCard className="p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div>
-            <p className="text-xs font-bold text-foreground/40 uppercase tracking-wider mb-1">Start Date</p>
+            <p className="text-xs font-bold text-foreground/40 uppercase tracking-wider mb-1">{t('milestones.form.startDateLabel')}</p>
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Calendar size={14} className="text-foreground/40" />
               {formatDate(milestone.start_date)}
             </div>
           </div>
           <div>
-            <p className="text-xs font-bold text-foreground/40 uppercase tracking-wider mb-1">Due Date</p>
+            <p className="text-xs font-bold text-foreground/40 uppercase tracking-wider mb-1">{t('milestones.form.dueDateLabel')}</p>
             <div className={`flex items-center gap-2 text-sm font-semibold ${milestone.is_overdue ? 'text-red-500' : ''}`}>
               <Calendar size={14} className={milestone.is_overdue ? 'text-red-500' : 'text-foreground/40'} />
               {formatDate(milestone.due_date)}
             </div>
           </div>
           <div>
-            <p className="text-xs font-bold text-foreground/40 uppercase tracking-wider mb-1">Progress</p>
+            <p className="text-xs font-bold text-foreground/40 uppercase tracking-wider mb-1">{t('milestones.detail.progress')}</p>
             <p className="text-sm font-semibold">
-              {milestone.progress.completed} / {milestone.progress.total} issues
+              {t('milestones.detail.progressCount', { completed: milestone.progress.completed, total: milestone.progress.total })}
             </p>
           </div>
         </div>
@@ -145,20 +154,20 @@ export default function MilestoneDetailPage({
           showLabel={false}
         />
         <p className="text-right text-xs font-bold text-brand-primary/60 mt-1">
-          {milestone.progress.percentage}% complete
+          {t('milestones.detail.completePercent', { percent: milestone.progress.percentage })}
         </p>
       </GlassCard>
 
       {/* Issues */}
       <h2 className="text-sm font-bold text-foreground/40 uppercase tracking-wider mb-4">
-        Issues <span className="ml-1 text-foreground/20">({milestone.issues.length})</span>
+        {t('issues.page.title')} <span className="ml-1 text-foreground/20">({milestone.issues.length})</span>
       </h2>
 
       {milestone.issues.length === 0 ? (
         <GlassCard className="p-10 text-center">
-          <p className="text-foreground/40 text-sm">No issues linked to this milestone yet.</p>
+          <p className="text-foreground/40 text-sm">{t('milestones.detail.noIssues')}</p>
           <p className="text-xs text-foreground/30 mt-1">
-            Set the milestone when creating or editing an issue.
+            {t('milestones.detail.noIssuesHint')}
           </p>
         </GlassCard>
       ) : (
@@ -187,7 +196,7 @@ export default function MilestoneDetailPage({
                   </span>
                 )}
                 <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${issueStatusColors[issue.status] ?? issueStatusColors.open}`}>
-                  {issue.status}
+                  {t(issueStatusLabelKey[issue.status] ?? 'issues.search.statusOpen')}
                 </span>
               </div>
             </motion.div>
