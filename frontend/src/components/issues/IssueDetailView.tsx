@@ -290,21 +290,21 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <label className="text-[10px] font-bold text-foreground/40 uppercase">Status</label>
-                          <select value={quickData.status} onChange={(e) => setQuickData({...quickData, status: e.target.value})} className="w-full bg-foreground/5 border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold text-brand-primary outline-none">
-                            <option value="open">OPEN</option><option value="in_progress">IN PROGRESS</option><option value="resolved">RESOLVED</option><option value="closed">CLOSED</option>
+                          <select value={quickData.status} onChange={(e) => setQuickData({...quickData, status: e.target.value})} className="w-full bg-background text-brand-primary border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold outline-none">
+                            <option value="open" className="bg-background text-foreground">OPEN</option><option value="in_progress" className="bg-background text-foreground">IN PROGRESS</option><option value="resolved" className="bg-background text-foreground">RESOLVED</option><option value="closed" className="bg-background text-foreground">CLOSED</option>
                           </select>
                         </div>
                         <div className="space-y-1">
                           <label className="text-[10px] font-bold text-foreground/40 uppercase">Priority</label>
-                          <select value={quickData.priority} onChange={(e) => setQuickData({...quickData, priority: e.target.value})} className="w-full bg-foreground/5 border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold text-foreground/60 outline-none">
-                            <option value="low">LOW</option><option value="normal">NORMAL</option><option value="high">HIGH</option>
+                          <select value={quickData.priority} onChange={(e) => setQuickData({...quickData, priority: e.target.value})} className="w-full bg-background text-foreground border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold outline-none">
+                            <option value="low" className="bg-background text-foreground">LOW</option><option value="normal" className="bg-background text-foreground">NORMAL</option><option value="high" className="bg-background text-foreground">HIGH</option>
                           </select>
                         </div>
                       </div>
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-foreground/40 uppercase">Assignee</label>
-                        <select value={quickData.assignee_id} onChange={(e) => setQuickData({...quickData, assignee_id: e.target.value})} className="w-full bg-foreground/5 border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold text-foreground/60 outline-none">
-                          <option value="">Unassigned</option>{members.map(m => <option key={m.id} value={m.id}>{m.name.toUpperCase()}</option>)}
+                        <select value={quickData.assignee_id} onChange={(e) => setQuickData({...quickData, assignee_id: e.target.value})} className="w-full bg-background text-foreground border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold outline-none">
+                          <option value="" className="bg-background text-foreground">Unassigned</option>{members.map(m => <option key={m.id} value={m.id} className="bg-background text-foreground">{m.name.toUpperCase()}</option>)}
                         </select>
                       </div>
                     </div>

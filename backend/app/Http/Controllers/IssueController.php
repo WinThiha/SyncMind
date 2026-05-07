@@ -30,6 +30,7 @@ class IssueController extends Controller
 
         $issues = $project->issues()
             ->with(['assignee', 'creator'])
+            ->withCount('comments')
             ->orderBy('created_at', 'desc')
             ->get();
 

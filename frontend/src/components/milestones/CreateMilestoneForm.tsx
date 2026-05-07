@@ -69,7 +69,7 @@ export function CreateMilestoneForm({ projectId, onSuccess, onCancel }: CreateMi
             value={form.name}
             onChange={(e) => set('name', e.target.value)}
             placeholder="e.g. v1.0 Launch"
-            className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+            className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
           />
         </div>
 
@@ -80,7 +80,7 @@ export function CreateMilestoneForm({ projectId, onSuccess, onCancel }: CreateMi
             onChange={(e) => set('description', e.target.value)}
             placeholder="Optional description"
             rows={2}
-            className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors resize-none"
+            className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors resize-none"
           />
         </div>
 
@@ -91,7 +91,7 @@ export function CreateMilestoneForm({ projectId, onSuccess, onCancel }: CreateMi
               type="date"
               value={form.start_date}
               onChange={(e) => set('start_date', e.target.value)}
-              className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+              className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
             />
           </div>
           <div>
@@ -101,7 +101,7 @@ export function CreateMilestoneForm({ projectId, onSuccess, onCancel }: CreateMi
               value={form.due_date}
               min={form.start_date || undefined}
               onChange={(e) => set('due_date', e.target.value)}
-              className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+              className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
             />
           </div>
         </div>
@@ -111,11 +111,11 @@ export function CreateMilestoneForm({ projectId, onSuccess, onCancel }: CreateMi
           <select
             value={form.status}
             onChange={(e) => set('status', e.target.value)}
-            className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+            className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors appearance-none"
           >
-            <option value="open">Open</option>
-            <option value="in_progress">In Progress</option>
-            <option value="closed">Closed</option>
+            <option value="open" className="bg-background text-foreground">Open</option>
+            <option value="in_progress" className="bg-background text-foreground">In Progress</option>
+            <option value="closed" className="bg-background text-foreground">Closed</option>
           </select>
         </div>
 

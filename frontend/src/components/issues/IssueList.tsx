@@ -23,6 +23,7 @@ type IssueListEntry = Partial<Issue> & {
   key_number?: number;
   full_key?: string;
   similarity?: number;
+  comments_count?: number;
 };
 
 export default function IssueList({ projectId }: IssueListProps) {
@@ -220,7 +221,7 @@ export default function IssueList({ projectId }: IssueListProps) {
                 title: issue.summary,
                 status: issue.status,
                 priority: issue.priority,
-                comments_count: 0,
+                comments_count: issue.comments_count || 0,
                 similarity: issue.similarity
               }} 
               onClick={() => {

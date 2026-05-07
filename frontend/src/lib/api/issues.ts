@@ -18,6 +18,7 @@ export interface Issue {
   creator_id: number;
   created_at: string;
   updated_at: string;
+  comments_count?: number;
   assignee?: {
     id: number;
     name: string;
