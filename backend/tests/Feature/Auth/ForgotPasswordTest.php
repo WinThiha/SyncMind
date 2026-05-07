@@ -3,7 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\LocalizedResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
@@ -23,7 +23,7 @@ class ForgotPasswordTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-        Notification::assertSentTo($user, ResetPassword::class);
+        Notification::assertSentTo($user, LocalizedResetPassword::class);
     }
 
     public function test_returns_200_for_unknown_email_without_revealing_existence()

@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import DashboardPage from '@/app/dashboard/page'
 import { AuthProvider } from '@/context/AuthContext'
 import { ThemeProvider } from '@/context/ThemeContext'
+import { LocaleProvider } from '@/context/LocaleContext'
 
 // Mock the hooks
 vi.mock('next/navigation', () => ({
@@ -28,28 +29,34 @@ vi.mock('@/lib/api/projects', () => ({
 }))
 
 describe('Dashboard Layout', () => {
-  it('renders sidebar with SyncMind logo', async () => {
+  it('renders dashboard project section', async () => {
     render(
       <ThemeProvider>
-        <DashboardPage />
+        <LocaleProvider>
+          <DashboardPage />
+        </LocaleProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText('SyncMind')).toBeInTheDocument()
+    expect(screen.getByText('Your Projects')).toBeInTheDocument()
   })
 
   it('renders topbar with welcome message', async () => {
     render(
       <ThemeProvider>
-        <DashboardPage />
+        <LocaleProvider>
+          <DashboardPage />
+        </LocaleProvider>
       </ThemeProvider>
     )
-    expect(screen.getByText(/Welcome back, John!/)).toBeInTheDocument()
+    expect(screen.getByText(/Welcome back,/)).toBeInTheDocument()
   })
 
   it('renders create project button', async () => {
     render(
       <ThemeProvider>
-        <DashboardPage />
+        <LocaleProvider>
+          <DashboardPage />
+        </LocaleProvider>
       </ThemeProvider>
     )
     expect(screen.getByText('Create New Project')).toBeInTheDocument()

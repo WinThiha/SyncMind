@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import IssueList from '@/components/issues/IssueList'
+import { LocaleProvider } from '@/context/LocaleContext'
 
 const mockGetIssues = vi.hoisted(() => vi.fn())
 const mockGetSimilarIssues = vi.hoisted(() => vi.fn())
@@ -60,7 +61,7 @@ describe('IssueList AI search key resolution', () => {
   })
 
   it('opens AI result detail with a defined issue key', async () => {
-    render(<IssueList projectId={2} />)
+    render(<LocaleProvider><IssueList projectId={2} /></LocaleProvider>)
 
     await screen.findByText('Initial issue')
 

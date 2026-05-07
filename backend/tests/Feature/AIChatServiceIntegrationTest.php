@@ -19,7 +19,10 @@ class AIChatServiceIntegrationTest extends TestCase
 
     public function test_issue_suggestion_service_retries_without_strict_json_mode(): void
     {
-        $user = User::factory()->create(['position' => 'Backend Engineer']);
+        $user = User::factory()->create([
+            'position' => 'Backend Engineer',
+            'settings' => ['preferences' => ['locale' => 'my-MM']],
+        ]);
         $project = Project::factory()->create(['creator_id' => $user->id, 'issue_types' => ['Task', 'Bug', 'Story']]);
         $project->members()->attach($user->id, ['role' => 'admin']);
 
@@ -28,6 +31,7 @@ class AIChatServiceIntegrationTest extends TestCase
             ->once()
             ->withArgs(function (array $messages, array $options): bool {
                 return isset($messages[0]['content'])
+                    && str_contains($messages[0]['content'], 'Output language locale: my-MM')
                     && ($options['response_format']['type'] ?? null) === 'json_object';
             })
             ->andThrow(new \RuntimeException('json mode unsupported'));
@@ -36,6 +40,7 @@ class AIChatServiceIntegrationTest extends TestCase
             ->once()
             ->withArgs(function (array $messages, array $options): bool {
                 return isset($messages[0]['content'])
+                    && str_contains($messages[0]['content'], 'Output language locale: my-MM')
                     && ! isset($options['response_format']);
             })
             ->andReturn(json_encode([
@@ -50,7 +55,7 @@ class AIChatServiceIntegrationTest extends TestCase
 
         $this->app->instance(ChatCompletionClient::class, $mock);
 
-        $result = app(AIIssueSuggestionService::class)->suggest($project, 'Fix auth failure');
+        $result = app(AIIssueSuggestionService::class)->suggest($project, 'Fix auth failure', $user);
 
         $this->assertSame('Generated description', $result['description']);
         $this->assertSame('Bug', $result['issue_type']);
@@ -61,7 +66,9 @@ class AIChatServiceIntegrationTest extends TestCase
 
     public function test_thread_summarization_service_uses_chat_client_path(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'settings' => ['preferences' => ['locale' => 'ja-JP']],
+        ]);
         $project = Project::factory()->create(['creator_id' => $user->id]);
         $issue = Issue::factory()->create([
             'project_id' => $project->id,
@@ -79,6 +86,10 @@ class AIChatServiceIntegrationTest extends TestCase
         $mock = Mockery::mock(ChatCompletionClient::class);
         $mock->shouldReceive('complete')
             ->once()
+            ->withArgs(function (array $messages): bool {
+                return isset($messages[0]['content'])
+                    && str_contains($messages[0]['content'], 'Output language locale: ja-JP');
+            })
             ->andReturn(json_encode([
                 'summary' => 'Thread summary',
                 'decisions' => ['Ship it'],
@@ -88,7 +99,7 @@ class AIChatServiceIntegrationTest extends TestCase
 
         $this->app->instance(ChatCompletionClient::class, $mock);
 
-        $result = app(AIThreadSummarizationService::class)->summarize($issue);
+        $result = app(AIThreadSummarizationService::class)->summarize($issue, $user);
 
         $this->assertSame('Thread summary', $result['summary']);
         $this->assertSame(['Ship it'], $result['decisions']);
