@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useLocale } from '@/context/LocaleContext';
 import api from '@/lib/axios';
 import MarkdownEditor from '../shared/MarkdownEditor';
 import Markdown from '../shared/Markdown';
@@ -32,6 +33,7 @@ interface CommentsProps {
 }
 
 export default function Comments({ projectId, issueKey, initialComments }: CommentsProps) {
+  const { t } = useLocale();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -50,7 +52,7 @@ export default function Comments({ projectId, issueKey, initialComments }: Comme
       setComments((prev) => [...prev, response.data.data]);
       setNewComment('');
     } catch (err: any) {
-      setError(err.response?.data?.message ?? 'Failed to post comment.');
+      setError(err.response?.data?.message ?? t('issues.comments.error'));
     } finally {
       setSubmitting(false);
     }
@@ -62,14 +64,14 @@ export default function Comments({ projectId, issueKey, initialComments }: Comme
       <div className="flex items-center gap-2 text-brand-primary mb-5">
         <MessageSquare size={15} />
         <h2 className="text-[10px] font-bold uppercase tracking-widest">
-          Comments {comments.length > 0 && <span className="ml-1 text-foreground/30">({comments.length})</span>}
+          {t('issues.comments.title')} {comments.length > 0 && <span className="ml-1 text-foreground/30">({comments.length})</span>}
         </h2>
       </div>
 
       {/* Comment list */}
       <div className="space-y-4 mb-6">
         {comments.length === 0 ? (
-          <p className="text-sm text-foreground/30 italic py-2">No comments yet. Be the first to comment.</p>
+          <p className="text-sm text-foreground/30 italic py-2">{t('issues.comments.empty')}</p>
         ) : (
           comments.map((comment) => (
             <div key={comment.id} className="flex gap-3">
@@ -101,7 +103,7 @@ export default function Comments({ projectId, issueKey, initialComments }: Comme
           <MarkdownEditor
             value={newComment}
             onChange={setNewComment}
-            placeholder="Add a comment…"
+            placeholder={t('issues.comments.placeholder')}
             rows={3}
           />
         </div>
@@ -127,7 +129,7 @@ export default function Comments({ projectId, issueKey, initialComments }: Comme
             disabled={submitting || !newComment.trim()}
           >
             <Send size={14} />
-            {submitting ? 'Posting…' : 'Post Comment'}
+            {submitting ? t('issues.comments.posting') : t('issues.comments.post')}
           </GlassButton>
         </div>
       </form>

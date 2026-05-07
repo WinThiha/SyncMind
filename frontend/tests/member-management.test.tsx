@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import MemberManagement from '@/components/projects/MemberManagement';
+import { LocaleProvider } from '@/context/LocaleContext';
 
 const mockGetProjectMembers = vi.hoisted(() => vi.fn());
 const mockGetProjectInvitations = vi.hoisted(() => vi.fn());
@@ -38,7 +39,7 @@ describe('MemberManagement', () => {
   });
 
   it('sends position when adding/inviting a member', async () => {
-    render(<MemberManagement projectId={7} creatorId={1} userRole="admin" />);
+    render(<LocaleProvider><MemberManagement projectId={7} creatorId={1} userRole="admin" /></LocaleProvider>);
 
     await screen.findByText('Project Members');
 
@@ -60,7 +61,7 @@ describe('MemberManagement', () => {
   });
 
   it('updates member position on blur for manageable members', async () => {
-    render(<MemberManagement projectId={7} creatorId={1} userRole="admin" />);
+    render(<LocaleProvider><MemberManagement projectId={7} creatorId={1} userRole="admin" /></LocaleProvider>);
 
     await screen.findByText('alice@example.com');
 

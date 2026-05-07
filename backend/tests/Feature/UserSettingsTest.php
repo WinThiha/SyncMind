@@ -25,6 +25,7 @@ class UserSettingsTest extends TestCase
                 'preferences' => [
                     'theme' => 'dark',
                     'sidebar_collapsed_default' => true,
+                    'locale' => 'ja-JP',
                 ],
                 'notifications' => [
                     'email_mentions' => false,
@@ -38,6 +39,7 @@ class UserSettingsTest extends TestCase
             ->assertJsonPath('data.profile.name', $user->name)
             ->assertJsonPath('data.preferences.theme', 'dark')
             ->assertJsonPath('data.preferences.sidebar_collapsed_default', true)
+            ->assertJsonPath('data.preferences.locale', 'ja-JP')
             ->assertJsonPath('data.notifications.email_mentions', false);
     }
 
@@ -51,7 +53,8 @@ class UserSettingsTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('data.preferences.theme', null)
-            ->assertJsonPath('data.preferences.sidebar_collapsed_default', false);
+            ->assertJsonPath('data.preferences.sidebar_collapsed_default', false)
+            ->assertJsonPath('data.preferences.locale', 'en');
     }
 
     public function test_user_can_update_settings_and_profile_name(): void
@@ -65,6 +68,7 @@ class UserSettingsTest extends TestCase
             'preferences' => [
                 'theme' => 'dark',
                 'sidebar_collapsed_default' => true,
+                'locale' => 'vi-VN',
             ],
             'notifications' => [
                 'email_mentions' => false,
@@ -76,6 +80,7 @@ class UserSettingsTest extends TestCase
             ->assertJsonPath('data.profile.name', 'Updated Name')
             ->assertJsonPath('data.preferences.theme', 'dark')
             ->assertJsonPath('data.preferences.sidebar_collapsed_default', true)
+            ->assertJsonPath('data.preferences.locale', 'vi-VN')
             ->assertJsonPath('data.notifications.email_mentions', false)
             ->assertJsonPath('data.notifications.in_app_mentions', false);
 
@@ -111,6 +116,44 @@ class UserSettingsTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['profile.name']);
+    }
+
+    public function test_user_can_update_only_locale_without_overwriting_other_preferences(): void
+    {
+        $user = User::factory()->create([
+            'settings' => [
+                'preferences' => [
+                    'theme' => 'dark',
+                    'sidebar_collapsed_default' => true,
+                    'locale' => 'en',
+                ],
+            ],
+        ]);
+
+        $response = $this->actingAs($user, 'web')->putJson('/api/user/settings', [
+            'preferences' => [
+                'locale' => 'km-KH',
+            ],
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('data.preferences.theme', 'dark')
+            ->assertJsonPath('data.preferences.sidebar_collapsed_default', true)
+            ->assertJsonPath('data.preferences.locale', 'km-KH');
+    }
+
+    public function test_update_rejects_invalid_locale_value(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user, 'web')->putJson('/api/user/settings', [
+            'preferences' => [
+                'locale' => 'fr-FR',
+            ],
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['preferences.locale']);
     }
 
     public function test_user_can_update_password_from_dedicated_endpoint(): void

@@ -33,7 +33,7 @@ class AIIssueController extends Controller
             'summary' => 'required|string|max:255',
         ]);
 
-        $suggestions = $this->suggestionService->suggest($project, $validated['summary']);
+        $suggestions = $this->suggestionService->suggest($project, $validated['summary'], $request->user());
 
         return response()->json(['data' => $suggestions]);
     }
@@ -78,7 +78,7 @@ class AIIssueController extends Controller
             return response()->json(['data' => $cached, 'cached' => true]);
         }
 
-        $summary = $this->summarizationService->summarize($issue);
+        $summary = $this->summarizationService->summarize($issue, $request->user());
 
         // Cache for 24 hours (can be invalidated by observers)
         Cache::put($cacheKey, $summary, now()->addDay());

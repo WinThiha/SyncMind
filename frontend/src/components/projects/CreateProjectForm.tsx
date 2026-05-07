@@ -9,15 +9,43 @@ import { GlassButton } from '@/components/ui/GlassButton';
 import { motion } from 'framer-motion';
 import { Folder, Key, Image as ImageIcon, ListChecks, ChevronLeft } from 'lucide-react';
 import { BASE_SPRING } from '@/lib/animations';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function CreateProjectForm() {
+  const { t } = useLocale();
+  const defaultIssueTypes = t('projects.create.typesDefault');
   const [name, setName] = useState('');
   const [key, setKey] = useState('');
   const [icon, setIcon] = useState('');
-  const [issueTypes, setIssueTypes] = useState('Task, Bug, Story');
+  const [issueTypes, setIssueTypes] = useState(defaultIssueTypes);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const setFieldValidityMessage = (target: HTMLInputElement, type: 'text' | 'key' | 'url') => {
+    if (target.validity.valueMissing) {
+      target.setCustomValidity(t('projects.create.validation.required'));
+      return;
+    }
+
+    if (type === 'key') {
+      if (target.validity.tooShort || target.validity.tooLong) {
+        target.setCustomValidity(t('projects.create.validation.keyLength'));
+        return;
+      }
+      if (target.validity.patternMismatch) {
+        target.setCustomValidity(t('projects.create.validation.keyPattern'));
+        return;
+      }
+    }
+
+    if (type === 'url' && target.validity.typeMismatch) {
+      target.setCustomValidity(t('projects.create.validation.url'));
+      return;
+    }
+
+    target.setCustomValidity('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +67,7 @@ export default function CreateProjectForm() {
         const firstError = Object.values(axiosError.response.data.errors)[0][0];
         setError(firstError);
       } else {
-        setError(axiosError.response?.data?.message || 'Failed to create project.');
+        setError(axiosError.response?.data?.message || t('projects.create.error'));
       }
     } finally {
       setLoading(false);
@@ -57,8 +85,8 @@ export default function CreateProjectForm() {
           <ChevronLeft size={24} />
         </motion.button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Create New Project</h1>
-          <p className="text-foreground/60 text-sm mt-1">Define your workspace and start tracking issues.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('projects.create.heading')}</h1>
+          <p className="text-foreground/60 text-sm mt-1">{t('projects.create.subtitle')}</p>
         </div>
       </div>
 
@@ -78,22 +106,24 @@ export default function CreateProjectForm() {
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider ml-1">
                 <Folder size={16} className="text-brand-primary" />
-                Project Name
+                {t('projects.create.nameLabel')}
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. SyncMind Pro"
+                placeholder={t('projects.create.namePlaceholder')}
                 className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-medium"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                onInvalid={(e) => setFieldValidityMessage(e.currentTarget, 'text')}
+                onInput={(e) => e.currentTarget.setCustomValidity('')}
               />
             </div>
 
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider ml-1">
                 <Key size={16} className="text-brand-primary" />
-                Project Key
+                {t('projects.create.keyLabel')}
               </label>
               <input
                 type="text"
@@ -101,42 +131,48 @@ export default function CreateProjectForm() {
                 minLength={2}
                 maxLength={10}
                 pattern="[A-Za-z]+"
-                placeholder="e.g. SYNC"
+                placeholder={t('projects.create.keyPlaceholder')}
                 className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-medium uppercase"
                 value={key}
                 onChange={(e) => setKey(e.target.value)}
+                onInvalid={(e) => setFieldValidityMessage(e.currentTarget, 'key')}
+                onInput={(e) => e.currentTarget.setCustomValidity('')}
               />
-              <p className="text-[10px] text-foreground/40 font-medium ml-1">2-10 letters, used as issue prefix.</p>
+              <p className="text-[10px] text-foreground/40 font-medium ml-1">{t('projects.create.keyHint')}</p>
             </div>
 
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider ml-1">
                 <ImageIcon size={16} className="text-brand-primary" />
-                Icon URL (Optional)
+                {t('projects.create.iconLabel')}
               </label>
               <input
                 type="url"
-                placeholder="https://example.com/logo.png"
+                placeholder={t('projects.create.iconPlaceholder')}
                 className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-medium"
                 value={icon}
                 onChange={(e) => setIcon(e.target.value)}
+                onInvalid={(e) => setFieldValidityMessage(e.currentTarget, 'url')}
+                onInput={(e) => e.currentTarget.setCustomValidity('')}
               />
             </div>
 
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-bold text-foreground/60 uppercase tracking-wider ml-1">
                 <ListChecks size={16} className="text-brand-primary" />
-                Issue Types
+                {t('projects.create.typesLabel')}
               </label>
               <input
                 type="text"
                 required
-                placeholder="Task, Bug, Story"
+                placeholder={t('projects.create.typesPlaceholder')}
                 className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-medium"
                 value={issueTypes}
                 onChange={(e) => setIssueTypes(e.target.value)}
+                onInvalid={(e) => setFieldValidityMessage(e.currentTarget, 'text')}
+                onInput={(e) => e.currentTarget.setCustomValidity('')}
               />
-              <p className="text-[10px] text-foreground/40 font-medium ml-1">Comma separated list of types.</p>
+              <p className="text-[10px] text-foreground/40 font-medium ml-1">{t('projects.create.typesHint')}</p>
             </div>
           </div>
 
@@ -147,14 +183,14 @@ export default function CreateProjectForm() {
               onClick={() => router.back()}
               className="px-8"
             >
-              Cancel
+              {t('common.cancel')}
             </GlassButton>
             <GlassButton
               type="submit"
               disabled={loading}
               className="px-10"
             >
-              {loading ? 'Creating...' : 'Create Project'}
+              {loading ? t('projects.create.submitting') : t('projects.create.title')}
             </GlassButton>
           </div>
         </form>

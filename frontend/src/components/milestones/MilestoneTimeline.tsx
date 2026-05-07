@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import type { Milestone } from '@/lib/api/milestones';
+import { useLocale } from '@/context/LocaleContext';
 
 interface MilestoneTimelineProps {
   milestones: Milestone[];
@@ -33,6 +34,7 @@ const barColors: Record<string, string> = {
 };
 
 export function MilestoneTimeline({ milestones, onSelect }: MilestoneTimelineProps) {
+  const { t } = useLocale();
   const dated = milestones.filter((m) => m.due_date || m.start_date);
   if (dated.length === 0) return null;
 
@@ -60,7 +62,7 @@ export function MilestoneTimeline({ milestones, onSelect }: MilestoneTimelinePro
           style={{ left: todayLeft }}
         >
           <span className="absolute -top-5 left-1 text-[10px] font-bold text-brand-primary/60 whitespace-nowrap">
-            Today
+            {t('milestones.timeline.today')}
           </span>
         </div>
       )}

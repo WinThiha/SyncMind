@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useLocale } from '@/context/LocaleContext';
 import { updateIssue, Issue } from '@/lib/api/issues';
 import { getProjectMembers, ProjectMember } from '@/lib/api/projects';
 import MarkdownEditor from '../shared/MarkdownEditor';
@@ -12,6 +13,7 @@ interface UpdateIssueFormProps {
 }
 
 export default function UpdateIssueForm({ projectId, issue, onSuccess }: UpdateIssueFormProps) {
+  const { t } = useLocale();
   const [formData, setFormData] = useState({
     summary: issue.summary,
     description: issue.description || '',
@@ -53,7 +55,7 @@ export default function UpdateIssueForm({ projectId, issue, onSuccess }: UpdateI
       });
       onSuccess();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update issue');
+      setError(err.response?.data?.message || t('issues.edit.error'));
     } finally {
       setLoading(false);
     }
@@ -73,7 +75,7 @@ export default function UpdateIssueForm({ projectId, issue, onSuccess }: UpdateI
       {error && <div className="p-3 bg-red-100 text-red-700 rounded text-sm">{error}</div>}
 
       <div>
-        <label htmlFor="summary" className="block text-sm font-medium text-gray-700 mb-1">Summary</label>
+        <label htmlFor="summary" className="block text-sm font-medium text-gray-700 mb-1">{t('issues.create.summary')}</label>
         <input
           type="text"
           name="summary"
@@ -87,7 +89,7 @@ export default function UpdateIssueForm({ projectId, issue, onSuccess }: UpdateI
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">{t('issues.edit.status')}</label>
           <select
             name="status"
             id="status"
@@ -95,15 +97,15 @@ export default function UpdateIssueForm({ projectId, issue, onSuccess }: UpdateI
             onChange={handleChange}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           >
-            <option value="open">Open</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-            <option value="closed">Closed</option>
+            <option value="open">{t('issues.search.statusOpen')}</option>
+            <option value="in_progress">{t('issues.search.statusInProgress')}</option>
+            <option value="resolved">{t('issues.search.statusResolved')}</option>
+            <option value="closed">{t('issues.search.statusClosed')}</option>
           </select>
         </div>
 
         <div>
-          <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+          <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">{t('issues.create.priority')}</label>
           <select
             name="priority"
             id="priority"
@@ -111,16 +113,16 @@ export default function UpdateIssueForm({ projectId, issue, onSuccess }: UpdateI
             onChange={handleChange}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           >
-            <option value="low">Low</option>
-            <option value="normal">Normal</option>
-            <option value="high">High</option>
+            <option value="low">{t('issues.search.priorityLow')}</option>
+            <option value="normal">{t('issues.search.priorityNormal')}</option>
+            <option value="high">{t('issues.search.priorityHigh')}</option>
           </select>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label htmlFor="assignee_id" className="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
+          <label htmlFor="assignee_id" className="block text-sm font-medium text-gray-700 mb-1">{t('issues.create.assignee')}</label>
           <select
             name="assignee_id"
             id="assignee_id"
@@ -128,7 +130,7 @@ export default function UpdateIssueForm({ projectId, issue, onSuccess }: UpdateI
             onChange={handleChange}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           >
-            <option value="">Unassigned</option>
+            <option value="">{t('issues.create.unassigned')}</option>
             {members.map((member) => (
               <option key={member.id} value={member.id}>{member.name}</option>
             ))}
@@ -136,7 +138,7 @@ export default function UpdateIssueForm({ projectId, issue, onSuccess }: UpdateI
         </div>
 
         <div>
-          <label htmlFor="estimated_hours" className="block text-sm font-medium text-gray-700 mb-1">Estimate (hrs)</label>
+          <label htmlFor="estimated_hours" className="block text-sm font-medium text-gray-700 mb-1">{t('issues.create.estimate')}</label>
           <input
             type="number"
             step="0.5"
@@ -149,7 +151,7 @@ export default function UpdateIssueForm({ projectId, issue, onSuccess }: UpdateI
         </div>
 
         <div>
-          <label htmlFor="actual_hours" className="block text-sm font-medium text-gray-700 mb-1">Actual (hrs)</label>
+          <label htmlFor="actual_hours" className="block text-sm font-medium text-gray-700 mb-1">{t('issues.edit.actualHours')}</label>
           <input
             type="number"
             step="0.5"
@@ -163,7 +165,7 @@ export default function UpdateIssueForm({ projectId, issue, onSuccess }: UpdateI
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t('issues.create.description')}</label>
         <MarkdownEditor 
           value={formData.description} 
           onChange={handleDescriptionChange}
@@ -177,7 +179,7 @@ export default function UpdateIssueForm({ projectId, issue, onSuccess }: UpdateI
           disabled={loading}
           className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
         >
-          {loading ? 'Saving...' : 'Update Issue'}
+          {loading ? t('issues.edit.saving') : t('issues.update.submit')}
         </button>
       </div>
     </form>

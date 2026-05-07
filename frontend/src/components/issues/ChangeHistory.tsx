@@ -1,5 +1,6 @@
 'use client';
 
+import { useLocale } from '@/context/LocaleContext';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { ArrowRight, History } from 'lucide-react';
 
@@ -39,8 +40,8 @@ function groupHistory(history: HistoryEntry[]) {
 }
 
 function formatValue(field: string, value: string | null): string {
-  if (!value) return 'None';
-  if (field === 'description' && value.length > 50) return 'Updated';
+  if (!value) return t('issues.history.none');
+  if (field === 'description' && value.length > 50) return t('issues.history.updated');
   return value;
 }
 
@@ -49,6 +50,7 @@ function formatField(field: string): string {
 }
 
 export default function ChangeHistory({ history }: ChangeHistoryProps) {
+  const { t } = useLocale();
   if (!history || history.length === 0) return null;
 
   const groups = groupHistory(history);
@@ -59,7 +61,7 @@ export default function ChangeHistory({ history }: ChangeHistoryProps) {
       <div className="flex items-center gap-2 text-brand-primary mb-5">
         <History size={15} />
         <h2 className="text-[10px] font-bold uppercase tracking-widest">
-          Activity History
+          {t('issues.history.title')}
           <span className="ml-1 text-foreground/30">({history.length})</span>
         </h2>
       </div>

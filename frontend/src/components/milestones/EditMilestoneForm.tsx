@@ -5,6 +5,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { updateMilestone, deleteMilestone, type Milestone } from '@/lib/api/milestones';
 import { Flag, Trash2, X } from 'lucide-react';
+import { useLocale } from '@/context/LocaleContext';
 
 interface EditMilestoneFormProps {
   projectId: number | string;
@@ -15,6 +16,7 @@ interface EditMilestoneFormProps {
 }
 
 export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, onDeleted }: EditMilestoneFormProps) {
+  const { t } = useLocale();
   const [form, setForm] = useState({
     name: milestone.name,
     description: milestone.description ?? '',
@@ -40,20 +42,20 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
       await updateMilestone(projectId, milestone.id, payload);
       onSuccess();
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Failed to update milestone.');
+      setError(err?.response?.data?.message ?? t('milestones.edit.updateError'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Delete milestone "${milestone.name}"? Issues will be unlinked.`)) return;
+    if (!confirm(t('milestones.delete.confirm', { name: milestone.name }))) return;
     setDeleting(true);
     try {
       await deleteMilestone(projectId, milestone.id);
       onDeleted();
     } catch {
-      setError('Failed to delete milestone.');
+      setError(t('milestones.edit.deleteError'));
       setDeleting(false);
     }
   };
@@ -63,7 +65,7 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold flex items-center gap-2">
           <Flag size={20} className="text-brand-primary" />
-          Edit Milestone
+          {t('milestones.edit.heading')}
         </h2>
         <button onClick={onCancel} className="p-2 rounded-lg hover:bg-foreground/5 text-foreground/40 hover:text-foreground transition-colors">
           <X size={18} />
@@ -76,7 +78,7 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">Name *</label>
+          <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('milestones.form.nameLabel')}</label>
           <input
             type="text"
             required
@@ -87,7 +89,7 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
         </div>
 
         <div>
-          <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">Description</label>
+          <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('milestones.form.descLabel')}</label>
           <textarea
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
@@ -98,7 +100,7 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">Start Date</label>
+            <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('milestones.form.startDateLabel')}</label>
             <input
               type="date"
               value={form.start_date}
@@ -107,7 +109,7 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">Due Date</label>
+            <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('milestones.form.dueDateLabel')}</label>
             <input
               type="date"
               value={form.due_date}
@@ -119,24 +121,24 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
         </div>
 
         <div>
-          <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">Status</label>
+          <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('milestones.form.statusLabel')}</label>
           <select
             value={form.status}
             onChange={(e) => set('status', e.target.value)}
             className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors appearance-none"
           >
-            <option value="open" className="bg-background text-foreground">Open</option>
-            <option value="in_progress" className="bg-background text-foreground">In Progress</option>
-            <option value="closed" className="bg-background text-foreground">Closed</option>
+            <option value="open" className="bg-background text-foreground">{t('milestones.status.open')}</option>
+            <option value="in_progress" className="bg-background text-foreground">{t('milestones.status.inProgress')}</option>
+            <option value="closed" className="bg-background text-foreground">{t('milestones.status.closed')}</option>
           </select>
         </div>
 
         <div className="flex gap-3 pt-2">
           <GlassButton type="submit" disabled={loading} className="flex-1">
-            {loading ? 'Saving…' : 'Save Changes'}
+            {loading ? t('milestones.edit.saving') : t('milestones.edit.saveChanges')}
           </GlassButton>
           <GlassButton type="button" variant="secondary" onClick={onCancel}>
-            Cancel
+            {t('common.cancel')}
           </GlassButton>
           <GlassButton type="button" variant="danger" onClick={handleDelete} disabled={deleting}>
             <Trash2 size={14} />

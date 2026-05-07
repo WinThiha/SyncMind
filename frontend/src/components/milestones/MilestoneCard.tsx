@@ -6,6 +6,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { MilestoneProgress } from './MilestoneProgress';
 import { FAST_SPRING } from '@/lib/animations';
 import type { Milestone } from '@/lib/api/milestones';
+import { useLocale } from '@/context/LocaleContext';
 
 interface MilestoneCardProps {
   milestone: Milestone;
@@ -14,9 +15,9 @@ interface MilestoneCardProps {
 }
 
 const statusConfig = {
-  open: { icon: Circle, label: 'Open', className: 'bg-foreground/10 text-foreground/60' },
-  in_progress: { icon: Clock, label: 'In Progress', className: 'bg-brand-primary/10 text-brand-primary' },
-  closed: { icon: CheckCircle2, label: 'Closed', className: 'bg-green-500/10 text-green-500' },
+  open: { icon: Circle, labelKey: 'milestones.status.open', className: 'bg-foreground/10 text-foreground/60' },
+  in_progress: { icon: Clock, labelKey: 'milestones.status.inProgress', className: 'bg-brand-primary/10 text-brand-primary' },
+  closed: { icon: CheckCircle2, labelKey: 'milestones.status.closed', className: 'bg-green-500/10 text-green-500' },
 };
 
 function formatDate(dateStr: string | null): string {
@@ -25,6 +26,7 @@ function formatDate(dateStr: string | null): string {
 }
 
 export function MilestoneCard({ milestone, onClick, onEdit }: MilestoneCardProps) {
+  const { t } = useLocale();
   const status = statusConfig[milestone.status] ?? statusConfig.open;
   const StatusIcon = status.icon;
 
@@ -44,7 +46,7 @@ export function MilestoneCard({ milestone, onClick, onEdit }: MilestoneCardProps
             {milestone.is_overdue && (
               <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 shrink-0">
                 <AlertTriangle size={10} />
-                Overdue
+                {t('milestones.card.overdue')}
               </span>
             )}
           </div>
@@ -56,7 +58,7 @@ export function MilestoneCard({ milestone, onClick, onEdit }: MilestoneCardProps
         <div className="flex items-center gap-2 ml-4 shrink-0">
           <span className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${status.className}`}>
             <StatusIcon size={10} />
-            {status.label}
+            {t(status.labelKey)}
           </span>
           {onEdit && (
             <motion.button
@@ -64,7 +66,7 @@ export function MilestoneCard({ milestone, onClick, onEdit }: MilestoneCardProps
               onClick={(e) => { e.stopPropagation(); onEdit(); }}
               className="p-1.5 rounded-lg text-foreground/30 hover:text-foreground hover:bg-foreground/5 transition-colors opacity-0 group-hover:opacity-100"
             >
-              <span className="text-xs font-bold">Edit</span>
+              <span className="text-xs font-bold">{t('milestones.card.edit')}</span>
             </motion.button>
           )}
         </div>
@@ -80,13 +82,13 @@ export function MilestoneCard({ milestone, onClick, onEdit }: MilestoneCardProps
         {milestone.start_date && (
           <div className="flex items-center gap-1">
             <Calendar size={12} />
-            <span>Start: {formatDate(milestone.start_date)}</span>
+            <span>{t('milestones.card.start')}: {formatDate(milestone.start_date)}</span>
           </div>
         )}
         {milestone.due_date && (
           <div className={`flex items-center gap-1 ${milestone.is_overdue ? 'text-red-500' : ''}`}>
             <Calendar size={12} />
-            <span>Due: {formatDate(milestone.due_date)}</span>
+            <span>{t('milestones.card.due')}: {formatDate(milestone.due_date)}</span>
           </div>
         )}
         <span className="ml-auto font-bold text-brand-primary/60">

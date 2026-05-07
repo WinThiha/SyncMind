@@ -6,6 +6,7 @@ import { Folder, Users, Layers, ChevronRight, GitBranch } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { FAST_SPRING } from '@/lib/animations';
 import type { Project } from '@/lib/api/projects';
+import { useLocale } from '@/context/LocaleContext';
 
 interface ProjectCardProps {
   project: Project;
@@ -24,6 +25,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   const issueTypes = project.issue_types ?? [];
   const visibleTypes = issueTypes.slice(0, 3);
   const hiddenCount = issueTypes.length - visibleTypes.length;
+  const { t } = useLocale();
 
   return (
     <Link href={`/projects/${project.id}`}>
@@ -53,12 +55,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
         <div className="flex items-center gap-3 mb-4 flex-wrap">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/50">
             <Users size={13} className="text-foreground/35" />
-            <span>{project.members_count ?? 0} member{project.members_count !== 1 ? 's' : ''}</span>
+            <span>{project.members_count ?? 0} {t('projects.card.members')}</span>
           </div>
           <div className="w-px h-3 bg-border-glow" />
           <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/50">
             <Layers size={13} className="text-foreground/35" />
-            <span>{project.issues_count ?? 0} issue{project.issues_count !== 1 ? 's' : ''}</span>
+            <span>{project.issues_count ?? 0} {t('projects.card.issues')}</span>
           </div>
         </div>
 
@@ -91,7 +93,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             {relativeTime(project.updated_at)}
           </span>
           <span className="flex items-center gap-1 text-brand-primary text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            Open <ChevronRight size={14} />
+            {t('projects.card.open')} <ChevronRight size={14} />
           </span>
         </div>
       </GlassCard>

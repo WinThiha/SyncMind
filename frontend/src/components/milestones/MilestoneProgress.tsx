@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useLocale } from '@/context/LocaleContext';
 
 interface MilestoneProgressProps {
   percentage: number;
@@ -10,6 +11,7 @@ interface MilestoneProgressProps {
 }
 
 export function MilestoneProgress({ percentage, completed, total, showLabel = true }: MilestoneProgressProps) {
+  const { t } = useLocale();
   const color =
     percentage === 100
       ? 'bg-green-500'
@@ -29,7 +31,7 @@ export function MilestoneProgress({ percentage, completed, total, showLabel = tr
       </div>
       {showLabel && (
         <p className="text-[11px] text-foreground/40 mt-1">
-          {completed} / {total} issues completed
+          {t('milestones.progress.label', { completed, total })}
         </p>
       )}
     </div>
