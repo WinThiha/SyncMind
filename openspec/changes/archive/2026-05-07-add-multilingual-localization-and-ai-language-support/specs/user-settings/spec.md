@@ -1,8 +1,4 @@
-## Purpose
-Define user preference storage, retrieval, and synchronization for SyncMind user settings.
-
-## Requirements
-### Requirement: Users can persist locale preference in settings
+## ADDED Requirements
 
 ### Requirement: Users can persist locale preference in settings
 The system SHALL allow authenticated users to view and update a locale preference in user-global settings and MUST persist it in the user settings payload.

@@ -1,8 +1,4 @@
-## Purpose
-Define authentication flow behavior, email localization, and form rendering for SyncMind auth surfaces.
-
-## Requirements
-### Requirement: Auth emails honor saved user locale
+## ADDED Requirements
 
 ### Requirement: Auth emails honor saved user locale
 The system SHALL localize authentication-related emails (including verification and password reset content) using the user’s saved locale preference when a user context exists and SHALL fallback to English otherwise.
