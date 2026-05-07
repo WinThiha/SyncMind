@@ -6,13 +6,14 @@ build/
 out/
 *.log
 .env
+.env.*
+!.env.example
 .vercel
 
 # PHP / Laravel
 vendor/
 *.log
 *.cache
-.env
 storage/*.key
 /public/hot
 /public/storage
@@ -35,3 +36,5 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+
+!.agent/

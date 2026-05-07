@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class LoginController extends Controller
 {
@@ -31,11 +32,22 @@ class LoginController extends Controller
         }
 
         RateLimiter::clear($this->throttleKey($request));
-        $request->session()->regenerate();
+
+        $user = Auth::user();
+        $token = null;
+
+        if ($request->has('device_name')) {
+            $token = $user->createToken($request->device_name)->plainTextToken;
+        } else {
+            if ($request->hasSession()) {
+                $request->session()->regenerate();
+            }
+        }
 
         return response()->json([
             'message' => 'Login successful',
-            'user' => Auth::user(),
+            'user' => $user,
+            'token' => $token,
         ]);
     }
 
@@ -44,11 +56,18 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
+        $currentAccessToken = $request->user()?->currentAccessToken();
+
+        if ($currentAccessToken instanceof PersonalAccessToken) {
+            $currentAccessToken->delete();
+        }
+
         Auth::guard('web')->logout();
 
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
         return response()->noContent();
     }

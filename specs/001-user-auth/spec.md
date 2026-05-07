@@ -35,10 +35,10 @@ As a user, I want to log in using my Google account so that I can access the sys
 ### User Story 4 - Protected System Access (Priority: P1)
 As an unauthenticated user, I should not be able to access the system so that private data and features remain secure.
 **Why this priority**: Fundamental security requirement to prevent unauthorized access.
-**Independent Test**: Can be tested by navigating to any internal system URL without an active session and verifying the user is redirected to the login page.
+**Independent Test**: Can be tested by navigating to any internal system URL without an active session or API token and verifying the user is redirected to the login page or receives a 401 Unauthorized response.
 **Acceptance Scenarios**:
-1. **Given** an unauthenticated user, **When** they attempt to navigate to a protected system route, **Then** they are redirected to the login page.
-2. **Given** a logged-in user, **When** their session expires and they attempt to perform an action, **Then** they are prompted to log in again.
+1. **Given** an unauthenticated user, **When** they attempt to navigate to a protected system route without a valid session or API token, **Then** they are redirected to the login page or receive a 401 Unauthorized response.
+2. **Given** a logged-in user, **When** their session or API token expires and they attempt to perform an action, **Then** they are prompted to log in again or receive a 401 Unauthorized response.
 
 ### Edge Cases
 - What happens if a user tries to log in with an unverified email/password account? (System displays a prompt to verify their email, possibly offering to resend the verification link).
@@ -68,7 +68,7 @@ As an unauthenticated user, I should not be able to access the system so that pr
 - **FR-006**: During the new account creation prompted by Google Social Login, the system MUST pre-fill the email address field with the Google account's email and disable it from being changed by the user.
 - **FR-007**: System MUST validate the format of the email address during registration.
 - **FR-008**: System MUST securely store user credentials (passwords).
-- **FR-009**: System MUST restrict access to all internal features and data; users MUST be logged in to enter the system.
+- **FR-009**: System MUST restrict access to all internal features and data; users MUST be logged in via session cookie OR provide a valid Bearer token to enter the system.
 - **FR-010**: System MUST automatically unlink a Google Social Login from a user's account if the user changes their primary email address in the system.
 - **FR-011**: System MUST provide a "Remember Me" option during login to allow users to opt-in to a persistent session.
 

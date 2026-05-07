@@ -5,6 +5,10 @@ import api from '@/lib/axios';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import GoogleLoginButton from './GoogleLoginButton';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { GlassButton } from '@/components/ui/GlassButton';
+import { User, Mail, Lock, UserPlus } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 function RegisterFormContent() {
     const router = useRouter();
@@ -29,6 +33,7 @@ function RegisterFormContent() {
         const socialName = searchParams.get('social_name');
         const provider = searchParams.get('social_provider');
         const id = searchParams.get('social_id');
+        const inviteToken = searchParams.get('invite');
 
         if (socialEmail) {
             setEmail(socialEmail);
@@ -36,6 +41,10 @@ function RegisterFormContent() {
             setSocialProvider(provider || '');
             setSocialId(id || '');
             setIsSocial(true);
+        }
+
+        if (inviteToken) {
+            sessionStorage.setItem('pendingInviteToken', inviteToken);
         }
     }, [searchParams]);
 
@@ -47,25 +56,13 @@ function RegisterFormContent() {
 
         try {
             await api.get('/sanctum/csrf-cookie');
-
-            const payload: any = {
-                name,
-                email,
-                password,
-                password_confirmation: passwordConfirmation,
-            };
-
-            if (isSocial) {
-                payload.social_provider = socialProvider;
-                payload.social_id = socialId;
-            }
-
+            const payload: any = { name, email, password, password_confirmation: passwordConfirmation };
+            if (isSocial) { payload.social_provider = socialProvider; payload.social_id = socialId; }
             const response = await api.post('/api/auth/register', payload);
-
             await refreshUser();
             setMessage(response.data.message);
-            router.push('/dashboard');
-
+            const pendingToken = sessionStorage.getItem('pendingInviteToken');
+            router.push(pendingToken ? `/invitations/${pendingToken}` : '/dashboard');
         } catch (error: any) {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors);
@@ -78,113 +75,85 @@ function RegisterFormContent() {
     };
 
     return (
-        <div className="space-y-6 max-w-md mx-auto p-6 bg-white shadow rounded-lg">
-            <h2 className="text-2xl font-bold text-center text-gray-900">
-                {isSocial ? 'Complete Your Registration' : 'Register Account'}
+        <GlassCard className="p-10 shadow-2xl border-border-glow/50">
+            <h2 className="text-2xl font-black text-center mb-8 tracking-tight">
+                {isSocial ? 'Complete Registration' : 'Create an account'}
             </h2>
 
             {!isSocial && (
                 <>
                     <GoogleLoginButton />
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300"></div>
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+                    <div className="relative my-8">
+                        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border-glow"></div></div>
+                        <div className="relative flex justify-center text-xs font-bold uppercase tracking-widest">
+                            <span className="px-4 bg-background text-foreground/30">Or join with email</span>
                         </div>
                     </div>
                 </>
             )}
 
             {isSocial && (
-                <div className="p-3 bg-indigo-50 text-indigo-700 rounded text-sm">
-                    You're almost there! We've pulled your details from Google. Just set a password to finish.
+                <div className="p-4 bg-brand-primary/10 border border-brand-primary/20 text-brand-primary rounded-xl text-sm font-bold mb-8">
+                    Almost there! We've got your info from Google. Just set a password to finish.
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
                 {message && (
-                    <div className={`p-3 rounded ${message.includes('error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className={`p-4 rounded-xl text-sm font-bold border ${message.includes('error') ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-green-500/10 border-green-500/20 text-green-500'}`}>
                         {message}
-                    </div>
+                    </motion.div>
                 )}
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                    <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border p-2 text-gray-900"
-                    />
-                    {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name[0]}</p>}
+                <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-[10px] font-bold text-foreground/40 uppercase tracking-widest ml-1">
+                        <User size={14} className="text-brand-primary" />Full Name
+                    </label>
+                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="John Doe" className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium" />
+                    {errors.name && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1 uppercase">{errors.name[0]}</p>}
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Email Address</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        readOnly={isSocial}
-                        disabled={isSocial}
-                        required
-                        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-gray-900 ${isSocial ? 'bg-gray-100 cursor-not-allowed' : 'focus:border-indigo-500 focus:ring-indigo-500'}`}
-                    />
-                    {isSocial && <p className="text-xs text-gray-500 mt-1">Email cannot be changed for social registration.</p>}
-                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email[0]}</p>}
+                <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-[10px] font-bold text-foreground/40 uppercase tracking-widest ml-1">
+                        <Mail size={14} className="text-brand-primary" />Email Address
+                    </label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} readOnly={isSocial} disabled={isSocial} required placeholder="you@example.com" className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none transition-all font-medium ${isSocial ? 'opacity-50 cursor-not-allowed' : 'focus:ring-4 focus:ring-brand-primary/10'}`} />
+                    {errors.email && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1 uppercase">{errors.email[0]}</p>}
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Password</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border p-2 text-gray-900"
-                    />
-                    {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password[0]}</p>}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-[10px] font-bold text-foreground/40 uppercase tracking-widest ml-1">
+                            <Lock size={14} className="text-brand-primary" />Password
+                        </label>
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium" />
+                        {errors.password && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1 uppercase">{errors.password[0]}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-[10px] font-bold text-foreground/40 uppercase tracking-widest ml-1">
+                            <Lock size={14} className="text-brand-primary" />Confirm
+                        </label>
+                        <input type="password" value={passwordConfirmation} onChange={(e) => setPasswordConfirmation(e.target.value)} required placeholder="••••••••" className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium" />
+                    </div>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
-                    <input
-                        type="password"
-                        value={passwordConfirmation}
-                        onChange={(e) => setPasswordConfirmation(e.target.value)}
-                        required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border p-2 text-gray-900"
-                    />
-                </div>
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
-                >
-                    {loading ? 'Processing...' : (isSocial ? 'Complete Registration' : 'Register')}
-                </button>
+                <GlassButton type="submit" disabled={loading} className="w-full py-4 mt-4">
+                    <UserPlus size={18} />{loading ? 'CREATING ACCOUNT...' : (isSocial ? 'FINISH REGISTRATION' : 'JOIN SYNCMIND')}
+                </GlassButton>
                 
                 {isSocial && (
-                    <button
-                        type="button"
-                        onClick={() => router.push('/register')}
-                        className="w-full text-center text-sm text-gray-600 hover:text-gray-900 mt-2"
-                    >
+                    <button type="button" onClick={() => router.push('/register')} className="w-full text-center text-xs font-bold text-foreground/40 hover:text-foreground transition-colors mt-2 uppercase tracking-widest">
                         Cancel and use different email
                     </button>
                 )}
             </form>
-        </div>
+        </GlassCard>
     );
 }
 
 export default function RegisterForm() {
     return (
-        <Suspense fallback={<div className="text-center p-6 bg-white shadow rounded-lg">Loading form...</div>}>
+        <Suspense fallback={<div className="text-center p-10 bg-background/50 rounded-2xl animate-pulse font-bold text-foreground/30">LOADING FORM...</div>}>
             <RegisterFormContent />
         </Suspense>
     );

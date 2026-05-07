@@ -8,7 +8,9 @@ interface User {
     id: number;
     name: string;
     email: string;
+    position: string | null;
     email_verified_at: string | null;
+    avatar?: string;
 }
 
 interface AuthContextType {
@@ -39,10 +41,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = async () => {
         try {
             await api.post('/api/auth/logout');
-            setUser(null);
-            router.push('/');
         } catch (error) {
             console.error('Logout failed', error);
+        } finally {
+            setUser(null);
+            router.push('/');
         }
     };
 

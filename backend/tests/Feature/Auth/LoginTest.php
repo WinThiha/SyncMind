@@ -25,6 +25,8 @@ class LoginTest extends TestCase
         ]);
 
         $response->assertStatus(200);
+        $response->assertJsonPath('user.email', $user->email);
+        $response->assertJsonPath('token', null);
         $this->assertAuthenticatedAs($user);
     }
 
@@ -57,5 +59,21 @@ class LoginTest extends TestCase
 
         $response->assertStatus(204);
         $this->assertGuest('web');
+    }
+
+    public function test_token_auth_users_can_logout_without_breaking_session_logout(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-device');
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
+            ->postJson('/api/auth/logout', [], [
+                'Referer' => 'http://localhost',
+            ]);
+
+        $response->assertStatus(204);
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'id' => $token->accessToken->id,
+        ]);
     }
 }

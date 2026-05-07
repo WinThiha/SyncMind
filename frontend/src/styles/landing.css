@@ -1,0 +1,56 @@
+.landing-page {
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+}
+
+.landing-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(96, 165, 250, 0.18), transparent 28%),
+    radial-gradient(circle at 80% 10%, rgba(59, 130, 246, 0.14), transparent 24%),
+    radial-gradient(circle at 50% 90%, rgba(37, 99, 235, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(2, 6, 23, 0), rgba(2, 6, 23, 0.14));
+}
+
+.landing-grid {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.10) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.landing-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.46));
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.dark .landing-panel {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.60));
+  border: 1px solid rgba(96, 165, 250, 0.18);
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.44);
+}
+
+.landing-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.landing-section {
+  position: relative;
+  padding-inline: 1rem;
+}
+
+.landing-surface {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 16px 50px rgba(15, 23, 42, 0.08);
+}

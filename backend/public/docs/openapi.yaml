@@ -1,0 +1,243 @@
+openapi: 3.0.0
+info:
+  title: SyncMind API
+  version: 1.0.0
+  description: API for SyncMind Project Management System
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+components:
+  securitySchemes:
+    sanctum:
+      type: http
+      scheme: bearer
+      description: Use Laravel Sanctum for authentication.
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string }
+        email_verified_at: { type: string, format: date-time, nullable: true }
+
+    Project:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        key: { type: string }
+        icon: { type: string, nullable: true }
+        issue_types: { type: array, items: { type: string } }
+        categories: { type: array, items: { type: string } }
+        milestones: { type: array, items: { type: string } }
+        versions: { type: array, items: { type: string } }
+        creator_id: { type: integer }
+        created_at: { type: string, format: date-time }
+
+    Issue:
+      type: object
+      properties:
+        id: { type: integer }
+        project_id: { type: integer }
+        key: { type: string }
+        summary: { type: string }
+        description: { type: string, nullable: true }
+        status: { type: string }
+        priority: { type: string }
+        issue_type: { type: string }
+        estimated_hours: { type: number, format: float, nullable: true }
+        actual_hours: { type: number, format: float, nullable: true }
+        assignee_id: { type: integer, nullable: true }
+        creator_id: { type: integer }
+        created_at: { type: string, format: date-time }
+        assignee: { $ref: '#/components/schemas/User' }
+        creator: { $ref: '#/components/schemas/User' }
+
+    Comment:
+      type: object
+      properties:
+        id: { type: integer }
+        content: { type: string }
+        user_id: { type: integer }
+        created_at: { type: string, format: date-time }
+        user: { $ref: '#/components/schemas/User' }
+
+paths:
+  /api/user:
+    get:
+      summary: Get authenticated user
+      security: [{ sanctum: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+
+  /api/projects:
+    get:
+      summary: List projects
+      security: [{ sanctum: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Project' } }
+    post:
+      summary: Create project
+      security: [{ sanctum: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, key]
+              properties:
+                name: { type: string }
+                key: { type: string }
+                icon: { type: string }
+      responses:
+        '201':
+          description: Created
+
+  /api/projects/{id}/issues:
+    get:
+      summary: List issues for a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Issue' } }
+    post:
+      summary: Create issue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [summary, issue_type]
+              properties:
+                summary: { type: string }
+                description: { type: string }
+                issue_type: { type: string }
+                priority: { type: string }
+                estimated_hours: { type: number }
+                assignee_id: { type: integer }
+      responses:
+        '201':
+          description: Created
+
+  /api/projects/{id}/issues/{key}:
+    get:
+      summary: Get issue details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: key
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Issue' }
+    patch:
+      summary: Update issue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: key
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                summary: { type: string }
+                description: { type: string }
+                status: { type: string }
+                priority: { type: string }
+                issue_type: { type: string }
+                estimated_hours: { type: number }
+                actual_hours: { type: number }
+                assignee_id: { type: integer }
+      responses:
+        '200':
+          description: OK
+    delete:
+      summary: Delete issue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: key
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Deleted
+
+  /api/projects/{id}/issues/{key}/comments:
+    post:
+      summary: Add comment to issue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: key
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string }
+                notify_emails: { type: boolean }
+      responses:
+        '201':
+          description: Created

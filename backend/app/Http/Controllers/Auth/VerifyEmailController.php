@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class VerifyEmailController extends Controller
 {
@@ -15,7 +16,13 @@ class VerifyEmailController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
-        $user = User::findOrFail($request->route('id'));
+        try {
+            $user = User::findOrFail($request->route('id'));
+        } catch (ModelNotFoundException) {
+            return response()->json([
+                'message' => 'This verification link is invalid or has expired. Please request a new one.',
+            ], 404);
+        }
 
         if (! hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
             return response()->json(['message' => 'Invalid verification link.'], 403);

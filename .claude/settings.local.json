@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(///wsl.localhost/Ubuntu/var/www/SyncMind/**)",
+      "Read(///wsl.localhost/Ubuntu/var/www/SyncMind/specs/__TRACKED_VAR__/**)",
+      "Read(///wsl.localhost/Ubuntu/var/www/SyncMind/frontend/src/components/ui/**)",
+      "Read(///wsl.localhost/Ubuntu/var/www/SyncMind/frontend/src/app/projects/[id]/**)",
+      "Read(///wsl.localhost/Ubuntu/var/www/SyncMind/frontend/src/app/projects/[id]/issues/**)",
+      "Bash(wsl -e bash -c \"cd /var/www/SyncMind && docker compose exec backend php artisan test --exclude-group=ai 2>&1\")",
+      "Bash(wsl -e bash -c \"cd /var/www/SyncMind && docker compose exec backend php artisan test tests/Feature/MilestoneTest.php tests/Feature/IssueLifecycleTest.php tests/Feature/ProjectCreationTest.php tests/Feature/ProjectMemberTest.php tests/Feature/IssueCommentTest.php tests/Feature/IssueHistoryTest.php 2>&1\")",
+      "Bash(xargs wc -l)",
+      "Read(///wsl.localhost/Ubuntu/mnt/**)",
+      "Read(///wsl.localhost/Ubuntu//**)",
+      "Bash(php artisan *)",
+      "Bash(wsl *)"
+    ]
+  }
+}
