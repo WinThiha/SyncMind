@@ -4,33 +4,36 @@ import { useState, useEffect } from 'react';
 import {
   getProjectMembers,
   removeProjectMember,
-  updateProjectMemberRole,
+  updateProjectMember,
   getProjectInvitations,
   cancelProjectInvitation,
   ProjectMember,
   ProjectInvitation,
+  addProjectMember,
 } from '@/lib/api/projects';
-import { addProjectMember } from '@/lib/api/projects';
 import { AxiosError } from 'axios';
 import { useAuth } from '@/context/AuthContext';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
-import { Users, Mail, Shield, UserMinus, UserPlus, ShieldAlert, Clock, X, CheckCircle } from 'lucide-react';
+import { Users, Mail, Shield, UserMinus, UserPlus, ShieldAlert, Clock, X, CheckCircle, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface MemberManagementProps {
   projectId: number;
+  creatorId: number;
   userRole: string;
 }
 
-export default function MemberManagement({ projectId, userRole }: MemberManagementProps) {
+export default function MemberManagement({ projectId, creatorId, userRole }: MemberManagementProps) {
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [invitations, setInvitations] = useState<ProjectInvitation[]>([]);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('normal');
+  const [position, setPosition] = useState('');
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [editingCreatorPositionId, setEditingCreatorPositionId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { user } = useAuth();
@@ -61,7 +64,11 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
     setError(null);
     setSuccessMessage(null);
     try {
-      const result = await addProjectMember(projectId, { email, role });
+      const result = await addProjectMember(projectId, {
+        email,
+        role,
+        position: position.trim() || null,
+      });
       if (result.type === 'invited') {
         setInvitations(prev => [...prev, result.data]);
         setSuccessMessage(`Invitation sent to ${email}`);
@@ -71,6 +78,7 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
         setSuccessMessage(`${result.data?.name || email} added to the project`);
       }
       setEmail('');
+      setPosition('');
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
       setError(axiosError.response?.data?.message || 'Failed to add member');
@@ -92,17 +100,25 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
     }
   };
 
-  const handleUpdateRole = async (userId: number, newRole: string) => {
+  const handleUpdateMember = async (userId: number, updates: { role: string; position?: string | null }) => {
     setUpdatingId(userId);
     setError(null);
     try {
-      await updateProjectMemberRole(projectId, userId, newRole);
-      setMembers(members.map(m =>
-        m.id === userId ? { ...m, pivot: { ...(m as any).pivot, role: newRole } } : m
-      ));
+      await updateProjectMember(projectId, userId, updates);
+      setMembers(members.map(member => {
+        if (member.id !== userId) return member;
+
+        return {
+          ...member,
+          pivot: {
+            role: updates.role,
+            position: updates.position ?? null,
+          },
+        };
+      }));
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }>;
-      setError(axiosError.response?.data?.message || 'Failed to update role');
+      setError(axiosError.response?.data?.message || 'Failed to update member');
     } finally {
       setUpdatingId(null);
     }
@@ -152,11 +168,15 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
         )}
       </AnimatePresence>
 
-      {/* Active members */}
       <ul className="space-y-3 mb-6 sm:mb-8">
         {members.map(member => {
-          const mRole = (member as any).pivot?.role || 'Member';
-          const canManageThisMember = isAdmin && member.id !== user?.id && mRole !== 'creator';
+          const mRole = member.pivot?.role || 'Member';
+          const mPosition = member.pivot?.position ?? '';
+          const isCreatorMember = member.id === creatorId;
+          const canManageRole = isAdmin && member.id !== user?.id && mRole !== 'creator';
+          const canManagePosition = isAdmin;
+          const canEditCreatorPosition = canManagePosition && isCreatorMember;
+          const isPositionEditable = canManagePosition && (!isCreatorMember || editingCreatorPositionId === member.id);
 
           return (
             <li
@@ -174,13 +194,16 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
               </div>
 
               <div className="flex items-center gap-2 shrink-0 ml-auto">
-                {canManageThisMember ? (
+                {canManageRole ? (
                   <div className="relative">
                     <select
                       className="appearance-none bg-background border border-border-glow rounded-xl px-4 py-1.5 pr-8 text-[10px] font-black outline-none cursor-pointer hover:border-brand-primary/30 transition-colors"
                       value={mRole}
                       disabled={updatingId === member.id}
-                      onChange={(e) => handleUpdateRole(member.id, e.target.value)}
+                      onChange={(e) => handleUpdateMember(member.id, {
+                        role: e.target.value,
+                        position: mPosition || null,
+                      })}
                     >
                       <option value="normal">NORMAL</option>
                       <option value="admin">ADMIN</option>
@@ -195,7 +218,47 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
                   </span>
                 )}
 
-                {canManageThisMember && (
+                {canManagePosition ? (
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="text"
+                      placeholder="Position"
+                      className="bg-background border border-border-glow rounded-xl px-3 py-1.5 text-[10px] font-bold outline-none w-36"
+                      defaultValue={mPosition}
+                      readOnly={!isPositionEditable}
+                      disabled={updatingId === member.id || (isCreatorMember && editingCreatorPositionId !== member.id)}
+                      onBlur={(e) => {
+                        if (!isPositionEditable) return;
+                        const nextPosition = e.target.value.trim();
+                        if (nextPosition !== mPosition) {
+                          void handleUpdateMember(member.id, {
+                            role: mRole,
+                            position: nextPosition || null,
+                          });
+                        }
+                        if (isCreatorMember) {
+                          setEditingCreatorPositionId(null);
+                        }
+                      }}
+                    />
+                    {canEditCreatorPosition && editingCreatorPositionId !== member.id && (
+                      <button
+                        type="button"
+                        onClick={() => setEditingCreatorPositionId(member.id)}
+                        className="p-1.5 text-foreground/40 hover:text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-all"
+                        title="Edit creator position"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-[10px] px-2.5 py-1 rounded-lg font-bold uppercase tracking-wider bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
+                    {mPosition || 'NO POSITION'}
+                  </span>
+                )}
+
+                {canManageRole && (
                   <button
                     onClick={() => handleRemoveMember(member.id)}
                     className="p-2 text-red-500/40 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
@@ -210,7 +273,6 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
         })}
       </ul>
 
-      {/* Pending invitations */}
       {isAdmin && invitations.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 text-foreground/40 mb-4">
@@ -238,6 +300,11 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
                   <span className="text-[10px] px-2.5 py-1 rounded-lg font-bold uppercase tracking-wider bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
                     {inv.role}
                   </span>
+                  {inv.position && (
+                    <span className="text-[10px] px-2.5 py-1 rounded-lg font-bold uppercase tracking-wider bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
+                      {inv.position}
+                    </span>
+                  )}
                   <button
                     onClick={() => handleCancelInvitation(inv.id)}
                     className="p-1.5 text-foreground/30 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
@@ -252,7 +319,6 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
         </div>
       )}
 
-      {/* Add member form */}
       {isAdmin && (
         <form onSubmit={handleAddMember} className="space-y-6 pt-8 border-t border-border-glow/50">
           <div className="flex items-center gap-2 text-foreground/40 mb-4">
@@ -285,6 +351,14 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
                 </select>
                 <ShieldAlert size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/30 pointer-events-none" />
               </div>
+
+              <input
+                type="text"
+                placeholder="Position (optional)"
+                className="bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 text-xs font-bold outline-none min-w-[200px] flex-1"
+                value={position}
+                onChange={e => setPosition(e.target.value)}
+              />
 
               <GlassButton type="submit" disabled={adding} className="px-10">
                 {adding ? 'SENDING...' : 'ADD / INVITE'}

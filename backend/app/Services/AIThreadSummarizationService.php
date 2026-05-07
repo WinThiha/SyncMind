@@ -3,16 +3,11 @@
 namespace App\Services;
 
 use App\Models\Issue;
-use OpenAI\Client;
+use App\Services\AI\Contracts\ChatCompletionClient;
 
 class AIThreadSummarizationService
 {
-    private Client $client;
-
-    public function __construct()
-    {
-        $this->client = app('ai.client');
-    }
+    public function __construct(private readonly ChatCompletionClient $chatClient) {}
 
     /**
      * Aggregate comments and history into a single chronological timeline.
@@ -99,29 +94,25 @@ Respond ONLY with a valid JSON object matching this exact schema:
 }
 PROMPT;
 
-        $model = config('openai.model', 'gpt-4o-mini');
+        $model = config('openai.chat.model', config('openai.model', 'gpt-4o-mini'));
         $messages = [
             ['role' => 'system', 'content' => $systemPrompt],
             ['role' => 'user',   'content' => "Issue Summary: {$issue->summary}\n\nTimeline:\n{$timelineText}"],
         ];
 
         try {
-            $response = $this->client->chat()->create([
-                'model' => $model,
-                'messages' => $messages,
+            $raw = $this->chatClient->complete($messages, [
+                'model' => (string) $model,
                 'response_format' => ['type' => 'json_object'],
                 'temperature' => 0.3,
             ]);
         } catch (\Throwable $e) {
             // Fallback for models without json_object support
-            $response = $this->client->chat()->create([
-                'model' => $model,
-                'messages' => $messages,
+            $raw = $this->chatClient->complete($messages, [
+                'model' => (string) $model,
                 'temperature' => 0.3,
             ]);
         }
-
-        $raw = $response->choices[0]->message->content ?? '{}';
 
         return $this->parseJson($raw);
     }

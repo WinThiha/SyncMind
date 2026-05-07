@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Services\AI\Contracts\ChatCompletionClient;
+use App\Services\AI\OpenAIPhpChatCompletionClient;
+use App\Services\AI\OpenRouterChatCompletionClient;
 use App\Models\Comment;
 use App\Models\Issue;
 use App\Models\Milestone;
@@ -36,6 +39,15 @@ class AppServiceProvider extends ServiceProvider
                 ->withHttpHeader('HTTP-Referer', config('app.url'))
                 ->withHttpHeader('X-Title', config('app.name'))
                 ->make();
+        });
+
+        $this->app->singleton(ChatCompletionClient::class, function ($app) {
+            $provider = strtolower((string) config('openai.chat.provider', 'openrouter'));
+
+            return match ($provider) {
+                'openrouter' => new OpenRouterChatCompletionClient(),
+                default => new OpenAIPhpChatCompletionClient($app->make('ai.client')),
+            };
         });
     }
 

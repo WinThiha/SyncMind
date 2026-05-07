@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Models\Issue;
 use App\Models\Project;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use RuntimeException;
 
 class AIIssueSearchService
 {
@@ -13,22 +15,38 @@ class AIIssueSearchService
      */
     public function findSimilar(Project $project, string $text, int $limit = 5): Collection
     {
-        $baseUrl = rtrim(config('openai.vector.base_uri'), '/');
-        $model = config('openai.vector.model');
+        $baseUrl = rtrim((string) config('openai.embedding.base_uri'), '/');
+        $model = (string) config('openai.embedding.model');
+        $apiKey = (string) config('openai.embedding.api_key');
+        $dimensions = config('openai.embedding.dimensions');
 
-        $response = \Illuminate\Support\Facades\Http::withHeaders([
-            'x-goog-api-key' => config('openai.api_key'),
-        ])->post($baseUrl."/models/{$model}:embedContent", [
-            'model' => "models/{$model}",
-            'content' => [
-                'parts' => [
-                    ['text' => $text],
-                ],
-            ],
-            'outputDimensionality' => config('openai.vector.output_dimensionality'),
-        ])->throw()->json();
+        $payload = [
+            'model' => $model,
+            'input' => $text,
+        ];
 
-        $embedding = $response['embedding']['values'];
+        if (is_numeric($dimensions) && (int) $dimensions > 0) {
+            $payload['dimensions'] = (int) $dimensions;
+        }
+
+        $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
+            ->post("{$baseUrl}/embeddings", $payload)
+            ->throw()
+            ->json();
+
+        $embedding = Arr::get($response, 'data.0.embedding');
+        if (! is_array($embedding) || $embedding === []) {
+            throw new RuntimeException('Embedding response did not contain data.0.embedding.');
+        }
+
+        if (is_numeric($dimensions) && (int) $dimensions > 0 && count($embedding) !== (int) $dimensions) {
+            throw new RuntimeException(sprintf(
+                'Embedding dimensions mismatch. Expected %d, got %d.',
+                (int) $dimensions,
+                count($embedding)
+            ));
+        }
+
         $vectorString = '['.implode(',', $embedding).']';
 
         // Use cosine distance (<=>) for similarity search
@@ -41,10 +59,11 @@ class AIIssueSearchService
             ->orderBy('distance', 'asc')
             ->limit($limit)
             ->get()
-            ->map(function ($issue) {
+            ->map(function ($issue) use ($project) {
                 // Convert distance to similarity score (0 to 1)
                 // distance = 1 - similarity
                 $issue->similarity = round(1 - $issue->distance, 4);
+                $issue->key = $issue->key_number ? "{$project->key}-{$issue->key_number}" : null;
                 unset($issue->distance);
                 unset($issue->embedding);
 

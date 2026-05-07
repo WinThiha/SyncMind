@@ -3,16 +3,11 @@
 namespace App\Services;
 
 use App\Models\Project;
-use OpenAI\Client;
+use App\Services\AI\Contracts\ChatCompletionClient;
 
 class AIIssueSuggestionService
 {
-    private Client $client;
-
-    public function __construct()
-    {
-        $this->client = app('ai.client');
-    }
+    public function __construct(private readonly ChatCompletionClient $chatClient) {}
 
     /**
      * Suggest issue fields based on a summary and project context.
@@ -23,7 +18,6 @@ class AIIssueSuggestionService
      */
     public function suggest(Project $project, string $summary): array
     {
-        \Log::info('test');
         $issueTypes = $project->issue_types ?? ['Task', 'Bug', 'Request'];
         $priorities = ['low', 'normal', 'high'];
 
@@ -66,7 +60,7 @@ Respond ONLY with a valid JSON object matching this exact schema:
 }
 PROMPT;
 
-        $model = config('openai.model', 'gpt-4o-mini');
+        $model = config('openai.chat.model', config('openai.model', 'gpt-4o-mini'));
         $messages = [
             ['role' => 'system', 'content' => $systemPrompt],
             ['role' => 'user',   'content' => "Issue summary: {$summary}"],
@@ -74,23 +68,17 @@ PROMPT;
 
         // Try with structured JSON mode first; fall back for models that don't support it.
         try {
-            $response = $this->client->chat()->create([
-                'model' => $model,
-                'messages' => $messages,
+            $raw = $this->chatClient->complete($messages, [
+                'model' => (string) $model,
                 'response_format' => ['type' => 'json_object'],
                 'temperature' => 0.3,
             ]);
         } catch (\Throwable $e) {
-            \Log::debug($e->getMessage());
-            $response = $this->client->chat()->create([
-                'model' => $model,
-                'messages' => $messages,
+            $raw = $this->chatClient->complete($messages, [
+                'model' => (string) $model,
                 'temperature' => 0.3,
             ]);
         }
-        \Log::debug(collect($response)->toArray());
-
-        $raw = $response->choices[0]->message->content ?? '{}';
         $data = $this->parseJson($raw);
 
         return $this->sanitize($data, $issueTypes, $members);

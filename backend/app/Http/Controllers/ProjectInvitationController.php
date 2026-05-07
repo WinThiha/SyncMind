@@ -20,7 +20,7 @@ class ProjectInvitationController extends Controller
             ->whereNull('accepted_at')
             ->where('expires_at', '>', now())
             ->with('inviter:id,name')
-            ->get(['id', 'email', 'role', 'invited_by', 'expires_at', 'created_at']);
+            ->get(['id', 'email', 'role', 'position', 'invited_by', 'expires_at', 'created_at']);
 
         return response()->json(['data' => $invitations]);
     }
@@ -34,6 +34,7 @@ class ProjectInvitationController extends Controller
         $validated = $request->validate([
             'email' => 'required|email',
             'role' => 'required|in:admin,normal',
+            'position' => 'nullable|string|max:255',
         ]);
 
         $existing = ProjectInvitation::where('project_id', $project->id)
@@ -52,6 +53,7 @@ class ProjectInvitationController extends Controller
             'project_id' => $project->id,
             'email' => $validated['email'],
             'role' => $validated['role'],
+            'position' => $validated['position'] ?? null,
             'token' => bin2hex(random_bytes(32)),
             'invited_by' => $request->user()->id,
             'expires_at' => now()->addDays(7),
