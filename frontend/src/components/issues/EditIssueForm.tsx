@@ -54,7 +54,7 @@ function SelectField({
         name={name}
         value={value}
         onChange={onChange}
-        className={`w-full appearance-none bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 pr-10 outline-none focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30 transition-all font-semibold text-sm cursor-pointer ${className}`}
+        className={`w-full appearance-none bg-background text-foreground border border-border-glow rounded-xl px-4 py-3 pr-10 outline-none focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30 transition-all font-semibold text-sm cursor-pointer ${className}`}
       >
         {children}
       </select>
@@ -257,27 +257,27 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
                 <FieldLabel icon={Layers}>{t('issues.create.type')}</FieldLabel>
                 <SelectField name="issue_type" value={formData.issue_type} onChange={handleChange}>
                   {project?.issue_types?.map((type: string) => (
-                    <option key={type} value={type}>{type}</option>
-                  )) ?? <option value="Task">{t('issues.create.fallbackTask')}</option>}
+                    <option key={type} value={type} className="bg-background text-foreground">{type}</option>
+                  )) ?? <option value="Task" className="bg-background text-foreground">{t('issues.create.fallbackTask')}</option>}
                 </SelectField>
               </div>
 
               <div>
                 <FieldLabel icon={AlertCircle}>{t('issues.create.priority')}</FieldLabel>
                 <SelectField name="priority" value={formData.priority} onChange={handleChange}>
-                  <option value="low">{t('issues.search.priorityLow')}</option>
-                  <option value="normal">{t('issues.search.priorityNormal')}</option>
-                  <option value="high">{t('issues.search.priorityHigh')}</option>
+                  <option value="low" className="bg-background text-foreground">{t('issues.search.priorityLow')}</option>
+                  <option value="normal" className="bg-background text-foreground">{t('issues.search.priorityNormal')}</option>
+                  <option value="high" className="bg-background text-foreground">{t('issues.search.priorityHigh')}</option>
                 </SelectField>
               </div>
 
               <div>
                 <FieldLabel icon={CheckCircle2}>{t('issues.edit.status')}</FieldLabel>
                 <SelectField name="status" value={formData.status} onChange={handleChange}>
-                  <option value="open">{t('issues.search.statusOpen')}</option>
-                  <option value="in_progress">{t('issues.search.statusInProgress')}</option>
-                  <option value="resolved">{t('issues.search.statusResolved')}</option>
-                  <option value="closed">{t('issues.search.statusClosed')}</option>
+                  <option value="open" className="bg-background text-foreground">{t('issues.search.statusOpen')}</option>
+                  <option value="in_progress" className="bg-background text-foreground">{t('issues.search.statusInProgress')}</option>
+                  <option value="resolved" className="bg-background text-foreground">{t('issues.search.statusResolved')}</option>
+                  <option value="closed" className="bg-background text-foreground">{t('issues.search.statusClosed')}</option>
                 </SelectField>
               </div>
             </div>
@@ -301,11 +301,11 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
               <div>
                 <FieldLabel icon={Flag}>{t('issues.create.milestone')}</FieldLabel>
                 <SelectField name="milestone_id" value={formData.milestone_id} onChange={handleChange}>
-                  <option value="">{t('issues.create.noMilestone')}</option>
+                  <option value="" className="bg-background text-foreground">{t('issues.create.noMilestone')}</option>
                   {milestones
                     .filter((m) => m.status !== 'closed' || formData.milestone_id === m.id.toString())
                     .map((m) => (
-                      <option key={m.id} value={m.id}>
+                      <option key={m.id} value={m.id} className="bg-background text-foreground">
                         {m.name}{m.status === 'closed' ? ' (closed)' : ''}
                       </option>
                     ))}
@@ -326,9 +326,9 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
               <div>
                 <FieldLabel icon={User}>{t('issues.create.assignee')}</FieldLabel>
                 <SelectField name="assignee_id" value={formData.assignee_id} onChange={handleChange}>
-                  <option value="">{t('issues.create.unassigned')}</option>
+                  <option value="" className="bg-background text-foreground">{t('issues.create.unassigned')}</option>
                   {members.map((m) => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
+                    <option key={m.id} value={m.id} className="bg-background text-foreground">{m.name}</option>
                   ))}
                 </SelectField>
               </div>

@@ -292,21 +292,21 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <label className="text-[10px] font-bold text-foreground/40 uppercase">{t('issues.edit.status')}</label>
-                          <select value={quickData.status} onChange={(e) => setQuickData({...quickData, status: e.target.value})} className="w-full bg-foreground/5 border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold text-brand-primary outline-none">
-                            <option value="open">{t('issues.search.statusOpen')}</option><option value="in_progress">{t('issues.search.statusInProgress')}</option><option value="resolved">{t('issues.search.statusResolved')}</option><option value="closed">{t('issues.search.statusClosed')}</option>
+                          <select value={quickData.status} onChange={(e) => setQuickData({...quickData, status: e.target.value})} className="w-full bg-background text-brand-primary border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold outline-none">
+                            <option value="open" className="bg-background text-foreground">{t('issues.search.statusOpen')}</option><option value="in_progress" className="bg-background text-foreground">{t('issues.search.statusInProgress')}</option><option value="resolved" className="bg-background text-foreground">{t('issues.search.statusResolved')}</option><option value="closed" className="bg-background text-foreground">{t('issues.search.statusClosed')}</option>
                           </select>
                         </div>
                         <div className="space-y-1">
                           <label className="text-[10px] font-bold text-foreground/40 uppercase">{t('issues.create.priority')}</label>
-                          <select value={quickData.priority} onChange={(e) => setQuickData({...quickData, priority: e.target.value})} className="w-full bg-foreground/5 border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold text-foreground/60 outline-none">
-                            <option value="low">{t('issues.search.priorityLow')}</option><option value="normal">{t('issues.search.priorityNormal')}</option><option value="high">{t('issues.search.priorityHigh')}</option>
+                          <select value={quickData.priority} onChange={(e) => setQuickData({...quickData, priority: e.target.value})} className="w-full bg-background text-foreground border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold outline-none">
+                            <option value="low" className="bg-background text-foreground">{t('issues.search.priorityLow')}</option><option value="normal" className="bg-background text-foreground">{t('issues.search.priorityNormal')}</option><option value="high" className="bg-background text-foreground">{t('issues.search.priorityHigh')}</option>
                           </select>
                         </div>
                       </div>
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-foreground/40 uppercase">{t('issues.create.assignee')}</label>
-                        <select value={quickData.assignee_id} onChange={(e) => setQuickData({...quickData, assignee_id: e.target.value})} className="w-full bg-foreground/5 border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold text-foreground/60 outline-none">
-                          <option value="">{t('issues.create.unassigned')}</option>{members.map(m => <option key={m.id} value={m.id}>{m.name.toUpperCase()}</option>)}
+                        <select value={quickData.assignee_id} onChange={(e) => setQuickData({...quickData, assignee_id: e.target.value})} className="w-full bg-background text-foreground border border-border-glow rounded-lg px-2 py-1.5 text-xs font-bold outline-none">
+                          <option value="" className="bg-background text-foreground">{t('issues.create.unassigned')}</option>{members.map(m => <option key={m.id} value={m.id} className="bg-background text-foreground">{m.name.toUpperCase()}</option>)}
                         </select>
                       </div>
                     </div>

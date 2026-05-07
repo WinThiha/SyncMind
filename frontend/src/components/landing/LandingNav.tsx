@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useLocale } from '@/context/LocaleContext';
 import Link from 'next/link';
-import { BrainCircuit, LayoutDashboard, LogIn, UserPlus, Menu, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { BrainCircuit, LayoutDashboard, LogIn, Menu, UserPlus, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { LandingButtonLink } from './LandingButtonLink';
 import { ToolbarPreferences } from '@/components/toolbar/ToolbarPreferences';
 
@@ -39,19 +39,6 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
             </div>
           </Link>
 
-          {/* Centre anchor links — desktop only */}
-          <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
-            {anchorLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="rounded-full px-4 py-2 text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-foreground/5 transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
           {/* Right actions */}
           <div className="flex items-center gap-2 shrink-0">
             <div className="hidden sm:block">
@@ -70,7 +57,7 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
               </>
             ) : (
               <>
-                <LandingButtonLink href="/login" variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <LandingButtonLink href="/login" variant="ghost" size="sm">
                   <LogIn size={16} />
                   {t('landing.nav.signIn')}
                 </LandingButtonLink>

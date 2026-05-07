@@ -282,7 +282,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               value={formData.issue_type}
               onChange={handleChange}
               disabled={aiLoading}
-              className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
+              className={`w-full bg-background text-foreground border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
             >
               {project?.issue_types?.map((type: string) => (
                 <option key={type} value={type} className="bg-background text-foreground">{type}</option>
@@ -306,7 +306,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               value={formData.priority}
               onChange={handleChange}
               disabled={aiLoading}
-              className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
+              className={`w-full bg-background text-foreground border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
             >
               <option value="low" className="bg-background text-foreground">{t('issues.create.priorityLow')}</option>
               <option value="normal" className="bg-background text-foreground">{t('issues.create.priorityNormal')}</option>
@@ -344,7 +344,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               value={formData.assignee_id}
               onChange={handleChange}
               disabled={aiLoading}
-              className={`w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
+              className={`w-full bg-background text-foreground border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all font-bold appearance-none cursor-pointer ${shimmer}`}
             >
               <option value="" className="bg-background text-foreground">{t('issues.create.unassigned')}</option>
               {members.map((member) => (
@@ -404,11 +404,11 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
                 name="milestone_id"
                 value={formData.milestone_id}
                 onChange={(e) => setFormData(prev => ({ ...prev, milestone_id: e.target.value }))}
-                className="w-full px-4 py-3 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+                className="w-full px-4 py-3 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors appearance-none"
               >
-                <option value="">{t('issues.create.noMilestone')}</option>
+                <option value="" className="bg-background text-foreground">{t('issues.create.noMilestone')}</option>
                 {milestones.filter(m => m.status !== 'closed').map((m) => (
-                  <option key={m.id} value={m.id}>{m.name}</option>
+                  <option key={m.id} value={m.id} className="bg-background text-foreground">{m.name}</option>
                 ))}
               </select>
             </div>

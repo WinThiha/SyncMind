@@ -84,7 +84,7 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
             required
             value={form.name}
             onChange={(e) => set('name', e.target.value)}
-            className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+            className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
           />
         </div>
 
@@ -94,7 +94,7 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
             rows={2}
-            className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors resize-none"
+            className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors resize-none"
           />
         </div>
 
@@ -105,7 +105,7 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
               type="date"
               value={form.start_date}
               onChange={(e) => set('start_date', e.target.value)}
-              className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+              className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
             />
           </div>
           <div>
@@ -115,7 +115,7 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
               value={form.due_date}
               min={form.start_date || undefined}
               onChange={(e) => set('due_date', e.target.value)}
-              className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+              className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
             />
           </div>
         </div>
@@ -125,11 +125,11 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
           <select
             value={form.status}
             onChange={(e) => set('status', e.target.value)}
-            className="mt-1 w-full px-4 py-2.5 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+            className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors appearance-none"
           >
-            <option value="open">{t('milestones.status.open')}</option>
-            <option value="in_progress">{t('milestones.status.inProgress')}</option>
-            <option value="closed">{t('milestones.status.closed')}</option>
+            <option value="open" className="bg-background text-foreground">{t('milestones.status.open')}</option>
+            <option value="in_progress" className="bg-background text-foreground">{t('milestones.status.inProgress')}</option>
+            <option value="closed" className="bg-background text-foreground">{t('milestones.status.closed')}</option>
           </select>
         </div>
 
