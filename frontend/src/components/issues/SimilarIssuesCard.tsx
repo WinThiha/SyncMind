@@ -38,7 +38,7 @@ export function SimilarIssuesCard({ issues, projectKey = 'PROJ' }: SimilarIssues
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-foreground/60 uppercase tracking-tight">
-                      {projectKey}-{issue.key_number}
+                      {issue.key ?? `${projectKey}-${issue.key_number}`}
                     </span>
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-tight ${
                       issue.similarity > 0.9 ? 'bg-amber-500/20 text-amber-500' : 'bg-white/10 text-foreground/40'
@@ -51,7 +51,7 @@ export function SimilarIssuesCard({ issues, projectKey = 'PROJ' }: SimilarIssues
                   </p>
                 </div>
                 <Link
-                  href={`/projects/${issue.project_id}/issues/${projectKey}-${issue.key_number}`}
+                  href={`/projects/${issue.project_id}/issues/${issue.key ?? `${projectKey}-${issue.key_number}`}`}
                   target="_blank"
                   className="shrink-0 p-1.5 rounded-lg bg-white/5 text-foreground/40 hover:bg-white/10 hover:text-foreground transition-all"
                 >

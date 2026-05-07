@@ -48,6 +48,10 @@ export interface ProjectMember {
   id: number;
   name: string;
   email: string;
+  pivot?: {
+    role: string;
+    position?: string | null;
+  };
 }
 
 export const getProjectMembers = async (projectId: number | string): Promise<ProjectMember[]> => {
@@ -55,7 +59,10 @@ export const getProjectMembers = async (projectId: number | string): Promise<Pro
   return response.data.data;
 };
 
-export const addProjectMember = async (projectId: number | string, data: { email: string; role: string }) => {
+export const addProjectMember = async (
+  projectId: number | string,
+  data: { email: string; role: string; position?: string | null }
+) => {
   const response = await api.post(`/api/projects/${projectId}/members`, data);
   return response.data;
 };
@@ -65,8 +72,12 @@ export const removeProjectMember = async (projectId: number | string, userId: nu
   return response.data;
 };
 
-export const updateProjectMemberRole = async (projectId: number | string, userId: number | string, role: string) => {
-  const response = await api.put(`/api/projects/${projectId}/members/${userId}`, { role });
+export const updateProjectMember = async (
+  projectId: number | string,
+  userId: number | string,
+  data: { role: string; position?: string | null }
+) => {
+  const response = await api.put(`/api/projects/${projectId}/members/${userId}`, data);
   return response.data;
 };
 
@@ -74,6 +85,7 @@ export interface ProjectInvitation {
   id: number;
   email: string;
   role: string;
+  position?: string | null;
   expires_at: string;
   created_at: string;
   inviter?: { id: number; name: string };
@@ -84,7 +96,10 @@ export const getProjectInvitations = async (projectId: number | string): Promise
   return response.data.data;
 };
 
-export const createProjectInvitation = async (projectId: number | string, data: { email: string; role: string }) => {
+export const createProjectInvitation = async (
+  projectId: number | string,
+  data: { email: string; role: string; position?: string | null }
+) => {
   const response = await api.post(`/api/projects/${projectId}/members`, data);
   return response.data;
 };

@@ -11,6 +11,7 @@ class ProjectInvitation extends Model
         'project_id',
         'email',
         'role',
+        'position',
         'token',
         'invited_by',
         'accepted_at',

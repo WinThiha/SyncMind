@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Project;
 use App\Models\User;
+use App\Services\AIIssueSearchService;
 use App\Services\AIIssueSuggestionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Tests\TestCase;
 
 class AIIssueControllerTest extends TestCase
@@ -197,5 +199,75 @@ class AIIssueControllerTest extends TestCase
             ])
             ->assertStatus(200)
             ->assertJsonCount(3, 'data.assignee_suggestions');
+    }
+
+    public function test_member_can_access_similar_issues_and_receives_key_field(): void
+    {
+        $user = User::factory()->create();
+        $project = $this->makeProject($user);
+
+        $this->mock(AIIssueSearchService::class, function ($mock) use ($project) {
+            $mock->shouldReceive('findSimilar')->once()->andReturn(new Collection([
+                (object) [
+                    'id' => 101,
+                    'project_id' => $project->id,
+                    'key_number' => 7,
+                    'key' => "{$project->key}-7",
+                    'summary' => 'Fix login regression',
+                    'status' => 'open',
+                    'priority' => 'high',
+                    'similarity' => 0.91,
+                ],
+            ]));
+        });
+
+        $this->actingAs($user)
+            ->getJson("/api/projects/{$project->id}/ai/similar-issues?text=login bug")
+            ->assertStatus(200)
+            ->assertJsonPath('data.0.key', "{$project->key}-7")
+            ->assertJsonPath('data.0.key_number', 7);
+    }
+
+    public function test_similar_issues_response_includes_non_empty_key_for_each_result(): void
+    {
+        $user = User::factory()->create();
+        $project = $this->makeProject($user);
+
+        $this->mock(AIIssueSearchService::class, function ($mock) use ($project) {
+            $mock->shouldReceive('findSimilar')->once()->andReturn(new Collection([
+                (object) [
+                    'id' => 11,
+                    'project_id' => $project->id,
+                    'key_number' => 1,
+                    'key' => "{$project->key}-1",
+                    'summary' => 'Issue one',
+                    'status' => 'open',
+                    'priority' => 'normal',
+                    'similarity' => 0.77,
+                ],
+                (object) [
+                    'id' => 12,
+                    'project_id' => $project->id,
+                    'key_number' => 2,
+                    'key' => "{$project->key}-2",
+                    'summary' => 'Issue two',
+                    'status' => 'in_progress',
+                    'priority' => 'low',
+                    'similarity' => 0.73,
+                ],
+            ]));
+        });
+
+        $response = $this->actingAs($user)
+            ->getJson("/api/projects/{$project->id}/ai/similar-issues?text=duplicate search")
+            ->assertStatus(200)
+            ->json('data');
+
+        $this->assertIsArray($response);
+        foreach ($response as $row) {
+            $this->assertArrayHasKey('key', $row);
+            $this->assertNotNull($row['key']);
+            $this->assertNotSame('', trim((string) $row['key']));
+        }
     }
 }

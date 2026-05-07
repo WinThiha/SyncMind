@@ -4,6 +4,7 @@ export interface InvitationInfo {
   project_id: number;
   project_name: string;
   role: string;
+  position?: string | null;
   inviter_name: string | null;
   expires_at: string;
 }

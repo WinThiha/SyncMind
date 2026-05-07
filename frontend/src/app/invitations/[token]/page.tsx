@@ -141,6 +141,14 @@ export default function AcceptInvitePage({ params }: { params: Promise<{ token: 
                   {invite.role}
                 </span>
               </div>
+              {invite.position && (
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-foreground/40 uppercase tracking-wider">Position</span>
+                  <span className="text-[10px] px-3 py-1 rounded-lg font-bold uppercase tracking-wider bg-foreground/10 text-foreground/60 border border-border-glow/30">
+                    {invite.position}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-foreground/40 uppercase tracking-wider">Expires</span>
                 <span className="text-xs font-medium text-foreground/50 flex items-center gap-1.5">

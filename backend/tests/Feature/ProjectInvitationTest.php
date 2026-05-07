@@ -32,6 +32,7 @@ class ProjectInvitationTest extends TestCase
         $response = $this->actingAs($admin)->postJson("/api/projects/{$project->id}/members", [
             'email' => 'newuser@example.com',
             'role' => 'normal',
+            'position' => 'Designer',
         ]);
 
         $response->assertStatus(200)
@@ -41,6 +42,7 @@ class ProjectInvitationTest extends TestCase
             'project_id' => $project->id,
             'email' => 'newuser@example.com',
             'role' => 'normal',
+            'position' => 'Designer',
         ]);
 
         Mail::assertQueued(ProjectInvitationMail::class, function ($mail) {
@@ -57,6 +59,7 @@ class ProjectInvitationTest extends TestCase
         $response = $this->actingAs($admin)->postJson("/api/projects/{$project->id}/members", [
             'email' => $existing->email,
             'role' => 'normal',
+            'position' => 'Developer',
         ]);
 
         $response->assertStatus(201)
@@ -65,6 +68,7 @@ class ProjectInvitationTest extends TestCase
         $this->assertDatabaseHas('project_members', [
             'project_id' => $project->id,
             'user_id' => $existing->id,
+            'position' => 'Developer',
         ]);
 
         $this->assertDatabaseMissing('project_invitations', [
@@ -162,6 +166,7 @@ class ProjectInvitationTest extends TestCase
             'project_id' => $project->id,
             'email' => 'guest@example.com',
             'role' => 'normal',
+            'position' => 'Product Manager',
             'token' => 'validtoken1234',
             'invited_by' => $admin->id,
             'expires_at' => now()->addDays(7),
@@ -171,7 +176,8 @@ class ProjectInvitationTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonPath('data.project_name', $project->name)
-            ->assertJsonPath('data.role', 'normal');
+            ->assertJsonPath('data.role', 'normal')
+            ->assertJsonPath('data.position', 'Product Manager');
     }
 
     public function test_show_returns_410_for_expired_token()
@@ -201,6 +207,7 @@ class ProjectInvitationTest extends TestCase
             'project_id' => $project->id,
             'email' => $invitee->email,
             'role' => 'normal',
+            'position' => 'QA Engineer',
             'token' => 'accepttoken9999',
             'invited_by' => $admin->id,
             'expires_at' => now()->addDays(7),
@@ -214,6 +221,7 @@ class ProjectInvitationTest extends TestCase
         $this->assertDatabaseHas('project_members', [
             'project_id' => $project->id,
             'user_id' => $invitee->id,
+            'position' => 'QA Engineer',
         ]);
 
         $this->assertDatabaseHas('project_invitations', [

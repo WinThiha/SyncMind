@@ -5,7 +5,9 @@ namespace App\Jobs;
 use App\Models\Issue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 class GenerateIssueEmbeddingJob implements ShouldQueue
 {
@@ -27,22 +29,37 @@ class GenerateIssueEmbeddingJob implements ShouldQueue
         try {
             $input = "Summary: {$this->issue->summary}\nDescription: {$this->issue->description}";
 
-            $baseUrl = rtrim(config('openai.vector.base_uri'), '/');
-            $model = config('openai.vector.model');
+            $baseUrl = rtrim((string) config('openai.embedding.base_uri'), '/');
+            $model = (string) config('openai.embedding.model');
+            $apiKey = (string) config('openai.embedding.api_key');
+            $dimensions = config('openai.embedding.dimensions');
 
-            $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'x-goog-api-key' => config('openai.api_key'),
-            ])->post($baseUrl."/models/{$model}:embedContent", [
-                'model' => "models/{$model}",
-                'content' => [
-                    'parts' => [
-                        ['text' => $input],
-                    ],
-                ],
-                'outputDimensionality' => config('openai.vector.output_dimensionality'),
-            ])->throw()->json();
+            $payload = [
+                'model' => $model,
+                'input' => $input,
+            ];
 
-            $embedding = $response['embedding']['values'];
+            if (is_numeric($dimensions) && (int) $dimensions > 0) {
+                $payload['dimensions'] = (int) $dimensions;
+            }
+
+            $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
+                ->post("{$baseUrl}/embeddings", $payload)
+                ->throw()
+                ->json();
+
+            $embedding = Arr::get($response, 'data.0.embedding');
+            if (! is_array($embedding) || $embedding === []) {
+                throw new RuntimeException('Embedding response did not contain data.0.embedding.');
+            }
+
+            if (is_numeric($dimensions) && (int) $dimensions > 0 && count($embedding) !== (int) $dimensions) {
+                throw new RuntimeException(sprintf(
+                    'Embedding dimensions mismatch. Expected %d, got %d.',
+                    (int) $dimensions,
+                    count($embedding)
+                ));
+            }
 
             // Format for pgvector: [0.1, 0.2, ...]
             $vectorString = '['.implode(',', $embedding).']';

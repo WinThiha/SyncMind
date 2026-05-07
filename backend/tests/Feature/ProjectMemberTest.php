@@ -22,6 +22,7 @@ class ProjectMemberTest extends TestCase
         $response = $this->actingAs($creator)->postJson("/api/projects/{$project->id}/members", [
             'email' => $userToAdd->email,
             'role' => 'normal',
+            'position' => 'Frontend Engineer',
         ]);
 
         $response->assertStatus(201);
@@ -29,6 +30,7 @@ class ProjectMemberTest extends TestCase
             'project_id' => $project->id,
             'user_id' => $userToAdd->id,
             'role' => 'normal',
+            'position' => 'Frontend Engineer',
         ]);
     }
 
@@ -61,6 +63,7 @@ class ProjectMemberTest extends TestCase
 
         $response = $this->actingAs($creator)->putJson("/api/projects/{$project->id}/members/{$member->id}", [
             'role' => 'admin',
+            'position' => 'Team Lead',
         ]);
 
         $response->assertStatus(200);
@@ -68,7 +71,23 @@ class ProjectMemberTest extends TestCase
             'project_id' => $project->id,
             'user_id' => $member->id,
             'role' => 'admin',
+            'position' => 'Team Lead',
         ]);
+    }
+
+    public function test_member_list_includes_membership_position()
+    {
+        $creator = User::factory()->create();
+        $member = User::factory()->create();
+
+        $project = Project::factory()->create(['creator_id' => $creator->id]);
+        $project->members()->attach($creator->id, ['role' => 'admin', 'position' => 'Engineering Manager']);
+        $project->members()->attach($member->id, ['role' => 'normal', 'position' => 'QA Engineer']);
+
+        $response = $this->actingAs($creator)->getJson("/api/projects/{$project->id}/members");
+
+        $response->assertStatus(200)
+            ->assertJsonFragment(['position' => 'QA Engineer']);
     }
 
     public function test_admin_can_remove_member()

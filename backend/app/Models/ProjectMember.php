@@ -14,5 +14,6 @@ class ProjectMember extends Pivot
         'project_id',
         'user_id',
         'role',
+        'position',
     ];
 }
