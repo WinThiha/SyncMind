@@ -5,6 +5,9 @@ import { AuthProvider } from "@/context/AuthContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { ThemePreferenceSync } from "@/components/theme/ThemePreferenceSync";
+import { LocaleProvider } from "@/context/LocaleContext";
+import { LocaleHtmlLang } from "@/components/locale/LocaleHtmlLang";
+import { LocalePreferenceSync } from "@/components/locale/LocalePreferenceSync";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,12 +42,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} font-sans antialiased`}
       >
         <ThemeProvider>
-          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-            <AuthProvider>
-              <ThemePreferenceSync />
-              {children}
-            </AuthProvider>
-          </GoogleOAuthProvider>
+          <LocaleProvider>
+            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+              <AuthProvider>
+                <ThemePreferenceSync />
+                <LocalePreferenceSync />
+                <LocaleHtmlLang />
+                {children}
+              </AuthProvider>
+            </GoogleOAuthProvider>
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>
