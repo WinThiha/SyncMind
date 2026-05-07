@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Comment;
+use App\Support\LocaleResolver;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -18,13 +19,17 @@ class IssueCommentNotification extends Mailable implements ShouldQueue
 
     public $issue;
 
+    public string $selectedLocale;
+
     /**
      * Create a new message instance.
      */
-    public function __construct(Comment $comment)
+    public function __construct(Comment $comment, ?string $locale = null)
     {
         $this->comment = $comment;
         $this->issue = $comment->issue;
+        $this->selectedLocale = $locale ?: LocaleResolver::DEFAULT_LOCALE;
+        $this->locale($this->selectedLocale);
     }
 
     /**
@@ -33,7 +38,7 @@ class IssueCommentNotification extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "[{$this->issue->full_key}] New Comment on: {$this->issue->summary}",
+            subject: trans('mail.issue_comment.subject', ['key' => $this->issue->full_key, 'summary' => $this->issue->summary], $this->selectedLocale),
         );
     }
 

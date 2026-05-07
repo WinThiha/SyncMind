@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\LocalizedResetPassword;
+use App\Notifications\LocalizedVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -75,5 +77,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Project::class, 'project_members')
             ->withPivot('role', 'position')
             ->withTimestamps();
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new LocalizedVerifyEmail());
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new LocalizedResetPassword($token));
     }
 }

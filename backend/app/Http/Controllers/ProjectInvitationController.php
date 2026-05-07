@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\ProjectInvitationMail;
 use App\Models\Project;
 use App\Models\ProjectInvitation;
+use App\Support\LocaleResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -61,7 +62,8 @@ class ProjectInvitationController extends Controller
 
         $invitation->load('inviter:id,name', 'project:id,name');
 
-        Mail::to($invitation->email)->queue(new ProjectInvitationMail($invitation));
+        $locale = app(LocaleResolver::class)->resolveForUser($request->user());
+        Mail::to($invitation->email)->queue(new ProjectInvitationMail($invitation, $locale));
 
         return response()->json([
             'message' => 'Invitation sent successfully.',
