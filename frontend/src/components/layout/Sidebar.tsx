@@ -117,7 +117,9 @@ export const Sidebar: React.FC = () => {
               >
                 <motion.div
                   whileTap={{ scale: 0.97 }}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors ${
+                  className={`flex items-center px-3 py-2.5 rounded-xl transition-colors ${
+                    collapsed ? 'justify-between lg:justify-center' : 'justify-between'
+                  } ${
                     isActive
                       ? 'bg-brand-primary/10 text-brand-primary'
                       : 'text-foreground/55 hover:bg-foreground/5 hover:text-foreground'
