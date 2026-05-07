@@ -588,10 +588,10 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-6 items-start">
-        {/* Sidebar nav */}
+      <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-4 lg:gap-6 items-start">
+        {/* Section nav: horizontal scrollable on mobile, vertical on lg+ */}
         <GlassCard className="p-2">
-          <nav className="space-y-0.5">
+          <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible">
             {sections.map((section) => {
               const Icon = sectionIcons[section];
               const active = section === activeSection;
@@ -599,7 +599,7 @@ export default function SettingsPage() {
                 <button
                   key={section}
                   onClick={() => { setActiveSection(section); clearFeedback(); setFieldErrors({}); }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  className={`shrink-0 flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors lg:w-full ${
                     active
                       ? 'bg-brand-primary/10 text-brand-primary'
                       : 'text-foreground/55 hover:bg-foreground/5 hover:text-foreground'
@@ -608,7 +608,7 @@ export default function SettingsPage() {
                   <Icon size={17} className="shrink-0" />
                   {section}
                   {active && (
-                    <ChevronRight size={14} className="ml-auto text-brand-primary/60" />
+                    <ChevronRight size={14} className="ml-auto text-brand-primary/60 hidden lg:block" />
                   )}
                 </button>
               );
@@ -617,7 +617,7 @@ export default function SettingsPage() {
         </GlassCard>
 
         {/* Content */}
-        <GlassCard className="p-8">
+        <GlassCard className="p-5 sm:p-8">
           {/* Section header */}
           <div className="flex items-center gap-3 mb-7 pb-6 border-b border-border-glow">
             <div className="w-9 h-9 bg-brand-primary/10 rounded-xl flex items-center justify-center">

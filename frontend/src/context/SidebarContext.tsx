@@ -6,6 +6,8 @@ interface SidebarContextType {
   collapsed: boolean;
   toggle: () => void;
   setCollapsed: (collapsed: boolean) => void;
+  mobileOpen: boolean;
+  setMobileOpen: (v: boolean) => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -25,12 +27,12 @@ function getInitialCollapsed(): boolean {
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(getInitialCollapsed);
-  
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   const persistCollapsed = useCallback((next: boolean) => {
     try {
       localStorage.setItem(STORAGE_KEY, String(next));
-    } catch {
-    }
+    } catch {}
   }, []);
 
   const toggle = useCallback(() => {
@@ -47,7 +49,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   }, [persistCollapsed]);
 
   return (
-    <SidebarContext.Provider value={{ collapsed, toggle, setCollapsed: setCollapsedState }}>
+    <SidebarContext.Provider value={{ collapsed, toggle, setCollapsed: setCollapsedState, mobileOpen, setMobileOpen }}>
       {children}
     </SidebarContext.Provider>
   );

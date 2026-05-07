@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Sun, Moon, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { Search, Sun, Moon, Settings, LogOut, ChevronDown, Menu } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export const Topbar: React.FC = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
-  const { collapsed } = useSidebar();
+  const { collapsed, mobileOpen, setMobileOpen } = useSidebar();
   const { modKey, isMac } = useModifierKey();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -22,7 +22,6 @@ export const Topbar: React.FC = () => {
     ? user.name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
     : 'U';
 
-  // Close dropdown on outside click or Esc
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -33,24 +32,17 @@ export const Topbar: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Global keyboard shortcuts
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const mod = isMac ? e.metaKey : e.ctrlKey;
-
-    // Ctrl/⌘+K → focus search
     if (mod && e.key === 'k') {
       e.preventDefault();
       searchRef.current?.focus();
       searchRef.current?.select();
       return;
     }
-
-    // Esc → close dropdown / blur search
     if (e.key === 'Escape') {
       setDropdownOpen(false);
-      if (document.activeElement === searchRef.current) {
-        searchRef.current?.blur();
-      }
+      if (document.activeElement === searchRef.current) searchRef.current?.blur();
     }
   }, [isMac]);
 
@@ -61,27 +53,36 @@ export const Topbar: React.FC = () => {
 
   return (
     <header
-      className={`fixed top-0 right-0 h-16 z-40 flex items-center justify-between px-6 bg-background/95 backdrop-blur-sm border-b border-border-glow transition-[left] duration-200 ease ${
-        collapsed ? 'left-20' : 'left-64'
+      className={`fixed top-0 right-0 h-16 z-40 flex items-center gap-3 px-4 sm:px-5 bg-background/95 backdrop-blur-sm border-b border-border-glow transition-[left] duration-200 ease ${
+        collapsed ? 'left-0 lg:left-20' : 'left-0 lg:left-64'
       }`}
     >
+      {/* Mobile hamburger — opens sidebar overlay */}
+      <button
+        onClick={() => setMobileOpen(!mobileOpen)}
+        aria-label="Open navigation"
+        className="lg:hidden shrink-0 p-2 rounded-lg hover:bg-foreground/8 transition-colors text-foreground/50 hover:text-foreground"
+      >
+        <Menu size={18} />
+      </button>
+
       {/* Search */}
-      <div className="flex items-center gap-3 bg-foreground/5 border border-border-glow px-4 py-2 rounded-xl w-80 max-w-full focus-within:ring-4 focus-within:ring-brand-primary/10 focus-within:border-brand-primary/30 transition-all">
+      <div className="flex items-center gap-2 bg-foreground/5 border border-border-glow px-3 py-2 rounded-xl flex-1 max-w-xs sm:max-w-sm lg:max-w-md focus-within:ring-4 focus-within:ring-brand-primary/10 focus-within:border-brand-primary/30 transition-all">
         <Search size={15} className="text-foreground/35 shrink-0" />
         <input
           ref={searchRef}
           id="topbar-search"
           type="text"
-          placeholder="Search projects, issues..."
-          className="bg-transparent border-none outline-none text-sm w-full placeholder:text-foreground/35 font-medium"
+          placeholder="Search..."
+          className="bg-transparent border-none outline-none text-sm w-full min-w-0 placeholder:text-foreground/35 font-medium"
         />
-        <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 bg-foreground/8 border border-foreground/10 rounded text-[10px] font-mono text-foreground/35 shrink-0 whitespace-nowrap">
+        <kbd className="hidden md:flex items-center gap-0.5 px-1.5 py-0.5 bg-foreground/8 border border-foreground/10 rounded text-[10px] font-mono text-foreground/35 shrink-0 whitespace-nowrap">
           {modKey} K
         </kbd>
       </div>
 
       {/* Right actions */}
-      <div className="flex items-center gap-1">
+      <div className="ml-auto flex items-center gap-1 shrink-0">
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
@@ -91,35 +92,31 @@ export const Topbar: React.FC = () => {
           {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
-        {/* Divider */}
-        <div className="w-px h-6 bg-border-glow mx-2" />
+        <div className="w-px h-6 bg-border-glow mx-1" />
 
         {/* Avatar + Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen((v) => !v)}
-            className="flex items-center gap-2.5 pl-1 pr-2 py-1.5 rounded-xl hover:bg-foreground/5 transition-colors"
+            className="flex items-center gap-2 pl-1 pr-2 py-1.5 rounded-xl hover:bg-foreground/5 transition-colors"
             aria-expanded={dropdownOpen}
             aria-haspopup="true"
           >
             <div className="w-8 h-8 rounded-full bg-brand-primary/15 border border-brand-primary/30 flex items-center justify-center shrink-0 font-bold text-xs text-brand-primary">
               {initials}
             </div>
-
             <div className="hidden sm:block text-left leading-tight">
-              <p className="text-sm font-semibold text-foreground">{user?.name ?? 'User'}</p>
+              <p className="text-sm font-semibold text-foreground truncate max-w-[100px]">{user?.name ?? 'User'}</p>
               {user?.position && (
-                <p className="text-[11px] text-foreground/40 truncate max-w-[120px]">{user.position}</p>
+                <p className="text-[11px] text-foreground/40 truncate max-w-[100px]">{user.position}</p>
               )}
             </div>
-
             <ChevronDown
               size={14}
               className={`text-foreground/35 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
             />
           </button>
 
-          {/* Dropdown */}
           <AnimatePresence>
             {dropdownOpen && (
               <motion.div

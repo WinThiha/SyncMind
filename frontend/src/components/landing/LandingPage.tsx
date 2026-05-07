@@ -7,6 +7,7 @@ import { LandingHero } from './LandingHero';
 import { LandingFeatures } from './LandingFeatures';
 import { LandingCta } from './LandingCta';
 import { LandingFooter } from './LandingFooter';
+import { AppLogo } from '@/components/ui/AppLogo';
 
 export default function LandingPage() {
   const { user, loading } = useAuth();
@@ -14,18 +15,16 @@ export default function LandingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+      <div className="min-h-screen flex items-center justify-center bg-background text-foreground px-4">
         <motion.div
           animate={{ scale: [1, 1.08, 1] }}
           transition={{ repeat: Infinity, duration: 2 }}
           className="flex items-center gap-4 rounded-3xl border border-border-glow/40 bg-background/75 px-6 py-4 shadow-2xl backdrop-blur-xl"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary text-white font-black shadow-lg shadow-brand-primary/20">
-            S
-          </div>
+          <AppLogo size="sm" showWordmark={false} />
           <div>
             <div className="text-sm font-semibold uppercase tracking-[0.2em] text-foreground/45">SyncMind</div>
-            <div className="text-base text-foreground/70">Preparing landing page...</div>
+            <div className="text-base text-foreground/70">Preparing workspace...</div>
           </div>
         </motion.div>
       </div>
@@ -33,7 +32,7 @@ export default function LandingPage() {
   }
 
   return (
-    <main className="landing-page min-h-screen bg-background text-foreground">
+    <main className="landing-page min-h-screen bg-background text-foreground overflow-x-hidden">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.16),transparent_30%),radial-gradient(circle_at_top_right,rgba(59,130,246,0.10),transparent_24%)]" />
       <div className="absolute inset-0 -z-10 landing-grid opacity-60" />
 

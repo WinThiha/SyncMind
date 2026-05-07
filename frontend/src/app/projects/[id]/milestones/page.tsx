@@ -55,28 +55,34 @@ export default function MilestonesPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
+        <div className="flex items-center gap-3">
           <motion.button
             whileHover={{ x: -4 }}
             onClick={() => router.push(`/projects/${projectId}`)}
-            className="p-2 hover:bg-foreground/5 rounded-full transition-colors text-foreground/40 hover:text-foreground"
+            className="p-2 hover:bg-foreground/5 rounded-full transition-colors text-foreground/40 hover:text-foreground shrink-0"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={22} />
           </motion.button>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight">Milestones</h1>
-              <span className="bg-brand-primary/10 text-brand-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border border-brand-primary/20">
-                {project?.key}
-              </span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Milestones</h1>
+              {project?.key && (
+                <span className="bg-brand-primary/10 text-brand-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border border-brand-primary/20 shrink-0">
+                  {project.key}
+                </span>
+              )}
             </div>
-            <p className="text-foreground/60 text-sm mt-1">{milestones.length} milestone{milestones.length !== 1 ? 's' : ''}</p>
+            <p className="text-foreground/60 text-sm mt-0.5">{milestones.length} milestone{milestones.length !== 1 ? 's' : ''}</p>
           </div>
         </div>
-        <GlassButton onClick={() => { setShowCreate(true); setEditing(null); }} className="flex items-center gap-2">
+        <GlassButton
+          onClick={() => { setShowCreate(true); setEditing(null); }}
+          className="self-start sm:self-auto shrink-0 flex items-center gap-2"
+        >
           <Plus size={16} />
-          New Milestone
+          <span className="hidden sm:inline">New Milestone</span>
+          <span className="sm:hidden">New</span>
         </GlassButton>
       </div>
 
@@ -121,7 +127,7 @@ export default function MilestonesPage({ params }: { params: Promise<{ id: strin
       </AnimatePresence>
 
       {milestones.length === 0 ? (
-        <GlassCard className="p-16 flex flex-col items-center text-center">
+        <GlassCard className="p-10 sm:p-16 flex flex-col items-center text-center">
           <Flag size={40} className="text-foreground/20 mb-4" />
           <h3 className="font-bold text-lg mb-2">No milestones yet</h3>
           <p className="text-sm text-foreground/50 max-w-sm">

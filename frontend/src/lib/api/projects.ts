@@ -12,6 +12,8 @@ export interface Project {
   creator_id: number;
   created_at: string;
   updated_at: string;
+  members_count?: number;
+  issues_count?: number;
 }
 
 export const getProjects = async (): Promise<Project[]> => {

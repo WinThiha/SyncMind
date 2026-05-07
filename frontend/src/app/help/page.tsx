@@ -219,7 +219,7 @@ export default function HelpPage() {
   );
 
   return (
-    <div className="max-w-3xl mx-auto space-y-12">
+    <div className="max-w-3xl mx-auto space-y-8 sm:space-y-12">
       {/* ── Header ── */}
       <div className="flex items-center gap-4">
         <div className="w-10 h-10 bg-brand-primary/10 rounded-2xl flex items-center justify-center text-brand-primary">

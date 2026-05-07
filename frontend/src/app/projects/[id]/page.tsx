@@ -70,28 +70,28 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <motion.button 
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
+        <div className="flex items-center gap-3">
+          <motion.button
             whileHover={{ x: -4 }}
-            onClick={() => router.push('/dashboard')} 
-            className="p-2 hover:bg-foreground/5 rounded-full transition-colors text-foreground/40 hover:text-foreground"
+            onClick={() => router.push('/dashboard')}
+            className="p-2 hover:bg-foreground/5 rounded-full transition-colors text-foreground/40 hover:text-foreground shrink-0"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={22} />
           </motion.button>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
-              <span className="bg-brand-primary/10 text-brand-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border border-brand-primary/20">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl truncate">{project.name}</h1>
+              <span className="bg-brand-primary/10 text-brand-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border border-brand-primary/20 shrink-0">
                 {project.key}
               </span>
               {isCreator && (
-                <span className="bg-brand-accent/10 text-brand-accent text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border border-brand-accent/20">
+                <span className="bg-brand-accent/10 text-brand-accent text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest border border-brand-accent/20 shrink-0">
                   Owner
                 </span>
               )}
             </div>
-            <p className="text-foreground/60 text-sm mt-1">Manage project details, members, and settings.</p>
+            <p className="text-foreground/60 text-sm mt-0.5">Manage project details, members, and settings.</p>
           </div>
         </div>
 
@@ -99,13 +99,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => router.push(`/projects/${unwrappedParams.id}/issues`)}
-          className="bg-brand-primary text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-brand-primary/20"
+          className="self-start sm:self-auto shrink-0 bg-brand-primary text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-brand-primary/20 text-sm"
         >
           View Issues
         </motion.button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <GlassCard 
           glow
           whileHover={{ y: -4 }}

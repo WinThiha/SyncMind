@@ -122,10 +122,10 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
   if (loading) return null;
 
   return (
-    <GlassCard className="p-8">
-      <div className="flex items-center gap-2 mb-8 text-brand-primary">
+    <GlassCard className="p-5 sm:p-8">
+      <div className="flex items-center gap-2 mb-6 sm:mb-8 text-brand-primary">
         <Users size={20} />
-        <h2 className="text-xl font-bold uppercase tracking-widest">Project Members</h2>
+        <h2 className="text-lg sm:text-xl font-bold uppercase tracking-widest">Project Members</h2>
       </div>
 
       <AnimatePresence>
@@ -153,7 +153,7 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
       </AnimatePresence>
 
       {/* Active members */}
-      <ul className="space-y-4 mb-8">
+      <ul className="space-y-3 mb-6 sm:mb-8">
         {members.map(member => {
           const mRole = (member as any).pivot?.role || 'Member';
           const canManageThisMember = isAdmin && member.id !== user?.id && mRole !== 'creator';
@@ -161,19 +161,19 @@ export default function MemberManagement({ projectId, userRole }: MemberManageme
           return (
             <li
               key={member.id}
-              className="p-4 bg-foreground/5 rounded-2xl border border-border-glow/30 flex flex-wrap justify-between items-center gap-4 group transition-all hover:bg-foreground/[0.07]"
+              className="p-3 sm:p-4 bg-foreground/5 rounded-2xl border border-border-glow/30 flex flex-wrap justify-between items-center gap-3 group transition-all hover:bg-foreground/[0.07]"
             >
-              <div className="flex items-center gap-4 min-w-0 flex-1">
-                <div className="w-10 h-10 bg-brand-primary/10 rounded-xl flex items-center justify-center text-brand-primary font-bold text-sm shrink-0">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-9 h-9 bg-brand-primary/10 rounded-xl flex items-center justify-center text-brand-primary font-bold text-sm shrink-0">
                   {member.name.charAt(0)}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-bold truncate">{member.name}</p>
+                  <p className="font-bold truncate text-sm">{member.name}</p>
                   <p className="text-xs text-foreground/40 font-medium truncate">{member.email}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0 ml-auto sm:ml-0">
+              <div className="flex items-center gap-2 shrink-0 ml-auto">
                 {canManageThisMember ? (
                   <div className="relative">
                     <select

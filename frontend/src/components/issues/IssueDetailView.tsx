@@ -184,23 +184,28 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100]" />
       <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={BASE_SPRING} className="fixed right-0 top-0 h-full w-full max-w-3xl z-[101] bg-background border-l border-border-glow shadow-2xl flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b border-border-glow">
-          <div className="flex items-center gap-3">
-            <span className="bg-brand-primary/10 text-brand-primary text-xs font-bold px-3 py-1 rounded-full border border-brand-primary/20">{issue.key}</span>
-            <h3 className="font-bold text-xl line-clamp-1">{issue.summary}</h3>
+        <div className="flex items-center justify-between gap-3 px-4 py-4 sm:px-6 border-b border-border-glow">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="bg-brand-primary/10 text-brand-primary text-[10px] font-bold px-2.5 py-1 rounded-full border border-brand-primary/20 shrink-0">{issue.key}</span>
+            <h3 className="font-bold text-base sm:text-lg line-clamp-1 min-w-0">{issue.summary}</h3>
           </div>
-          <div className="flex items-center gap-3">
-            <Link href={`/projects/${issue.project_id}/issues/${issue.key}/edit`}><GlassButton variant="ghost" className="px-4 py-2 text-xs font-bold gap-2"><Edit2 size={14} />Edit Issue</GlassButton></Link>
-            <button onClick={onClose} className="p-2 hover:bg-foreground/5 rounded-full transition-colors text-foreground/40 hover:text-foreground"><X size={24} /></button>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link href={`/projects/${issue.project_id}/issues/${issue.key}/edit`}>
+              <GlassButton variant="ghost" size="sm" className="gap-1.5">
+                <Edit2 size={13} />
+                <span className="hidden sm:inline">Edit</span>
+              </GlassButton>
+            </Link>
+            <button onClick={onClose} className="p-1.5 hover:bg-foreground/5 rounded-full transition-colors text-foreground/40 hover:text-foreground"><X size={20} /></button>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8">
           <div className="max-w-3xl mx-auto space-y-12">
             <section className="space-y-4">
               <div className="flex items-center gap-2 text-brand-primary"><FileText size={18} /><h4 className="text-sm font-bold uppercase tracking-widest">Description</h4></div>
               <div className="p-6 bg-foreground/[0.03] rounded-3xl text-sm leading-relaxed border border-border-glow/30 whitespace-pre-wrap shadow-inner min-h-[100px]">{issue.description || 'No description provided.'}</div>
-              <div className="grid grid-cols-2 gap-8 pt-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 pt-6">
                 <div className="space-y-4"><h4 className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Status</h4><div className="flex items-center gap-2 px-4 py-2 bg-brand-primary/10 text-brand-primary rounded-xl text-xs font-bold border border-brand-primary/10 w-fit"><CheckCircle2 size={14} />{issue.status?.toUpperCase()}</div></div>
                 <div className="space-y-4"><h4 className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Priority</h4><div className="flex items-center gap-2 px-4 py-2 bg-foreground/5 text-foreground/60 rounded-xl text-xs font-bold border border-foreground/10 w-fit"><AlertCircle size={14} />{issue.priority?.toUpperCase()}</div></div>
                 <div className="space-y-4">
@@ -280,7 +285,7 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
                 {/* Scrollable area for inputs if they get too tall */}
                 <div className="max-h-[50vh] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="bg-background border border-border-glow rounded-2xl p-4 shadow-sm space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">

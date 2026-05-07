@@ -17,6 +17,7 @@ class ProjectController extends Controller
         $projects = $request->user()->projects()
             ->select('projects.*')
             ->withPivot('role')
+            ->withCount(['members', 'issues'])
             ->get();
 
         return response()->json([

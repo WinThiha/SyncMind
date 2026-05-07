@@ -16,17 +16,19 @@ export default function DashboardPage() {
 
     return (
         <div className="flex flex-col">
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome back, {user.name.split(' ')[0]}</h1>
-                    <p className="text-foreground/55">Here&apos;s what&apos;s happening with your projects today.</p>
+                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl mb-1">Welcome back, {user.name.split(' ')[0]}</h1>
+                    <p className="text-foreground/55 text-sm sm:text-base">Here&apos;s what&apos;s happening with your projects today.</p>
                 </div>
-                
+
                 <GlassButton
                     onClick={() => router.push('/projects/new')}
+                    className="self-start sm:self-auto shrink-0"
                 >
                     <Plus size={18} />
-                    Create New Project
+                    <span className="hidden sm:inline">Create New Project</span>
+                    <span className="sm:hidden">New Project</span>
                 </GlassButton>
             </div>
             

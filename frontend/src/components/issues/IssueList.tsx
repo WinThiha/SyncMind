@@ -102,64 +102,64 @@ export default function IssueList({ projectId }: IssueListProps) {
 
   return (
     <div className="space-y-8">
-      <GlassCard className="p-6 flex flex-wrap items-center gap-8">
-        <div className="flex items-center gap-3 bg-foreground/5 border border-border-glow rounded-2xl px-6 py-3 flex-1 min-w-[250px] group focus-within:ring-4 focus-within:ring-brand-primary/10 transition-all">
-          <Search size={18} className="text-foreground/30 group-focus-within:text-brand-primary transition-colors" />
-          <input 
-            type="text" 
-            placeholder={isAISearchEnabled ? "Search with AI..." : "Search issues by key or summary..."}
+      <GlassCard className="p-4 sm:p-5 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+        {/* Search */}
+        <div className="flex items-center gap-2 bg-foreground/5 border border-border-glow rounded-2xl px-4 py-2.5 flex-1 min-w-0 group focus-within:ring-4 focus-within:ring-brand-primary/10 transition-all">
+          <Search size={16} className="text-foreground/30 group-focus-within:text-brand-primary transition-colors shrink-0" />
+          <input
+            type="text"
+            placeholder={isAISearchEnabled ? 'Search with AI...' : 'Search issues...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent border-none outline-none text-sm w-full placeholder:text-foreground/30 font-medium"
+            className="bg-transparent border-none outline-none text-sm w-full min-w-0 placeholder:text-foreground/30 font-medium"
           />
-          <button 
+          <button
             onClick={() => setIsAISearchEnabled(!isAISearchEnabled)}
-            className={`p-2 rounded-xl transition-all ${isAISearchEnabled ? 'bg-brand-primary/20 text-brand-primary shadow-[0_0_15px_rgba(var(--brand-primary-rgb),0.3)]' : 'text-foreground/30 hover:text-brand-primary hover:bg-foreground/5'}`}
-            title={isAISearchEnabled ? "Switch to Keyword Search" : "Switch to AI Search"}
+            className={`p-1.5 rounded-xl transition-all shrink-0 ${isAISearchEnabled ? 'bg-brand-primary/20 text-brand-primary' : 'text-foreground/30 hover:text-brand-primary hover:bg-foreground/5'}`}
+            title={isAISearchEnabled ? 'Switch to Keyword Search' : 'Switch to AI Search'}
           >
-            <Sparkles size={18} className={isAISearchEnabled ? "animate-pulse" : ""} />
+            <Sparkles size={16} className={isAISearchEnabled ? 'animate-pulse' : ''} />
           </button>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <Filter size={16} className="text-foreground/30" />
-            <div className="relative">
-              <select 
-                value={statusFilter} 
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="appearance-none bg-background border border-border-glow rounded-xl px-4 py-2 pr-10 text-xs font-bold text-foreground/60 outline-none cursor-pointer hover:border-brand-primary/30 transition-all"
-              >
-                <option value="all">ALL STATUS</option>
-                <option value="open">OPEN</option>
-                <option value="in_progress">IN PROGRESS</option>
-                <option value="resolved">RESOLVED</option>
-                <option value="closed">CLOSED</option>
-              </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/30" />
-            </div>
-          </div>
-          
+        {/* Filters */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Filter size={14} className="text-foreground/30 shrink-0" />
           <div className="relative">
-            <select 
-              value={priorityFilter} 
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="appearance-none bg-background border border-border-glow rounded-xl px-3 py-2 pr-8 text-xs font-bold text-foreground/60 outline-none cursor-pointer hover:border-brand-primary/30 transition-all"
+            >
+              <option value="all">ALL STATUS</option>
+              <option value="open">OPEN</option>
+              <option value="in_progress">IN PROGRESS</option>
+              <option value="resolved">RESOLVED</option>
+              <option value="closed">CLOSED</option>
+            </select>
+            <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/30" />
+          </div>
+
+          <div className="relative">
+            <select
+              value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="appearance-none bg-background border border-border-glow rounded-xl px-4 py-2 pr-10 text-xs font-bold text-foreground/60 outline-none cursor-pointer hover:border-brand-primary/30 transition-all"
+              className="appearance-none bg-background border border-border-glow rounded-xl px-3 py-2 pr-8 text-xs font-bold text-foreground/60 outline-none cursor-pointer hover:border-brand-primary/30 transition-all"
             >
               <option value="all">ALL PRIORITY</option>
               <option value="high">HIGH</option>
               <option value="normal">NORMAL</option>
               <option value="low">LOW</option>
             </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/30" />
+            <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/30" />
           </div>
-          
-          <button 
+
+          <button
             onClick={() => { setStatusFilter('all'); setPriorityFilter('all'); setSearchQuery(''); }}
-            className="p-3 hover:bg-foreground/5 rounded-xl transition-all text-foreground/30 hover:text-brand-primary"
+            className="p-2 hover:bg-foreground/5 rounded-xl transition-all text-foreground/30 hover:text-brand-primary"
             title="Reset Filters"
           >
-            <RotateCcw size={20} />
+            <RotateCcw size={16} />
           </button>
         </div>
       </GlassCard>

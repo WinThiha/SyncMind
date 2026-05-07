@@ -4,14 +4,25 @@ import { useState } from 'react';
 import api from '@/lib/axios';
 import MarkdownEditor from '../shared/MarkdownEditor';
 import Markdown from '../shared/Markdown';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { GlassButton } from '@/components/ui/GlassButton';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageSquare, Send, AlertTriangle } from 'lucide-react';
+
+function relativeTime(dateStr: string): string {
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+  return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
 
 interface Comment {
   id: number;
   content: string;
   created_at: string;
-  user: {
-    name: string;
-  };
+  user: { name: string };
 }
 
 interface CommentsProps {
@@ -23,87 +34,103 @@ interface CommentsProps {
 export default function Comments({ projectId, issueKey, initialComments }: CommentsProps) {
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState('');
-  const [notifyEmails, setNotifyEmails] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
-
     setSubmitting(true);
     setError(null);
-
     try {
-      const response = await api.post(`/api/projects/${projectId}/issues/${issueKey}/comments`, {
-        content: newComment,
-        notify_emails: notifyEmails
-      });
-      
-      setComments([...comments, response.data.data]);
+      const response = await api.post(
+        `/api/projects/${projectId}/issues/${issueKey}/comments`,
+        { content: newComment },
+      );
+      setComments((prev) => [...prev, response.data.data]);
       setNewComment('');
-      setNotifyEmails(false);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to post comment');
+      setError(err.response?.data?.message ?? 'Failed to post comment.');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="mt-8 space-y-6">
-      <h3 className="text-lg font-bold text-gray-900 border-b pb-2">Comments</h3>
-      
-      <div className="space-y-4">
-        {comments.map((comment) => (
-          <div key={comment.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-bold text-sm text-gray-900">{comment.user.name}</span>
-              <span className="text-xs text-gray-500">{new Date(comment.created_at).toLocaleString()}</span>
+    <GlassCard className="p-5 sm:p-6">
+      {/* Header */}
+      <div className="flex items-center gap-2 text-brand-primary mb-5">
+        <MessageSquare size={15} />
+        <h2 className="text-[10px] font-bold uppercase tracking-widest">
+          Comments {comments.length > 0 && <span className="ml-1 text-foreground/30">({comments.length})</span>}
+        </h2>
+      </div>
+
+      {/* Comment list */}
+      <div className="space-y-4 mb-6">
+        {comments.length === 0 ? (
+          <p className="text-sm text-foreground/30 italic py-2">No comments yet. Be the first to comment.</p>
+        ) : (
+          comments.map((comment) => (
+            <div key={comment.id} className="flex gap-3">
+              <div className="w-8 h-8 rounded-full bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center shrink-0 font-bold text-xs text-brand-primary">
+                {comment.user.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <span className="text-sm font-bold">{comment.user.name}</span>
+                  <span
+                    className="text-[10px] text-foreground/35"
+                    title={new Date(comment.created_at).toLocaleString()}
+                  >
+                    {relativeTime(comment.created_at)}
+                  </span>
+                </div>
+                <div className="text-sm leading-relaxed text-foreground/70 bg-foreground/[0.03] border border-border-glow/40 rounded-xl p-3.5">
+                  <Markdown content={comment.content} />
+                </div>
+              </div>
             </div>
-            <Markdown content={comment.content} className="text-sm text-gray-800" />
-          </div>
-        ))}
-        
-        {comments.length === 0 && (
-          <p className="text-sm text-gray-500 italic py-4">No comments yet.</p>
+          ))
         )}
       </div>
 
-      <div className="mt-6 bg-white p-4 border border-gray-200 rounded-lg shadow-sm">
-        <MarkdownEditor 
-          value={newComment} 
-          onChange={setNewComment} 
-          placeholder="Add a comment..."
-          rows={3}
-        />
-        
-        <div className="mt-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="notify_emails"
-              name="notify_emails"
-              type="checkbox"
-              checked={notifyEmails}
-              onChange={(e) => setNotifyEmails(e.target.checked)}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-            />
-            <label htmlFor="notify_emails" className="ml-2 block text-sm text-gray-700">
-              Notify by Email
-            </label>
-          </div>
-          
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={submitting || !newComment.trim()}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
-            {submitting ? 'Posting...' : 'Post Comment'}
-          </button>
+      {/* New comment form */}
+      <form onSubmit={handleSubmit} className="border-t border-border-glow pt-5 space-y-3">
+        <div className="rounded-xl overflow-hidden border border-border-glow focus-within:border-brand-primary/30 focus-within:ring-4 focus-within:ring-brand-primary/10 transition-all bg-foreground/[0.02]">
+          <MarkdownEditor
+            value={newComment}
+            onChange={setNewComment}
+            placeholder="Add a comment…"
+            rows={3}
+          />
         </div>
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-      </div>
-    </div>
+
+        <AnimatePresence>
+          {error && (
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-2 text-xs text-red-500 font-medium"
+            >
+              <AlertTriangle size={12} />
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
+
+        <div className="flex justify-end">
+          <GlassButton
+            type="submit"
+            size="sm"
+            disabled={submitting || !newComment.trim()}
+          >
+            <Send size={14} />
+            {submitting ? 'Posting…' : 'Post Comment'}
+          </GlassButton>
+        </div>
+      </form>
+    </GlassCard>
   );
 }

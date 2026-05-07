@@ -26,30 +26,32 @@ export default function IssueListPage({ params }: { params: Promise<{ id: string
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <motion.button 
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
+        <div className="flex items-center gap-3">
+          <motion.button
             whileHover={{ x: -4 }}
-            onClick={() => router.push(`/projects/${unwrappedParams.id}`)} 
-            className="p-2 hover:bg-foreground/5 rounded-full transition-colors text-foreground/40 hover:text-foreground"
+            onClick={() => router.push(`/projects/${unwrappedParams.id}`)}
+            className="p-2 hover:bg-foreground/5 rounded-full transition-colors text-foreground/40 hover:text-foreground shrink-0"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={22} />
           </motion.button>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight">Issues</h1>
-              <span className="text-foreground/40 text-sm font-medium">/</span>
-              <span className="text-foreground/60 text-sm font-bold">{project?.name || 'Loading...'}</span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Issues</h1>
+              <span className="text-foreground/30 text-sm hidden sm:inline">/</span>
+              <span className="text-foreground/60 text-sm font-bold truncate hidden sm:block">{project?.name || 'Loading...'}</span>
             </div>
-            <p className="text-foreground/60 text-sm mt-1">Manage and track your project tasks.</p>
+            <p className="text-foreground/60 text-sm mt-0.5">Manage and track your project tasks.</p>
           </div>
         </div>
 
         <GlassButton
           onClick={() => router.push(`/projects/${unwrappedParams.id}/issues/new`)}
+          className="self-start sm:self-auto shrink-0"
         >
           <Plus size={18} />
-          New Issue
+          <span className="hidden sm:inline">New Issue</span>
+          <span className="sm:hidden">New</span>
         </GlassButton>
       </div>
 
