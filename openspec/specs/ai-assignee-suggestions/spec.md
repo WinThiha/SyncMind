@@ -19,3 +19,11 @@ The system SHALL keep `issue_type` constrained to the available project issue-ty
 - **WHEN** a project has custom issue type labels and a user requests AI suggestions in `vi-VN`
 - **THEN** AI-selected `issue_type` matches one of the exact project-provided labels
 - **AND** no translation is applied to the `issue_type` value
+
+### Requirement: Assignee context uses project-scoped member position
+The system SHALL provide assignee recommendation context using each member's `project_members.position` value for the active project rather than the global `users.position` profile field.
+
+#### Scenario: Same user has different positions across projects
+- **WHEN** a user belongs to multiple projects and has different per-project membership positions
+- **THEN** AI assignee suggestion context for a given project uses the position from that project's membership record
+- **AND** the global `users.position` value does not override project-scoped member position
