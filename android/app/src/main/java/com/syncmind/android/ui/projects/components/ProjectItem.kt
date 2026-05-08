@@ -29,21 +29,24 @@ fun ProjectItem(project: Project) {
                     style = MaterialTheme.typography.titleLarge
                 )
                 Badge(
-                    containerColor = when (project.status) {
-                        "active" -> MaterialTheme.colorScheme.primaryContainer
-                        "completed" -> MaterialTheme.colorScheme.secondaryContainer
-                        else -> MaterialTheme.colorScheme.surfaceVariant
-                    }
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
                 ) {
-                    Text(text = project.status.uppercase())
+                    Text(text = project.key.uppercase())
                 }
             }
             
-            project.description?.let {
-                Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Key: ${project.key}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            if (!project.issue_types.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "Issue Types: ${project.issue_types.joinToString(", ")}",
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
