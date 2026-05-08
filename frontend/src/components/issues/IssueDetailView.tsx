@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
 import MarkdownEditor from '../shared/MarkdownEditor';
@@ -51,11 +52,13 @@ interface Issue {
 
 interface IssueDetailViewProps {
   issue: Issue;
+  onIssueMutated?: () => Promise<void> | void;
   onClose: () => void;
 }
 
-export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initialIssue, onClose }) => {
+export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initialIssue, onIssueMutated, onClose }) => {
   const { t } = useLocale();
+  const [mounted, setMounted] = useState(false);
   const [issue, setIssue] = useState<Issue>(initialIssue);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
@@ -95,6 +98,11 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
     loadIssueDetails();
     loadMembers();
   }, [initialIssue.id, initialIssue.key, initialIssue.project_id]);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   const loadIssueDetails = async () => {
     setLoading(true);
@@ -152,6 +160,9 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
       setNewComment('');
       setIsEditorFocused(false);
       await loadIssueDetails();
+      if (onIssueMutated) {
+        await onIssueMutated();
+      }
     } catch (err) {
       console.error('Failed to update issue or add comment', err);
     } finally {
@@ -181,8 +192,7 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
   }, [issue.comments, issue.history]);
 
   const currentAssignee = issue.assignee || issue.assigned_to;
-
-  return (
+  const overlay = (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100]" />
       <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={BASE_SPRING} className="fixed right-0 top-0 h-full w-full max-w-3xl z-[101] bg-background border-l border-border-glow shadow-2xl flex flex-col">
@@ -339,4 +349,10 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
       </motion.div>
     </>
   );
+
+  if (!mounted) {
+    return null;
+  }
+
+  return createPortal(overlay, document.body);
 };

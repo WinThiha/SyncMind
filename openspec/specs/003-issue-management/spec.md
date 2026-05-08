@@ -19,3 +19,21 @@ The system SHALL provide an AI-powered thread summarization feature in the issue
 #### Scenario: User views thread summary
 - **WHEN** a user visits an issue detail page with existing comments or history
 - **THEN** they see an option to "Summarize Thread" which displays an overview of decisions and action items
+
+### Requirement: Issue List Metadata Consistency After Detail Updates
+The system SHALL keep issue-list metadata in sync after a user updates issue fields or posts a comment from the issue detail slider.
+
+#### Scenario: User updates issue in detail slider
+- **WHEN** a user updates status, priority, assignee, or time-tracking fields in the issue detail slider
+- **THEN** the issue list refreshes that issue metadata without requiring a full page reload
+
+#### Scenario: User posts comment in detail slider
+- **WHEN** a user posts a new comment from the issue detail slider
+- **THEN** the issue list refreshes comment-related metadata (including comment count) without requiring a full page reload
+
+### Requirement: Issue Detail Slider Overlay Coverage
+The system SHALL render the issue detail slider overlay as a full-viewport layer so dimming and backdrop blur coverage includes the entire screen, including the bottom edge, across scrollable app layouts.
+
+#### Scenario: User opens issue detail slider from issue list
+- **WHEN** a user opens the issue detail slider from the issue list page
+- **THEN** the background dim/blur overlay covers the full viewport from top to bottom without clipped regions

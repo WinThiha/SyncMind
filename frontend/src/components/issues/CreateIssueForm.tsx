@@ -89,8 +89,8 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
       setIsSearchingSimilar(true);
       try {
         const issues = await getSimilarIssues(projectId, formData.summary);
-        // Only show issues with similarity > 0.7
-        setSimilarIssues(issues.filter(i => i.similarity > 0.7));
+        // Only show issues with similarity >= 0.6
+        setSimilarIssues(issues.filter(i => i.similarity >= 0.6));
       } catch (err) {
         console.error('Failed to fetch similar issues', err);
       } finally {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocale } from '@/context/LocaleContext';
 import { getIssues, Issue, getSimilarIssues } from '@/lib/api/issues';
 import { IssueListItem } from './IssueListItem';
@@ -50,20 +50,22 @@ export default function IssueList({ projectId }: IssueListProps) {
     return null;
   };
 
-  useEffect(() => {
-    async function loadIssues() {
-      try {
-        const data = await getIssues(projectId);
-        setIssues(data);
-        setFilteredIssues(data);
-      } catch (err) {
-        setError(t('issues.search.loadError'));
-      } finally {
-        setLoading(false);
-      }
+  const loadIssues = useCallback(async () => {
+    try {
+      const data = await getIssues(projectId);
+      setIssues(data);
+      setFilteredIssues(data);
+      setError(null);
+    } catch (err) {
+      setError(t('issues.search.loadError'));
+    } finally {
+      setLoading(false);
     }
+  }, [projectId, t]);
+
+  useEffect(() => {
     loadIssues();
-  }, [projectId]);
+  }, [loadIssues]);
 
   useEffect(() => {
     if (isAISearchEnabled) {
@@ -254,6 +256,7 @@ export default function IssueList({ projectId }: IssueListProps) {
               assigned_to: selectedIssue.assignee,
               created_at: selectedIssue.created_at || new Date(0).toISOString()
             }}
+            onIssueMutated={loadIssues}
             onClose={() => setSelectedIssue(null)}
           />
         )}
