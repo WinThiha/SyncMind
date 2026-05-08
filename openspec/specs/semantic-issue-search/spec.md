@@ -18,6 +18,10 @@ The system SHALL provide an API endpoint to search for issues that are semantica
 - **WHEN** the frontend requests similar issues for a provided text string
 - **THEN** the backend generates an embedding for the text using the embedding provider lane and returns issues ordered by cosine similarity from the database.
 
+#### Scenario: Issue creation duplicate suggestions threshold
+- **WHEN** the issue creation form receives similar issue results
+- **THEN** the frontend SHALL show duplicate suggestions only for issues with similarity greater than or equal to `0.6`.
+
 #### Scenario: General-purpose semantic search
 - **WHEN** the frontend requests similar issues from the issue list search bar in AI Search mode
 - **THEN** the backend SHALL generate an embedding for the search query using the embedding provider lane and return the top matching issues from the database.

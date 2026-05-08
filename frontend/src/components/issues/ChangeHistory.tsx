@@ -40,9 +40,9 @@ function groupHistory(history: HistoryEntry[]) {
 }
 
 function formatValue(
-  t: (key: string, params?: Record<string, string | number>) => string,
   field: string,
   value: string | null,
+  t: (key: string, params?: Record<string, string | number>) => string,
 ): string {
   if (!value) return t('issues.history.none');
   if (field === 'description' && value.length > 50) return t('issues.history.updated');
@@ -99,11 +99,11 @@ export default function ChangeHistory({ history }: ChangeHistoryProps) {
                     </span>
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="line-through text-foreground/30">
-                        {formatValue(t, entry.field, entry.old_value)}
+                        {formatValue(entry.field, entry.old_value, t)}
                       </span>
                       <ArrowRight size={10} className="text-brand-primary/40 shrink-0" />
                       <span className="font-bold text-brand-primary">
-                        {formatValue(t, entry.field, entry.new_value)}
+                        {formatValue(entry.field, entry.new_value, t)}
                       </span>
                     </div>
                   </div>
