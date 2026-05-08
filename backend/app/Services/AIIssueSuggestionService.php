@@ -27,12 +27,12 @@ class AIIssueSuggestionService
         $priorities = ['low', 'normal', 'high'];
 
         $members = $project->members()
-            ->select('users.id', 'users.name', 'users.position')
+            ->select('users.id', 'users.name')
             ->get()
             ->map(fn ($m) => [
                 'id' => $m->id,
                 'name' => $m->name,
-                'position' => $m->position ?? 'Team Member',
+                'position' => $m->pivot?->position ?? 'Team Member',
             ])
             ->values()
             ->all();
