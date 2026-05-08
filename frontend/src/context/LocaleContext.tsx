@@ -1,19 +1,10 @@
 'use client';
 
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { DEFAULT_LOCALE, isSupportedLocale, type Locale } from '@/lib/i18n/locales';
 import { getTranslation } from '@/lib/i18n/catalog';
 
 const LOCALE_STORAGE_KEY = 'syncmind-locale';
-
-function getInitialLocale(): Locale {
-  if (typeof window === 'undefined') {
-    return DEFAULT_LOCALE;
-  }
-
-  const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-  return storedLocale && isSupportedLocale(storedLocale) ? storedLocale : DEFAULT_LOCALE;
-}
 
 interface LocaleContextValue {
   locale: Locale;
@@ -24,7 +15,14 @@ interface LocaleContextValue {
 const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(getInitialLocale);
+  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+
+  useEffect(() => {
+    const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+    if (storedLocale && isSupportedLocale(storedLocale)) {
+      setLocaleState(storedLocale);
+    }
+  }, []);
 
   const value = useMemo<LocaleContextValue>(() => ({
     locale,
