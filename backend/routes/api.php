@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AIIssueController;
+use App\Http\Controllers\AIMilestoneController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleAuthController;
@@ -38,6 +39,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('projects/{project}/issues/{issue_key}/ai/summarize', [AIIssueController::class, 'summarize']);
     Route::post('projects/{project}/ai/suggest-issue', [AIIssueController::class, 'suggest']);
     Route::get('projects/{project}/ai/similar-issues', [AIIssueController::class, 'similar']);
+    Route::post('projects/{project}/ai/suggest-milestone-dates', [AIMilestoneController::class, 'suggestDatesForNew']);
+    Route::post('projects/{project}/milestones/{milestone}/ai/summarize', [AIMilestoneController::class, 'summarize']);
+    Route::post('projects/{project}/milestones/{milestone}/ai/risk-analysis', [AIMilestoneController::class, 'riskAnalysis']);
+    Route::post('projects/{project}/milestones/{milestone}/ai/suggest-dates', [AIMilestoneController::class, 'suggestDates']);
+    Route::post('projects/{project}/milestones/{milestone}/ai/suggest-issues', [AIMilestoneController::class, 'suggestIssues']);
 
     Route::post('/invitations/{token}/accept', [ProjectInvitationAcceptController::class, 'accept']);
 });

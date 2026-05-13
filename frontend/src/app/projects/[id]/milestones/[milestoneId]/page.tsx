@@ -8,6 +8,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { MilestoneProgress } from '@/components/milestones/MilestoneProgress';
 import { EditMilestoneForm } from '@/components/milestones/EditMilestoneForm';
+import { MilestoneAIPanel } from '@/components/milestones/MilestoneAIPanel';
 import { getMilestone, type MilestoneWithIssues } from '@/lib/api/milestones';
 import { FAST_SPRING } from '@/lib/animations';
 import { useLocale } from '@/context/LocaleContext';
@@ -157,6 +158,9 @@ export default function MilestoneDetailPage({
           {t('milestones.detail.completePercent', { percent: milestone.progress.percentage })}
         </p>
       </GlassCard>
+
+      {/* AI Insights */}
+      <MilestoneAIPanel projectId={projectId} milestoneId={milestoneId} />
 
       {/* Issues */}
       <h2 className="text-sm font-bold text-foreground/40 uppercase tracking-wider mb-4">
