@@ -82,7 +82,7 @@ export const projects: Dictionary = {
   'projects.detail.cards.issues.title': 'Issues',
   'projects.detail.cards.issues.description': 'Track tasks and bugs.',
   'projects.detail.cards.wiki.title': 'Wiki',
-  'projects.detail.cards.wiki.description': 'Documentation (Soon).',
+  'projects.detail.cards.wiki.description': 'Documentation.',
   'projects.detail.cards.milestones.title': 'Milestones',
   'projects.detail.cards.milestones.description': 'Track schedule and progress.',
   'projects.detail.overview.title': 'Project Overview',

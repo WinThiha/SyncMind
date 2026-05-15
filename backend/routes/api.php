@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AIIssueController;
 use App\Http\Controllers\AIMilestoneController;
+use App\Http\Controllers\AIWikiController;
+use App\Http\Controllers\WikiPageController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleAuthController;
@@ -44,6 +46,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('projects/{project}/milestones/{milestone}/ai/risk-analysis', [AIMilestoneController::class, 'riskAnalysis']);
     Route::post('projects/{project}/milestones/{milestone}/ai/suggest-dates', [AIMilestoneController::class, 'suggestDates']);
     Route::post('projects/{project}/milestones/{milestone}/ai/suggest-issues', [AIMilestoneController::class, 'suggestIssues']);
+    Route::post('projects/{project}/wiki/ai/chat', [AIWikiController::class, 'chat']);
+    Route::post('projects/{project}/wiki/ai/draft', [AIWikiController::class, 'draft']);
+    Route::apiResource('projects.wiki', WikiPageController::class)->parameters(['wiki' => 'wikiPage']);
 
     Route::post('/invitations/{token}/accept', [ProjectInvitationAcceptController::class, 'accept']);
 });

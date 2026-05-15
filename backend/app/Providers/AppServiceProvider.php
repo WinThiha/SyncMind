@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\AI\Contracts\ChatCompletionClient;
+use App\Services\AIWikiService;
 use App\Services\AI\OpenAIPhpChatCompletionClient;
 use App\Services\AI\OpenRouterChatCompletionClient;
 use App\Models\Comment;
@@ -10,12 +11,15 @@ use App\Models\Issue;
 use App\Models\Milestone;
 use App\Models\Project;
 use App\Models\User;
+use App\Models\WikiPage;
 use App\Observers\CommentObserver;
 use App\Observers\IssueObserver;
 use App\Observers\UserObserver;
+use App\Observers\WikiPageObserver;
 use App\Policies\IssuePolicy;
 use App\Policies\MilestonePolicy;
 use App\Policies\ProjectPolicy;
+use App\Policies\WikiPagePolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -41,6 +45,8 @@ class AppServiceProvider extends ServiceProvider
                 ->make();
         });
 
+        $this->app->singleton(AIWikiService::class);
+
         $this->app->singleton(ChatCompletionClient::class, function ($app) {
             $provider = strtolower((string) config('openai.chat.provider', 'openrouter'));
 
@@ -60,11 +66,13 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Project::class, ProjectPolicy::class);
         Gate::policy(Issue::class, IssuePolicy::class);
         Gate::policy(Milestone::class, MilestonePolicy::class);
+        Gate::policy(WikiPage::class, WikiPagePolicy::class);
 
         // Register Observers
         User::observe(UserObserver::class);
         Issue::observe(IssueObserver::class);
         Comment::observe(CommentObserver::class);
+        WikiPage::observe(WikiPageObserver::class);
 
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
