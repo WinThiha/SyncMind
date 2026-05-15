@@ -7,6 +7,7 @@ import { updateMilestone, deleteMilestone, type Milestone } from '@/lib/api/mile
 import { suggestMilestoneDates } from '@/lib/api/milestones-ai';
 import { Flag, Loader2, Sparkles, Trash2, X } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
+import { confirmAction } from '@/lib/alert';
 
 interface EditMilestoneFormProps {
   projectId: number | string;
@@ -67,7 +68,14 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
   };
 
   const handleDelete = async () => {
-    if (!confirm(t('milestones.delete.confirm', { name: milestone.name }))) return;
+    const ok = await confirmAction({
+      title: t('common.areYouSure'),
+      text: t('milestones.delete.confirm', { name: milestone.name }),
+      confirmText: t('common.yesDelete'),
+      cancelText: t('common.cancel'),
+      danger: true,
+    });
+    if (!ok) return;
     setDeleting(true);
     try {
       await deleteMilestone(projectId, milestone.id);

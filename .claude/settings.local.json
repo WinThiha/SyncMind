@@ -49,7 +49,15 @@
       "Read(///wsl.localhost/Ubuntu/var/www/SyncMind/openspec/changes/project-wiki-ai-assistant/**)",
       "Read(///wsl.localhost/Ubuntu/var/www/SyncMind/openspec/changes/**)",
       "Bash(mkdir -p \"\\\\\\\\\\\\\\\\wsl.localhost\\\\\\\\Ubuntu\\\\\\\\var\\\\\\\\www\\\\\\\\SyncMind\\\\\\\\openspec\\\\\\\\changes\\\\\\\\archive\")",
-      "Bash(mv \"\\\\\\\\\\\\\\\\wsl.localhost\\\\\\\\Ubuntu\\\\\\\\var\\\\\\\\www\\\\\\\\SyncMind\\\\\\\\openspec\\\\\\\\changes\\\\\\\\project-wiki-ai-assistant\" \"\\\\\\\\\\\\\\\\wsl.localhost\\\\\\\\Ubuntu\\\\\\\\var\\\\\\\\www\\\\\\\\SyncMind\\\\\\\\openspec\\\\\\\\changes\\\\\\\\archive\\\\\\\\2026-05-15-project-wiki-ai-assistant\")"
+      "Bash(mv \"\\\\\\\\\\\\\\\\wsl.localhost\\\\\\\\Ubuntu\\\\\\\\var\\\\\\\\www\\\\\\\\SyncMind\\\\\\\\openspec\\\\\\\\changes\\\\\\\\project-wiki-ai-assistant\" \"\\\\\\\\\\\\\\\\wsl.localhost\\\\\\\\Ubuntu\\\\\\\\var\\\\\\\\www\\\\\\\\SyncMind\\\\\\\\openspec\\\\\\\\changes\\\\\\\\archive\\\\\\\\2026-05-15-project-wiki-ai-assistant\")",
+      "Bash(git -C \"\\\\\\\\\\\\\\\\wsl.localhost\\\\\\\\Ubuntu\\\\\\\\var\\\\\\\\www\\\\\\\\SyncMind\" diff --stat HEAD)",
+      "Bash(git -C \"\\\\\\\\\\\\\\\\wsl.localhost\\\\\\\\Ubuntu\\\\\\\\var\\\\\\\\www\\\\\\\\SyncMind\" status --short)",
+      "Bash(mkdir -p \"\\\\\\\\\\\\\\\\wsl.localhost\\\\\\\\Ubuntu\\\\\\\\var\\\\\\\\www\\\\\\\\SyncMind\\\\\\\\openspec\\\\\\\\changes\\\\\\\\replace-alerts-sweetalert\")",
+      "Read(///wsl.localhost/Ubuntu/var/www/SyncMind/openspec/changes/archive/**)",
+      "Bash(openspec instructions *)",
+      "PowerShell(openspec instructions *)",
+      "PowerShell(Get-Command *)",
+      "Bash(git -C \"\\\\\\\\wsl.localhost\\\\Ubuntu\\\\var\\\\www\\\\SyncMind\" diff --stat HEAD)"
     ]
   }
 }

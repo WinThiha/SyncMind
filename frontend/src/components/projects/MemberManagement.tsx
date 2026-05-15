@@ -14,6 +14,7 @@ import {
 import { AxiosError } from 'axios';
 import { useAuth } from '@/context/AuthContext';
 import { useLocale } from '@/context/LocaleContext';
+import { confirmAction } from '@/lib/alert';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { Users, Mail, Shield, UserMinus, UserPlus, ShieldAlert, Clock, X, CheckCircle, Pencil } from 'lucide-react';
@@ -90,15 +91,21 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
   };
 
   const handleRemoveMember = async (userId: number) => {
-    if (confirm(t('projects.members.confirmRemove'))) {
-      setError(null);
-      try {
-        await removeProjectMember(projectId, userId);
-        setMembers(members.filter(m => m.id !== userId));
-      } catch (err) {
-        const axiosError = err as AxiosError<{ message?: string }>;
-        setError(axiosError.response?.data?.message || t('projects.members.removeError'));
-      }
+    const ok = await confirmAction({
+      title: t('common.areYouSure'),
+      text: t('projects.members.confirmRemove'),
+      confirmText: t('common.yesRemove'),
+      cancelText: t('common.cancel'),
+      danger: true,
+    });
+    if (!ok) return;
+    setError(null);
+    try {
+      await removeProjectMember(projectId, userId);
+      setMembers(members.filter(m => m.id !== userId));
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      setError(axiosError.response?.data?.message || t('projects.members.removeError'));
     }
   };
 
