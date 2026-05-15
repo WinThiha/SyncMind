@@ -3,6 +3,8 @@
 Auto-generated from all feature plans. Last updated: 2026-04-17
 
 ## Active Technologies
+- Kotlin 2.0+ / Java 17 + Jetpack Compose (BOM), Hilt (DI), Retrofit/OkHttp (Networking), Compose Navigation, Kotlin Serialization (005-android-app-setup)
+- EncryptedSharedPreferences (Auth tokens) (005-android-app-setup)
 - PHP 8.2+, Node.js 20+, TypeScript + Laravel 12, Next.js 16, TailwindCSS v4, Laravel Sanctum
 - **AI Infrastructure**: 
     - **Suggestion Service**: OpenAI-compatible (via OpenRouter/openai-php)
@@ -62,6 +64,7 @@ The project includes a `docker-compose.yml` file to spin up the entire stack:
 PHP 8.2+ (via scoop), Node.js 20+ (via nvs), TypeScript: Follow standard conventions
 
 ## Recent Changes
+- 005-android-app-setup: Added Kotlin 2.0+ / Java 17 + Jetpack Compose (BOM), Hilt (DI), Retrofit/OkHttp (Networking), Compose Navigation, Kotlin Serialization
 - fix-embedding-dimensions: Corrected vector dimension mismatch using `outputDimensionality: 768` for native Gemini embeddings
 - refactor-gemini-native-api: Refactored Vector Search Service to use native Gemini REST API instead of OpenAI compatibility layer
 - semantic-issue-search: Implemented AI-driven duplicate issue detection using `pgvector` and Gemini embeddings
