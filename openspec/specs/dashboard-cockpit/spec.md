@@ -120,3 +120,30 @@ The dashboard page SHALL render the cockpit using real dashboard API data and ex
 #### Scenario: Dashboard text remains readable in light mode
 - **WHEN** the dashboard is rendered in light mode
 - **THEN** supporting labels, metadata, empty states, and activity text have sufficient contrast against dashboard glass surfaces
+
+## ADDED Requirements
+
+### Requirement: Recent activity translation wiring
+The dashboard recent activity feed SHALL display activity descriptions using the translation catalog with interpolated parameters, rather than pre-composed English strings from the API.
+
+#### Scenario: Comment activity displays translated text
+- **WHEN** the dashboard receives a `comment` type activity with `actor: "John"` and `issue_key: "SYNMIND-42"`
+- **THEN** the system SHALL display `t('dashboard.activity.commented', { actor: "John", issue: "SYNMIND-42" })` which resolves to "John commented on SYNMIND-42" in English
+
+#### Scenario: History activity displays translated text
+- **WHEN** the dashboard receives a `history` type activity with `actor: "Jane"`, `field: "status"`, and `issue_key: "SYNMIND-43"`
+- **THEN** the system SHALL display `t('dashboard.activity.changed', { actor: "Jane", field: "status", issue: "SYNMIND-43" })` which resolves to "Jane changed status on SYNMIND-43" in English
+
+#### Scenario: Activity icon container has fixed height
+- **WHEN** the activity item contains text that wraps to multiple lines
+- **THEN** the icon container SHALL maintain a fixed height of 44px with vertically centered icon
+- **AND** the icon SHALL NOT expand based on text content height
+
+#### Scenario: Missing actor falls back to "Someone"
+- **WHEN** the activity has `actor: null`
+- **THEN** the system SHALL use "Someone" as the actor parameter in translations
+
+#### Scenario: All locales receive activity translation keys
+- **WHEN** the system loads the dashboard
+- **THEN** all six locales (en, my-MM, ja-JP, vi-VN, km-KH, ko-KR) SHALL have the `dashboard.activity.commented` and `dashboard.activity.changed` keys available
+- **AND** non-English locales SHALL fall back to English keys until their translations are added
