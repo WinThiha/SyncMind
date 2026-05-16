@@ -88,7 +88,7 @@ export default function WikiPageEditPage({
           <h1 className="text-2xl font-bold">{page.title}</h1>
         </div>
       </div>
-      <GlassCard className="p-6 flex-1">
+      <GlassCard className="p-4 sm:p-6 flex-1">
         <WikiPageEditor
           projectId={projectId}
           initialTitle={page.title}

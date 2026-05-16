@@ -17,7 +17,7 @@ export function WikiPageList({ pages, projectId, isAdmin }: WikiPageListProps) {
   const { t } = useLocale();
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border-glow">
         <span className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('wiki.list.pages')}</span>
         {isAdmin && (
@@ -31,7 +31,7 @@ export function WikiPageList({ pages, projectId, isAdmin }: WikiPageListProps) {
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-2">
+      <nav className="overflow-y-auto py-2 max-h-[220px] lg:max-h-none">
         {pages.length === 0 ? (
           <p className="px-3 py-2 text-xs text-foreground/40 italic">{t('wiki.list.noPagesYet')}</p>
         ) : (
