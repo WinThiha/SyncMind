@@ -26,10 +26,8 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import {
   getGlobalIssues,
-  getIssuesSummary,
   getGlobalSimilarIssues,
   GlobalIssue,
-  IssuesSummary,
   GlobalSimilarIssue,
   type GetIssuesParams,
 } from '@/lib/api/issues';
@@ -159,11 +157,9 @@ export default function IssuesPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const initialProjectId = searchParams.get('project_id');
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(initialProjectId ? Number(initialProjectId) : null);
-  const [summary, setSummary] = useState<IssuesSummary | null>(null);
   const [issues, setIssues] = useState<GlobalIssue[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<GlobalIssue | null>(null);
   const [loading, setLoading] = useState(true);
-  const [summaryLoading, setSummaryLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isAISearchEnabled, setIsAISearchEnabled] = useState(false);
@@ -202,21 +198,6 @@ export default function IssuesPage() {
     }
     loadProjects();
   }, []);
-
-  useEffect(() => {
-    async function loadSummary() {
-      setSummaryLoading(true);
-      try {
-        const data = await getIssuesSummary(selectedProjectId ?? undefined);
-        setSummary(data);
-      } catch (e) {
-        console.error('Failed to load summary', e);
-      } finally {
-        setSummaryLoading(false);
-      }
-    }
-    loadSummary();
-  }, [selectedProjectId]);
 
   const loadIssues = useCallback(async () => {
     setLoading(true);
@@ -401,11 +382,11 @@ export default function IssuesPage() {
   };
 
   const quickFilters = [
-    { label: 'All', icon: CircleDot },
-    { label: 'Assigned to Me', icon: UserCheck },
-    { label: 'Overdue', icon: AlertTriangle },
-    { label: 'High Priority', icon: AlertTriangle },
-    { label: 'Unassigned', icon: UserCheck },
+    { label: 'All', value: 'all', icon: CircleDot },
+    { label: 'Assigned to Me', value: 'assignedToMe', icon: UserCheck },
+    { label: 'Overdue', value: 'overdue', icon: AlertTriangle },
+    { label: 'High Priority', value: 'highPriority', icon: AlertTriangle },
+    { label: 'Unassigned', value: 'unassigned', icon: UserCheck },
   ];
 
   return (
@@ -548,7 +529,7 @@ export default function IssuesPage() {
                     : 'border-slate-300 bg-white text-foreground/80 hover:bg-white hover:-translate-y-[1px] hover:shadow-md active:translate-y-0 dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/60 dark:hover:bg-background'
                 )}
               >
-                <Icon className="h-4 w-4" /> {filter.label}
+                <Icon className="h-4 w-4" /> {t(`issues.global.quickFilters.${filter.value}`)}
                 {active && <span className="ml-0.5 text-brand-primary">✓</span>}
               </button>
             );
@@ -710,7 +691,7 @@ export default function IssuesPage() {
                     <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600 dark:text-foreground/50">
                       {'project_name' in issue && issue.project_name && <span className="font-bold text-slate-800 dark:text-foreground/50">{issue.project_name}</span>}
                       <span className="hidden h-1 w-1 rounded-full bg-slate-600 sm:inline-block" />
-                      <Pill>{issue.status.replace('_', ' ')}</Pill>
+                      <Pill>{t(`issues.global.status.${issue.status}`) || issue.status.replace('_', ' ')}</Pill>
                       {issue.assignee && (
                         <>
                           <span className="hidden h-1 w-1 rounded-full bg-slate-600 sm:inline-block" />
@@ -722,7 +703,7 @@ export default function IssuesPage() {
 
                   <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                     <Badge tone={issue.priority === 'critical' ? 'critical' : issue.priority === 'high' ? 'high' : 'muted'}>
-                      {issue.priority}
+                      {t(`issues.global.priority.${issue.priority}`) || issue.priority}
                     </Badge>
                     {issue.due_date && (
                       <Badge tone={new Date(issue.due_date) < new Date() ? 'critical' : 'default'}>
