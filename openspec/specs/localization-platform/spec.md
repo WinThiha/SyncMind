@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Locale catalog and fallback behavior
-The system SHALL support the locale catalog `en`, `my-MM`, `ja-JP`, `vi-VN`, and `km-KH` and MUST fallback to `en` whenever a locale is absent or invalid.
+The system SHALL support the locale catalog `en`, `my-MM`, `ja-JP`, `vi-VN`, `km-KH`, and `ko-KR` and MUST fallback to `en` whenever a locale is absent or invalid.
 
 #### Scenario: Saved locale is valid
 - **WHEN** a user has a saved locale value in the supported catalog

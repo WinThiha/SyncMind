@@ -11,11 +11,13 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectInvitationAcceptController;
 use App\Http\Controllers\ProjectInvitationController;
+use App\Http\Controllers\IssuesGlobalController;
 use App\Http\Controllers\UserSettingsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +32,10 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/user/settings', [UserSettingsController::class, 'show']);
     Route::put('/user/settings', [UserSettingsController::class, 'update']);
     Route::put('/user/settings/password', [UserSettingsController::class, 'updatePassword'])->middleware('throttle:password-update');
+    Route::get('/dashboard', [DashboardController::class, 'show']);
+    Route::get('/issues', [IssuesGlobalController::class, 'index']);
+    Route::get('/issues/summary', [IssuesGlobalController::class, 'summary']);
+    Route::get('/issues/ai/similar', [IssuesGlobalController::class, 'similar']);
 
     Route::apiResource('projects', ProjectController::class);
     Route::post('projects/{project}/transfer', [ProjectController::class, 'transferOwnership']);

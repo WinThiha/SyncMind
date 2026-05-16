@@ -31,7 +31,7 @@ export default function NewIssuePage() {
 
       <CreateIssueForm 
         projectId={id} 
-        onSuccess={() => router.push(`/projects/${id}/issues`)}
+        onSuccess={() => router.push(`/issues?project_id=${id}`)}
         onCancel={() => router.back()}
       />
     </div>

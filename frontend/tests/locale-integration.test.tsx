@@ -99,7 +99,7 @@ describe('Locale end-to-end integration', () => {
 
     await screen.findByText('システム設定')
     fireEvent.click(screen.getByRole('button', { name: '環境設定' }))
-    await screen.findByText('Appearance')
+    await screen.findByText('外観')
 
     expect(screen.getByLabelText('優先言語')).toHaveValue('ja-JP')
   })
@@ -156,7 +156,7 @@ describe('Locale end-to-end integration', () => {
 
     await screen.findByText('စနစ်ဆက်တင်များ')
     fireEvent.click(screen.getByRole('button', { name: 'စိတ်ကြိုက်များ' }))
-    await screen.findByText('Appearance')
+    await screen.findByText('အပြင်အဆင်')
 
     expect(screen.getByRole('button', { name: 'အကောင့်' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'လုံခြုံရေး' })).toBeInTheDocument()

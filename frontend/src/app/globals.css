@@ -19,6 +19,44 @@
   --glass-blur-heavy: 0px; 
   --glass-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --glass-transparency: 1;
+
+  /* Badge Colors */
+  --badge-status-open-bg: #e2e8f0;
+  --badge-status-open-text: #64748b;
+  --badge-status-closed-bg: #e2e8f0;
+  --badge-status-closed-text: #94a3b8;
+  --badge-priority-low-bg: #f1f5f9;
+  --badge-priority-low-text: #94a3b8;
+
+  /* Badge Tones - Light Mode */
+  --badge-default-bg: #e2e8f0;
+  --badge-default-text: #64748b;
+  --badge-default-border: #cbd5e1;
+  --badge-high-bg: #fef3c7;
+  --badge-high-text: #b45309;
+  --badge-high-border: #fde68a;
+  --badge-critical-bg: #fee2e2;
+  --badge-critical-text: #dc2626;
+  --badge-critical-border: #fecaca;
+  --badge-success-bg: #d1fae5;
+  --badge-success-text: #047857;
+  --badge-success-border: #a7f3d0;
+  --badge-blue-bg: #e0f2fe;
+  --badge-blue-text: #0369a1;
+  --badge-blue-border: #bae6fd;
+  --badge-muted-bg: #f1f5f9;
+  --badge-muted-text: #94a3b8;
+  --badge-muted-border: #e2e8f0;
+
+  /* Key Badge - Light Mode */
+  --badge-key-bg: #e2e8f0;
+  --badge-key-text: #475569;
+  --badge-key-border: #cbd5e1;
+
+  /* Pill Badge - Light Mode */
+  --badge-pill-bg: #e2e8f0;
+  --badge-pill-text: #475569;
+  --badge-pill-border: #cbd5e1;
 }
 
 .dark {
@@ -37,6 +75,44 @@
   --border-glow: rgba(96, 165, 250, 0.2);
   --glass-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5);
   --glass-transparency: 1;
+
+  /* Badge Colors - Dark Mode */
+  --badge-status-open-bg: #1e293b;
+  --badge-status-open-text: #94a3b8;
+  --badge-status-closed-bg: #1e293b;
+  --badge-status-closed-text: #64748b;
+  --badge-priority-low-bg: #1e293b;
+  --badge-priority-low-text: #64748b;
+
+  /* Badge Tones - Dark Mode */
+  --badge-default-bg: #334155;
+  --badge-default-text: #94a3b8;
+  --badge-default-border: #475569;
+  --badge-high-bg: #451a03;
+  --badge-high-text: #fcd34d;
+  --badge-high-border: #92400e;
+  --badge-critical-bg: #450a0a;
+  --badge-critical-text: #fca5a5;
+  --badge-critical-border: #991b1b;
+  --badge-success-bg: #022c22;
+  --badge-success-text: #6ee7b7;
+  --badge-success-border: #065f46;
+  --badge-blue-bg: #0c4a6e;
+  --badge-blue-text: #7dd3fc;
+  --badge-blue-border: #0ea5e9;
+  --badge-muted-bg: #1e293b;
+  --badge-muted-text: #64748b;
+  --badge-muted-border: #334155;
+
+  /* Key Badge - Dark Mode */
+  --badge-key-bg: #334155;
+  --badge-key-text: #94a3b8;
+  --badge-key-border: #475569;
+
+  /* Pill Badge - Dark Mode */
+  --badge-pill-bg: #475569;
+  --badge-pill-text: #f8fafc;
+  --badge-pill-border: #64748b;
 }
 
 @theme inline {

@@ -30,6 +30,31 @@ class LoginTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
+    public function test_users_can_login_with_device_name_and_receive_api_token(): void
+    {
+        $user = User::factory()->create([
+            'password' => Hash::make('password'),
+        ]);
+
+        $response = $this->postJson('/api/auth/login', [
+            'email' => $user->email,
+            'password' => 'password',
+            'device_name' => 'Pixel 8',
+        ], [
+            'Referer' => 'http://localhost',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('user.email', $user->email);
+        $response->assertJsonStructure(['token']);
+        $this->assertNotNull($response->json('token'));
+        $this->assertDatabaseHas('personal_access_tokens', [
+            'tokenable_id' => $user->id,
+            'tokenable_type' => User::class,
+            'name' => 'Pixel 8',
+        ]);
+    }
+
     public function test_users_cannot_login_with_incorrect_password(): void
     {
         $user = User::factory()->create([
