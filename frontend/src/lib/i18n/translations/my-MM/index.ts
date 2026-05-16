@@ -450,6 +450,8 @@ export const myMM: Dictionary = {
   'projects.settings.confirmDelete': 'ဤပရောဂျက်ကို အပြီးအပိုင် ဖျက်မည်မှာ သေချာပါသလား? ဤလုပ်ဆောင်မှုကို ပြန်မလှည့်နိုင်ပါ။',
   'projects.settings.confirmTransfer': 'ပိုင်ဆိုင်မှုကို လွှဲပြောင်းမည်မှာ သေချာပါသလား? ဖန်တီးသူ၏ အခွင့်ထူးများကို ဆုံးရှုံးမည်ဖြစ်သည်။',
   'projects.members.confirmRemove': 'ဤအဖွဲ့ဝင်ကို ဖယ်ရှားမည်မှာ သေချာပါသလား?',
+  'projects.members.removeNoPermission': 'ခွင့်ပြုချက် ငြင်းဆိုခဲ့သည်',
+  'projects.members.removeNoPermissionText': 'ဤအဖွဲ့ဝင်ကို ဖယ်ရှားရန် ခွင့်မပြုပါ။',
   'milestones.delete.confirm': 'မိုင်းကျောက် "{name}" ကို ဖျက်မည်လား? ချိတ်ဆက်ထားသော ပြဿနာများ ဖြုတ်ချမည်ဖြစ်သည်။',
   'issues.detail.discardConfirm': 'ဖယ်ချမည်လား?',
   'common.areYouSure': 'သေချာပါသလား？',

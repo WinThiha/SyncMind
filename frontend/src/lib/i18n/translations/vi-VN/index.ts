@@ -463,6 +463,8 @@ export const viVN: Dictionary = {
   'projects.settings.confirmDelete': 'Bạn có chắc muốn xóa hoàn toàn dự án này không? Hành động này không thể hoàn tác.',
   'projects.settings.confirmTransfer': 'Bạn có chắc muốn chuyển quyền sở hữu không? Bạn sẽ mất quyền của người tạo.',
   'projects.members.confirmRemove': 'Bạn có chắc muốn xóa thành viên này không?',
+  'projects.members.removeNoPermission': 'Không có quyền',
+  'projects.members.removeNoPermissionText': 'Bạn không có quyền xóa thành viên này.',
   'milestones.delete.confirm': 'Xóa cột mốc "{name}"? Các vấn đề liên kết sẽ bị hủy liên kết.',
   'issues.detail.discardConfirm': 'Bỏ qua?',
   'common.areYouSure': 'Bạn có chắc không?',

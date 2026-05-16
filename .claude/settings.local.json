@@ -57,7 +57,9 @@
       "Bash(openspec instructions *)",
       "PowerShell(openspec instructions *)",
       "PowerShell(Get-Command *)",
-      "Bash(git -C \"\\\\\\\\wsl.localhost\\\\Ubuntu\\\\var\\\\www\\\\SyncMind\" diff --stat HEAD)"
+      "Bash(git -C \"\\\\\\\\wsl.localhost\\\\Ubuntu\\\\var\\\\www\\\\SyncMind\" diff --stat HEAD)",
+      "Bash(openspec new *)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")"
     ]
   }
 }

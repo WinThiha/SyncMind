@@ -1,5 +1,32 @@
 import Swal from 'sweetalert2';
 
+interface AlertOptions {
+  title: string;
+  text: string;
+  confirmText?: string;
+}
+
+export async function showAlert(opts: AlertOptions): Promise<void> {
+  await Swal.fire({
+    title: opts.title,
+    text: opts.text,
+    icon: 'warning',
+    iconColor: '#f59e0b',
+    confirmButtonText: opts.confirmText ?? 'OK',
+    background: 'var(--background)',
+    color: 'var(--foreground)',
+    customClass: {
+      popup: 'swal-glass',
+      icon: 'swal-icon',
+      title: 'swal-title',
+      htmlContainer: 'swal-text',
+      actions: 'swal-actions',
+      confirmButton: 'swal-btn-danger',
+    },
+    buttonsStyling: false,
+  });
+}
+
 interface ConfirmOptions {
   title: string;
   text: string;

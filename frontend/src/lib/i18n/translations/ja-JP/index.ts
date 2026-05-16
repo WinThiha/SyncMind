@@ -463,6 +463,8 @@ export const jaJP: Dictionary = {
   'projects.settings.confirmDelete': 'このプロジェクトを完全に削除してもよろしいですか？この操作は元に戻せません。',
   'projects.settings.confirmTransfer': '所有権を譲渡してもよろしいですか？作成者の権限を失います。',
   'projects.members.confirmRemove': 'このメンバーを削除してもよろしいですか？',
+  'projects.members.removeNoPermission': 'アクセス拒否',
+  'projects.members.removeNoPermissionText': 'このメンバーを削除する権限がありません。',
   'milestones.delete.confirm': 'マイルストーン「{name}」を削除しますか？関連するイシューはリンクが解除されます。',
   'issues.detail.discardConfirm': '破棄しますか？',
   'common.areYouSure': 'よろしいですか？',
