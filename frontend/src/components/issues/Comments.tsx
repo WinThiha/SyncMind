@@ -1,6 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+/**
+ * STALE COMPONENT - No longer used on the issue detail page.
+ * The detail page now uses a unified activity feed via useActivityEntities hook.
+ * Kept for reference or potential future use.
+ */
+
+import { useEffect, useState } from 'react';
 import { useLocale } from '@/context/LocaleContext';
 import api from '@/lib/axios';
 import MarkdownEditor from '../shared/MarkdownEditor';
@@ -30,14 +36,20 @@ interface CommentsProps {
   projectId: number | string;
   issueKey: string;
   initialComments: Comment[];
+  hideForm?: boolean;
+  onCommentCreated?: () => Promise<void> | void;
 }
 
-export default function Comments({ projectId, issueKey, initialComments }: CommentsProps) {
+export default function Comments({ projectId, issueKey, initialComments, hideForm = false, onCommentCreated }: CommentsProps) {
   const { t } = useLocale();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setComments(initialComments);
+  }, [initialComments]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,8 +63,10 @@ export default function Comments({ projectId, issueKey, initialComments }: Comme
       );
       setComments((prev) => [...prev, response.data.data]);
       setNewComment('');
-    } catch (err: any) {
-      setError(err.response?.data?.message ?? t('issues.comments.error'));
+      await onCommentCreated?.();
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setError(message ?? t('issues.comments.error'));
     } finally {
       setSubmitting(false);
     }
@@ -98,6 +112,7 @@ export default function Comments({ projectId, issueKey, initialComments }: Comme
       </div>
 
       {/* New comment form */}
+      {!hideForm && (
       <form onSubmit={handleSubmit} className="border-t border-border-glow pt-5 space-y-3">
         <div className="rounded-xl overflow-hidden border border-border-glow focus-within:border-brand-primary/30 focus-within:ring-4 focus-within:ring-brand-primary/10 transition-all bg-foreground/[0.02]">
           <MarkdownEditor
@@ -133,6 +148,7 @@ export default function Comments({ projectId, issueKey, initialComments }: Comme
           </GlassButton>
         </div>
       </form>
+      )}
     </GlassCard>
   );
 }

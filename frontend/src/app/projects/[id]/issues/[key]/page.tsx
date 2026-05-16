@@ -2,12 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, use, useCallback } from 'react';
-import { getIssue, Issue, deleteIssue, updateIssue } from '@/lib/api/issues';
-import { getProject, Project } from '@/lib/api/projects';
+import { createIssueComment, getIssue, Issue, deleteIssue, updateIssue, summarizeIssue, type ThreadSummary } from '@/lib/api/issues';
+import { getProject, getProjectMembers, Project, type ProjectMember } from '@/lib/api/projects';
 import { getMilestones, type Milestone } from '@/lib/api/milestones';
-import ChangeHistory from '@/components/issues/ChangeHistory';
-import Comments from '@/components/issues/Comments';
 import Markdown from '@/components/shared/Markdown';
+import { ActivityComment, ActivityHistoryEntry } from '@/components/issues/hooks/useActivityEntities';
+import MarkdownEditor from '@/components/shared/MarkdownEditor';
+import SummaryCard from '@/components/issues/SummaryCard';
 import { useAuth } from '@/context/AuthContext';
 import { useLocale } from '@/context/LocaleContext';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -18,25 +19,15 @@ import {
   ChevronLeft, Edit2, Trash2, FileText,
   CheckCircle2, AlertCircle, Calendar, Copy, Check,
   ChevronDown, Flag, AlertTriangle,
+  Clock, History as HistoryIcon, MessageSquare, Send, Sparkles, User as UserIcon, ArrowRight,
 } from 'lucide-react';
+import { useActivityEntities } from '@/components/issues/hooks/useActivityEntities';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-interface Comment {
-  id: number;
-  content: string;
-  created_at: string;
-  user: { name: string };
-}
+interface Comment extends ActivityComment {}
 
-interface HistoryEntry {
-  id: number;
-  field: string;
-  old_value: string | null;
-  new_value: string | null;
-  created_at: string;
-  user: { name: string };
-}
+interface HistoryEntry extends ActivityHistoryEntry {}
 
 interface IssueWithExtras extends Issue {
   comments?: Comment[];
@@ -117,16 +108,29 @@ export default function IssueDetailPage({ params }: { params: Promise<{ id: stri
 
   const [issue, setIssue]           = useState<IssueWithExtras | null>(null);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [members, setMembers]       = useState<ProjectMember[]>([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState<string | null>(null);
   const [canEdit, setCanEdit]       = useState(false);
   const [canDelete, setCanDelete]   = useState(false);
+  const [quickData, setQuickData]   = useState({
+    status: '',
+    priority: '',
+    assignee_id: '',
+    estimated_hours: '',
+    actual_hours: '',
+  });
+  const [newComment, setNewComment] = useState('');
+  const [submittingUpdate, setSubmittingUpdate] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [summary, setSummary] = useState<ThreadSummary | null>(null);
+  const [summarizing, setSummarizing] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   // UX states
   const [confirmDelete, setConfirmDelete]     = useState(false);
   const [deleting, setDeleting]               = useState(false);
   const [copied, setCopied]                   = useState(false);
-  const [changingStatus, setChangingStatus]   = useState(false);
 
   const loadIssue = useCallback(async () => {
     setLoading(true);
@@ -138,6 +142,13 @@ export default function IssueDetailPage({ params }: { params: Promise<{ id: stri
       ]);
       setIssue(issueData as IssueWithExtras);
       setMilestones(milestonesData);
+      setQuickData({
+        status: issueData.status || '',
+        priority: issueData.priority || '',
+        assignee_id: issueData.assignee_id?.toString() || '',
+        estimated_hours: issueData.estimated_hours?.toString() || '',
+        actual_hours: issueData.actual_hours?.toString() || '',
+      });
       const member = projectData.members?.find((m) => m.id === user?.id);
       const isCreator = projectData.creator_id === user?.id;
       const isAdmin = member?.pivot?.role === 'admin' || isCreator;
@@ -149,11 +160,23 @@ export default function IssueDetailPage({ params }: { params: Promise<{ id: stri
     } finally {
       setLoading(false);
     }
-  }, [projectId, issueKey, user]);
+  }, [projectId, issueKey, t, user]);
 
   useEffect(() => {
     if (user) loadIssue();
   }, [loadIssue, user]);
+
+  useEffect(() => {
+    async function loadMembers() {
+      try {
+        const data = await getProjectMembers(projectId);
+        setMembers(data);
+      } catch (err) {
+        console.error('Failed to load project members', err);
+      }
+    }
+    if (user) loadMembers();
+  }, [projectId, user]);
 
   // Keyboard shortcut: E → edit page
   useEffect(() => {
@@ -187,16 +210,80 @@ export default function IssueDetailPage({ params }: { params: Promise<{ id: stri
     }
   };
 
-  const handleStatusChange = async (newStatus: string) => {
+  const hasQuickChanges = (currentIssue = issue) => {
+    if (!currentIssue) return false;
+    return quickData.status !== currentIssue.status ||
+      quickData.priority !== currentIssue.priority ||
+      quickData.assignee_id !== (currentIssue.assignee_id?.toString() || '') ||
+      quickData.estimated_hours !== (currentIssue.estimated_hours?.toString() || '') ||
+      quickData.actual_hours !== (currentIssue.actual_hours?.toString() || '');
+  };
+
+  const handleSummarize = async (force = false) => {
     if (!issue) return;
-    setChangingStatus(true);
+    setSummarizing(true);
+    setSummaryError(null);
     try {
-      await updateIssue(projectId, issueKey, { status: newStatus });
-      setIssue((prev) => prev ? { ...prev, status: newStatus } : prev);
+      const result = await summarizeIssue(projectId, issue.key, force);
+      setSummary(result);
+    } catch {
+      setSummaryError(t('issues.detail.summaryError'));
     } finally {
-      setChangingStatus(false);
+      setSummarizing(false);
     }
   };
+
+  const handleQuickSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!issue) return;
+
+    const hasChanges = hasQuickChanges(issue);
+    if (!newComment.trim() && !hasChanges) return;
+
+    setSubmittingUpdate(true);
+    setUpdateError(null);
+    try {
+      if (hasChanges) {
+        await updateIssue(projectId, issue.key, {
+          status: quickData.status,
+          priority: quickData.priority,
+          assignee_id: quickData.assignee_id ? parseInt(quickData.assignee_id, 10) : null,
+          estimated_hours: quickData.estimated_hours ? parseFloat(quickData.estimated_hours) : null,
+          actual_hours: quickData.actual_hours ? parseFloat(quickData.actual_hours) : null,
+        });
+      }
+
+      if (newComment.trim()) {
+        await createIssueComment(projectId, issue.key, { content: newComment });
+      }
+
+      setNewComment('');
+      setSummary(null);
+      await loadIssue();
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setUpdateError(message ?? t('issues.edit.error'));
+    } finally {
+      setSubmittingUpdate(false);
+    }
+  };
+
+  const { activityEntities } = useActivityEntities(
+    (issue?.comments || []) as ActivityComment[],
+    (issue?.history || []) as ActivityHistoryEntry[],
+    {
+      members,
+      resolveAssignee: (oldValue, newValue) => {
+        const oldMember = members.find(m => m.id.toString() === oldValue?.toString());
+        const newMember = members.find(m => m.id.toString() === newValue?.toString());
+        return {
+          displayField: t('issues.create.assignee').toLowerCase(),
+          displayOld: oldMember ? oldMember.name : (oldValue || t('issues.history.none')),
+          displayNew: newMember ? newMember.name : (newValue || t('issues.history.none')),
+        };
+      },
+    },
+  );
 
   if (loading) return <PageSkeleton />;
 
@@ -345,15 +432,232 @@ export default function IssueDetailPage({ params }: { params: Promise<{ id: stri
             </div>
           </GlassCard>
 
-          {/* Comments */}
-          <Comments
-            projectId={projectId}
-            issueKey={issueKey}
-            initialComments={issue.comments ?? []}
-          />
+          {/* AI Summary */}
+          <GlassCard className="p-5 sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
+              <div className="flex items-center gap-2 text-brand-primary">
+                <Sparkles size={15} />
+                <h2 className="text-[10px] font-bold uppercase tracking-widest">{t('issues.detail.activity')}</h2>
+              </div>
+              {!summary && !summarizing && (
+                <button
+                  onClick={() => handleSummarize()}
+                  className="inline-flex items-center justify-center text-[10px] font-bold text-brand-primary hover:text-brand-primary/80 bg-brand-primary/5 px-3 py-1.5 rounded-xl border border-brand-primary/10 transition-all w-fit"
+                >
+                  <Sparkles className="w-3 h-3 mr-1.5" />
+                  {t('issues.detail.summarizeThread')}
+                </button>
+              )}
+            </div>
 
-          {/* History */}
-          <ChangeHistory history={issue.history ?? []} />
+            {summaryError && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-2xl text-[11px] font-bold uppercase tracking-wider mb-4">
+                {summaryError}
+              </div>
+            )}
+
+            <SummaryCard
+              summary={summary}
+              loading={summarizing}
+              onRefresh={() => handleSummarize(true)}
+            />
+
+            {!summary && !summarizing && !summaryError && (
+              <p className="text-sm text-foreground/35 italic">{t('issues.detail.noActivity')}</p>
+            )}
+          </GlassCard>
+
+          {/* Quick update */}
+          {canEdit && (
+            <GlassCard className="p-5 sm:p-6">
+              <div className="flex items-center gap-2 text-brand-primary mb-5">
+                <MessageSquare size={15} />
+                <h2 className="text-[10px] font-bold uppercase tracking-widest">{t('issues.detail.updateAndPost')}</h2>
+              </div>
+
+              <form onSubmit={handleQuickSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <label className="flex items-center gap-1.5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest mb-2">
+                      <CheckCircle2 size={12} className="text-brand-primary" />
+                      {t('issues.edit.status')}
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={quickData.status}
+                        onChange={(e) => setQuickData({ ...quickData, status: e.target.value })}
+                        className="w-full appearance-none bg-background border border-border-glow rounded-xl px-3 py-2.5 pr-8 text-xs font-bold text-foreground/70 outline-none cursor-pointer hover:border-brand-primary/30 transition-all"
+                      >
+                        {Object.entries(statusCfg).map(([val, cfg]) => (
+                          <option key={val} value={val}>{t(cfg.labelKey)}</option>
+                        ))}
+                      </select>
+                      <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/30" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center gap-1.5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest mb-2">
+                      <AlertCircle size={12} className="text-brand-primary" />
+                      {t('issues.create.priority')}
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={quickData.priority}
+                        onChange={(e) => setQuickData({ ...quickData, priority: e.target.value })}
+                        className="w-full appearance-none bg-background border border-border-glow rounded-xl px-3 py-2.5 pr-8 text-xs font-bold text-foreground/70 outline-none cursor-pointer hover:border-brand-primary/30 transition-all"
+                      >
+                        <option value="low">{t('issues.search.priorityLow')}</option>
+                        <option value="normal">{t('issues.search.priorityNormal')}</option>
+                        <option value="high">{t('issues.search.priorityHigh')}</option>
+                      </select>
+                      <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/30" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center gap-1.5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest mb-2">
+                      <UserIcon size={12} className="text-brand-primary" />
+                      {t('issues.create.assignee')}
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={quickData.assignee_id}
+                        onChange={(e) => setQuickData({ ...quickData, assignee_id: e.target.value })}
+                        className="w-full appearance-none bg-background border border-border-glow rounded-xl px-3 py-2.5 pr-8 text-xs font-bold text-foreground/70 outline-none cursor-pointer hover:border-brand-primary/30 transition-all"
+                      >
+                        <option value="">{t('issues.create.unassigned')}</option>
+                        {members.map((member) => (
+                          <option key={member.id} value={member.id}>{member.name}</option>
+                        ))}
+                      </select>
+                      <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/30" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center gap-1.5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest mb-2">
+                      <Clock size={12} className="text-brand-primary" />
+                      {t('issues.detail.estHours')}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      value={quickData.estimated_hours}
+                      onChange={(e) => setQuickData({ ...quickData, estimated_hours: e.target.value })}
+                      placeholder={t('issues.detail.hoursPlaceholder')}
+                      className="w-full bg-foreground/5 border border-border-glow rounded-xl px-3 py-2.5 text-xs font-bold outline-none focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30 transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="flex items-center gap-1.5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest mb-2">
+                      <HistoryIcon size={12} className="text-brand-primary" />
+                      {t('issues.detail.actHours')}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      value={quickData.actual_hours}
+                      onChange={(e) => setQuickData({ ...quickData, actual_hours: e.target.value })}
+                      placeholder={t('issues.detail.hoursPlaceholder')}
+                      className="w-full bg-foreground/5 border border-border-glow rounded-xl px-3 py-2.5 text-xs font-bold outline-none focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-xl overflow-hidden border border-border-glow bg-foreground/[0.02]">
+                  <MarkdownEditor
+                    value={newComment}
+                    onChange={setNewComment}
+                    placeholder={t('issues.detail.commentPlaceholder')}
+                    rows={3}
+                  />
+                </div>
+
+                <AnimatePresence>
+                  {updateError && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="flex items-center gap-2 text-xs text-red-500 font-medium"
+                    >
+                      <AlertTriangle size={12} />
+                      {updateError}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+
+                <div className="flex justify-end">
+                  <GlassButton
+                    type="submit"
+                    size="sm"
+                    disabled={submittingUpdate || (!newComment.trim() && !hasQuickChanges())}
+                  >
+                    <Send size={14} />
+                    {t('issues.detail.updateAndPost')}
+                  </GlassButton>
+                </div>
+              </form>
+            </GlassCard>
+          )}
+
+          {/* Activity Feed */}
+          <GlassCard className="p-5 sm:p-6">
+            <div className="flex items-center gap-2 text-brand-primary mb-5">
+              <HistoryIcon size={15} />
+              <h2 className="text-[10px] font-bold uppercase tracking-widest">{t('issues.detail.activity')}</h2>
+            </div>
+
+            <div className="space-y-6">
+              {activityEntities.length === 0 ? (
+                <p className="text-sm text-foreground/35 italic">{t('issues.detail.noActivity')}</p>
+              ) : (
+                activityEntities.map((entity) => (
+                  <div key={entity.id} className="relative flex gap-4">
+                    <div className="absolute left-[18px] top-[40px] bottom-[-32px] w-px bg-border-glow/20 last:hidden" />
+                    <div className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center z-10 shadow-sm border bg-background text-brand-primary border-border-glow font-bold text-xs">
+                      {entity.user.name.charAt(0)}
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold">{entity.user.name}</span>
+                        <span className="text-[10px] font-bold text-foreground/30 uppercase">
+                          {new Date(entity.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </span>
+                      </div>
+                      <div className="bg-foreground/[0.03] border border-border-glow/30 rounded-xl overflow-hidden">
+                        {entity.history.length > 0 && (
+                          <div className={`p-4 space-y-2 bg-foreground/[0.01] ${entity.comments.length > 0 ? 'border-b border-border-glow/10' : ''}`}>
+                            {entity.formattedHistory.map((h) => (
+                              <div key={h.id} className="flex items-center gap-3 text-xs font-bold">
+                                <span className="text-foreground/40 uppercase tracking-wider shrink-0">{h.displayField}:</span>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="text-foreground/30 line-through font-medium">{h.displayOld}</span>
+                                  <ArrowRight size={10} className="text-brand-primary/40" />
+                                  <span className="text-brand-primary">{h.displayNew}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {entity.comments.length > 0 && (
+                          <div className="p-5 text-sm leading-relaxed text-foreground/80">
+                            {entity.comments.map((c: any) => (
+                              <div key={c.id} className="whitespace-pre-wrap">{c.content}</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </GlassCard>
         </div>
 
         {/* ── Sidebar ── */}
@@ -365,28 +669,12 @@ export default function IssueDetailPage({ params }: { params: Promise<{ id: stri
               {t('issues.detail.properties')}
             </h2>
 
-            {/* Status — quick-change when user can edit */}
+            {/* Status */}
             <PropRow label={t('issues.edit.status')}>
-              {canEdit ? (
-                <div className="relative">
-                  <select
-                    value={issue.status}
-                    disabled={changingStatus}
-                    onChange={(e) => handleStatusChange(e.target.value)}
-                    className={`appearance-none text-[10px] font-bold pl-2.5 pr-6 py-1 rounded-full border cursor-pointer outline-none transition-opacity ${status.cls} ${changingStatus ? 'opacity-50' : ''}`}
-                  >
-                    {Object.entries(statusCfg).map(([val, cfg]) => (
-                      <option key={val} value={val}>{t(cfg.labelKey)}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={9} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-60" />
-                </div>
-              ) : (
-                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border ${status.cls}`}>
-                  <CheckCircle2 size={9} />
-                  {t(status.labelKey)}
-                </span>
-              )}
+              <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border ${status.cls}`}>
+                <CheckCircle2 size={9} />
+                {t(status.labelKey)}
+              </span>
             </PropRow>
 
             <PropRow label={t('issues.create.priority')}>
