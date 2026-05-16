@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, BookOpen, Plus } from 'lucide-react';
+import { ChevronLeft, BookOpen, Plus, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { WikiPageList } from '@/components/wiki/WikiPageList';
@@ -20,6 +20,7 @@ export default function WikiHomePage({ params }: { params: Promise<{ id: string 
   const [project, setProject] = useState<Project | null>(null);
   const [pages, setPages] = useState<WikiPageSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     async function load() {
@@ -70,16 +71,28 @@ export default function WikiHomePage({ params }: { params: Promise<{ id: string 
         </div>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+        {/* Mobile sidebar toggle */}
+        <button
+          onClick={() => setSidebarOpen((v) => !v)}
+          className="lg:hidden flex items-center gap-2 w-full text-sm font-medium px-3 py-2 rounded-xl border border-border-glow bg-foreground/5 hover:bg-foreground/10 text-foreground/70 hover:text-foreground transition-colors"
+        >
+          <FileText size={14} />
+          {t('wiki.list.pages')}
+          {sidebarOpen ? <ChevronUp size={14} className="ml-auto" /> : <ChevronDown size={14} className="ml-auto" />}
+        </button>
+
         {/* Sidebar page list */}
-        <GlassCard className="w-60 shrink-0 p-0 overflow-hidden self-start sticky top-4">
-          <WikiPageList pages={pages} projectId={projectId} isAdmin={!!isAdmin} />
-        </GlassCard>
+        <div className={`${sidebarOpen ? 'block' : 'hidden'} lg:block lg:w-60 lg:shrink-0 lg:self-start lg:sticky lg:top-4`}>
+          <GlassCard className="p-0 overflow-hidden">
+            <WikiPageList pages={pages} projectId={projectId} isAdmin={!!isAdmin} />
+          </GlassCard>
+        </div>
 
         {/* Main content area */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {pages.length === 0 ? (
-            <GlassCard className="p-12 text-center">
+            <GlassCard className="p-8 sm:p-12 text-center">
               <BookOpen size={40} className="mx-auto mb-4 text-foreground/20" />
               <h2 className="text-xl font-bold mb-2">{t('wiki.home.noPages')}</h2>
               <p className="text-foreground/50 text-sm mb-6">

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
+import { confirmAction } from '@/lib/alert';
 import MarkdownEditor from '../shared/MarkdownEditor';
 import { 
   X, 
@@ -133,6 +134,17 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
     } catch (err) {
       console.error('Failed to load members', err);
     }
+  };
+
+  const handleDiscardComment = async () => {
+    if (!newComment.trim()) { setIsEditorFocused(false); return; }
+    const ok = await confirmAction({
+      title: t('common.areYouSure'),
+      text: t('issues.detail.discardConfirm'),
+      confirmText: t('common.discard'),
+      cancelText: t('common.cancel'),
+    });
+    if (ok) { setNewComment(''); setIsEditorFocused(false); }
   };
 
   const handleAddComment = async (e: React.FormEvent) => {
@@ -342,7 +354,7 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
                 </div>
 
                 <div className="flex justify-end gap-3 shrink-0">
-                  <GlassButton variant="ghost" size="sm" onClick={() => { if (!newComment.trim()) setIsEditorFocused(false); else if (window.confirm(t('issues.detail.discardConfirm'))) { setNewComment(''); setIsEditorFocused(false); } }}>{t('common.cancel')}</GlassButton>
+                  <GlassButton variant="ghost" size="sm" onClick={handleDiscardComment}>{t('common.cancel')}</GlassButton>
                   <GlassButton size="sm" disabled={submittingComment} onClick={(e) => handleAddComment(e as any)}><Send size={14} />{t('issues.detail.updateAndPost')}</GlassButton>
                 </div>
               </div>

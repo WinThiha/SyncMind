@@ -14,6 +14,7 @@ import {
 import { AxiosError } from 'axios';
 import { useAuth } from '@/context/AuthContext';
 import { useLocale } from '@/context/LocaleContext';
+import { confirmAction, showAlert } from '@/lib/alert';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { Users, Mail, Shield, UserMinus, UserPlus, ShieldAlert, Clock, X, CheckCircle, Pencil } from 'lucide-react';
@@ -34,20 +35,22 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
-  const [editingCreatorPositionId, setEditingCreatorPositionId] = useState<number | null>(null);
+  const [editingPositionId, setEditingPositionId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { user } = useAuth();
   const { t } = useLocale();
 
   const isAdmin = userRole === 'admin';
+  const isCreator = userRole === 'creator';
+  const canManageMembers = isAdmin || isCreator;
 
   useEffect(() => {
     async function loadData() {
       try {
         const membersData = await getProjectMembers(projectId);
         setMembers(membersData);
-        if (isAdmin) {
+        if (canManageMembers) {
           const invitesData = await getProjectInvitations(projectId);
           setInvitations(invitesData);
         }
@@ -58,7 +61,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
       }
     }
     loadData();
-  }, [projectId, isAdmin]);
+  }, [projectId, canManageMembers]);
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,15 +93,21 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
   };
 
   const handleRemoveMember = async (userId: number) => {
-    if (confirm(t('projects.members.confirmRemove'))) {
-      setError(null);
-      try {
-        await removeProjectMember(projectId, userId);
-        setMembers(members.filter(m => m.id !== userId));
-      } catch (err) {
-        const axiosError = err as AxiosError<{ message?: string }>;
-        setError(axiosError.response?.data?.message || t('projects.members.removeError'));
-      }
+    const ok = await confirmAction({
+      title: t('common.areYouSure'),
+      text: t('projects.members.confirmRemove'),
+      confirmText: t('common.yesRemove'),
+      cancelText: t('common.cancel'),
+      danger: true,
+    });
+    if (!ok) return;
+    setError(null);
+    try {
+      await removeProjectMember(projectId, userId);
+      setMembers(members.filter(m => m.id !== userId));
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      setError(axiosError.response?.data?.message || t('projects.members.removeError'));
     }
   };
 
@@ -175,10 +184,20 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
           const mRole = member.pivot?.role || 'Member';
           const mPosition = member.pivot?.position ?? '';
           const isCreatorMember = member.id === creatorId;
-          const canManageRole = isAdmin && member.id !== user?.id && mRole !== 'creator';
-          const canManagePosition = isAdmin;
-          const canEditCreatorPosition = canManagePosition && isCreatorMember;
-          const isPositionEditable = canManagePosition && (!isCreatorMember || editingCreatorPositionId === member.id);
+          const isOwnRow = member.id === user?.id;
+          const isNormalMember = mRole === 'normal';
+          const currentUserIsOwner = user?.id === creatorId;
+          const canManageRole = isAdmin && !isOwnRow && !isCreatorMember;
+          const canRemoveMember = currentUserIsOwner
+            ? !isCreatorMember
+            : isAdmin && isNormalMember && !isOwnRow;
+          // Owner can manage all positions; admin can manage normal-member positions only; normal member can manage own only
+          const canManagePosition = currentUserIsOwner
+            ? true
+            : isAdmin
+              ? isNormalMember && !isCreatorMember
+              : isOwnRow;
+          const isPositionEditable = canManagePosition && editingPositionId === member.id;
 
           return (
             <li
@@ -214,9 +233,9 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
                   </div>
                 ) : (
                   <span className={`text-[10px] px-3 py-1 rounded-lg font-bold uppercase tracking-wider ${
-                    mRole === 'creator' ? 'bg-brand-primary/10 text-brand-primary' : 'bg-foreground/10 text-foreground/60'
+                    isCreatorMember ? 'bg-brand-primary/10 text-brand-primary' : 'bg-foreground/10 text-foreground/60'
                   }`}>
-                    {mRole}
+                    {isCreatorMember ? 'owner' : mRole}
                   </span>
                 )}
 
@@ -228,7 +247,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
                       className="bg-background border border-border-glow rounded-xl px-3 py-1.5 text-[10px] font-bold outline-none w-36"
                       defaultValue={mPosition}
                       readOnly={!isPositionEditable}
-                      disabled={updatingId === member.id || (isCreatorMember && editingCreatorPositionId !== member.id)}
+                      disabled={updatingId === member.id || editingPositionId !== member.id}
                       onBlur={(e) => {
                         if (!isPositionEditable) return;
                         const nextPosition = e.target.value.trim();
@@ -238,15 +257,13 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
                             position: nextPosition || null,
                           });
                         }
-                        if (isCreatorMember) {
-                          setEditingCreatorPositionId(null);
-                        }
+                        setEditingPositionId(null);
                       }}
                     />
-                    {canEditCreatorPosition && editingCreatorPositionId !== member.id && (
+                    {editingPositionId !== member.id && (
                       <button
                         type="button"
-                        onClick={() => setEditingCreatorPositionId(member.id)}
+                        onClick={() => setEditingPositionId(member.id)}
                         className="p-1.5 text-foreground/40 hover:text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-all"
                         title={t('projects.members.editCreatorTitle')}
                       >
@@ -260,10 +277,24 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
                   </span>
                 )}
 
-                {canManageRole && (
+                {!isOwnRow && (
                   <button
-                    onClick={() => handleRemoveMember(member.id)}
-                    className="p-2 text-red-500/40 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                    onClick={() => {
+                      if (canRemoveMember) {
+                        void handleRemoveMember(member.id);
+                      } else {
+                        void showAlert({
+                          title: t('projects.members.removeNoPermission'),
+                          text: t('projects.members.removeNoPermissionText'),
+                          confirmText: t('common.confirm'),
+                        });
+                      }
+                    }}
+                    className={`p-2 rounded-xl transition-all ${
+                      canRemoveMember
+                        ? 'text-red-500/40 hover:text-red-500 hover:bg-red-500/10'
+                        : 'text-foreground/20 hover:text-foreground/40 cursor-not-allowed'
+                    }`}
                     title={t('projects.members.removeTitle')}
                   >
                     <UserMinus size={18} />
@@ -275,7 +306,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
         })}
       </ul>
 
-      {isAdmin && invitations.length > 0 && (
+      {canManageMembers && invitations.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 text-foreground/40 mb-4">
             <Clock size={16} />
@@ -321,7 +352,7 @@ export default function MemberManagement({ projectId, creatorId, userRole }: Mem
         </div>
       )}
 
-      {isAdmin && (
+      {canManageMembers && (
         <form onSubmit={handleAddMember} className="space-y-6 pt-8 border-t border-border-glow/50">
           <div className="flex items-center gap-2 text-foreground/40 mb-4">
             <UserPlus size={16} />

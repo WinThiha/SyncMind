@@ -79,7 +79,7 @@ export default function WikiNewPage({ params }: { params: Promise<{ id: string }
           <h1 className="text-2xl font-bold">{t('wiki.new.title')}</h1>
         </div>
       </div>
-      <GlassCard className="p-6 flex-1">
+      <GlassCard className="p-4 sm:p-6 flex-1">
         <WikiPageEditor
           projectId={projectId}
           onSave={handleSave}

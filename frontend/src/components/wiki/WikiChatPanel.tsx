@@ -46,7 +46,7 @@ export function WikiChatPanel({ projectId, onClose }: WikiChatPanelProps) {
   }
 
   return (
-    <div className="fixed right-0 top-0 h-full w-96 z-40 flex flex-col bg-background border-l border-border-glow shadow-2xl">
+    <div className="w-full h-full flex flex-col bg-background border-l border-border-glow shadow-2xl">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border-glow shrink-0">
         <div>

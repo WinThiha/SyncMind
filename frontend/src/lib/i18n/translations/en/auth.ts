@@ -8,6 +8,8 @@ export const auth: Dictionary = {
   'auth.login.passwordPlaceholder': '••••••••',
   'auth.login.rememberMe': 'Keep me logged in',
   'auth.login.forgotPassword': 'Forgot password?',
+  'auth.login.showPassword': 'Show password',
+  'auth.login.hidePassword': 'Hide password',
   'auth.login.submit': 'LOG IN',
   'auth.login.submitting': 'AUTHENTICATING...',
   'auth.login.errorGeneric': 'An unexpected error occurred. Please try again.',

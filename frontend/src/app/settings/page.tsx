@@ -33,6 +33,8 @@ import {
   Monitor,
   RefreshCw,
   ChevronRight,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -239,6 +241,10 @@ function SecurityPanel({
   fieldErrors: Record<string, string[]>;
   t: (key: string) => string;
 }) {
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   return (
     <div className="space-y-6">
       {/* Social login info */}
@@ -270,34 +276,67 @@ function SecurityPanel({
 
           <div>
             <FieldLabel>{t('settings.security.currentPassword')}</FieldLabel>
-            <FieldInput
-              type="password"
-              value={passwordDraft.current_password}
-              onChange={(v) => setPasswordDraft({ ...passwordDraft, current_password: v })}
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showCurrent ? 'text' : 'password'}
+                value={passwordDraft.current_password}
+                onChange={(e) => setPasswordDraft({ ...passwordDraft, current_password: e.target.value })}
+                placeholder="••••••••"
+                className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 pr-10 text-sm font-medium outline-none transition-all focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrent(!showCurrent)}
+                aria-label={t(showCurrent ? 'auth.login.hidePassword' : 'auth.login.showPassword')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors"
+              >
+                {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
             <FieldError msg={fieldErrors.current_password?.[0]} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <FieldLabel>{t('settings.security.newPassword')}</FieldLabel>
-              <FieldInput
-                type="password"
-                value={passwordDraft.new_password}
-                onChange={(v) => setPasswordDraft({ ...passwordDraft, new_password: v })}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  type={showNew ? 'text' : 'password'}
+                  value={passwordDraft.new_password}
+                  onChange={(e) => setPasswordDraft({ ...passwordDraft, new_password: e.target.value })}
+                  placeholder="••••••••"
+                  className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 pr-10 text-sm font-medium outline-none transition-all focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNew(!showNew)}
+                  aria-label={t(showNew ? 'auth.login.hidePassword' : 'auth.login.showPassword')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors"
+                >
+                  {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               <FieldError msg={fieldErrors.new_password?.[0]} />
             </div>
             <div>
               <FieldLabel>{t('settings.security.confirmNewPassword')}</FieldLabel>
-              <FieldInput
-                type="password"
-                value={passwordDraft.new_password_confirmation}
-                onChange={(v) => setPasswordDraft({ ...passwordDraft, new_password_confirmation: v })}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  type={showConfirm ? 'text' : 'password'}
+                  value={passwordDraft.new_password_confirmation}
+                  onChange={(e) => setPasswordDraft({ ...passwordDraft, new_password_confirmation: e.target.value })}
+                  placeholder="••••••••"
+                  className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 pr-10 text-sm font-medium outline-none transition-all focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  aria-label={t(showConfirm ? 'auth.login.hidePassword' : 'auth.login.showPassword')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors"
+                >
+                  {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -600,7 +639,7 @@ export default function SettingsPage() {
   const ActiveIcon = sectionIcons[activeSection];
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto w-full">
       {/* Page header */}
       <div className="flex items-center gap-4 mb-8">
         <div className="w-10 h-10 bg-brand-primary/10 rounded-2xl flex items-center justify-center text-brand-primary">
@@ -611,36 +650,39 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-4 lg:gap-6 items-start">
-        {/* Section nav: horizontal scrollable on mobile, vertical on lg+ */}
-        <GlassCard className="p-2">
-          <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible">
-            {sections.map((section) => {
-              const Icon = sectionIcons[section];
-              const active = section === activeSection;
-              return (
-                <button
-                  key={section}
-                  onClick={() => { setActiveSection(section); clearFeedback(); setFieldErrors({}); }}
-                  className={`shrink-0 flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors lg:w-full ${
-                    active
-                      ? 'bg-brand-primary/10 text-brand-primary'
-                      : 'text-foreground/55 hover:bg-foreground/5 hover:text-foreground'
-                  }`}
-                >
-                  <Icon size={17} className="shrink-0" />
-                  {t(`settings.sections.${section}`)}
-                  {active && (
-                    <ChevronRight size={14} className="ml-auto text-brand-primary/60 hidden lg:block" />
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-        </GlassCard>
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 w-full">
+        {/* Section nav */}
+        <div className="w-full lg:w-[220px] lg:shrink-0 lg:self-start lg:sticky lg:top-4">
+          <GlassCard className="p-2">
+            <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible">
+              {sections.map((section) => {
+                const Icon = sectionIcons[section];
+                const active = section === activeSection;
+                return (
+                  <button
+                    key={section}
+                    onClick={() => { setActiveSection(section); clearFeedback(); setFieldErrors({}); }}
+                    className={`shrink-0 flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors lg:w-full ${
+                      active
+                        ? 'bg-brand-primary/10 text-brand-primary'
+                        : 'text-foreground/55 hover:bg-foreground/5 hover:text-foreground'
+                    }`}
+                  >
+                    <Icon size={17} className="shrink-0" />
+                    {t(`settings.sections.${section}`)}
+                    {active && (
+                      <ChevronRight size={14} className="ml-auto text-brand-primary/60 hidden lg:block" />
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </GlassCard>
+        </div>
 
         {/* Content */}
-        <GlassCard className="p-5 sm:p-8">
+        <div className="flex-1 min-w-0 w-full">
+          <GlassCard className="p-5 sm:p-8 min-h-[520px] w-full">
           {/* Section header */}
           <div className="flex items-center gap-3 mb-7 pb-6 border-b border-border-glow">
             <div className="w-9 h-9 bg-brand-primary/10 rounded-xl flex items-center justify-center">
@@ -720,7 +762,8 @@ export default function SettingsPage() {
               )}
             </motion.div>
           </AnimatePresence>
-        </GlassCard>
+          </GlassCard>
+        </div>
       </div>
     </div>
   );

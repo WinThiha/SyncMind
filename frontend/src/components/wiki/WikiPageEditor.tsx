@@ -69,7 +69,7 @@ export function WikiPageEditor({
       />
 
       {/* Toolbar actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center gap-2">
         <GlassButton
           type="button"
           size="sm"
@@ -80,7 +80,7 @@ export function WikiPageEditor({
           {t('wiki.editor.askAiDraft')}
         </GlassButton>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           {onCancel && (
             <GlassButton
               type="button"
