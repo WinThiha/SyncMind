@@ -412,14 +412,14 @@ export default function IssuesPage() {
     <div className="space-y-6 pb-12">
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Issues</h1>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('issues.global.title')}</h1>
           <p className="mt-2 text-sm font-medium text-foreground/70 dark:text-foreground/55">
-            Showing work assigned to you across all projects. Filter, prioritize, and move issues forward from one focused view.
+            {t('issues.global.subtitle')}
           </p>
         </div>
 
         <GlassButton onClick={handleNewIssue} className="self-start md:self-auto">
-          <Plus size={18} /> New Issue
+          <Plus size={18} /> {t('issues.global.newIssue')}
         </GlassButton>
       </header>
 
@@ -472,7 +472,7 @@ export default function IssuesPage() {
       <GlassCard className={`p-4 ${cardSurface}`}>
         <div className="mb-4">
           <label className="mb-2 block text-xs font-black uppercase tracking-widest text-foreground/55 dark:text-foreground/40">
-            Project
+            {t('issues.global.projectPickerLabel')}
           </label>
           <select
             aria-label="Project"
@@ -480,7 +480,7 @@ export default function IssuesPage() {
             onChange={e => handleProjectChange(e.target.value ? Number(e.target.value) : null)}
             className="w-full max-w-xs rounded-xl border border-slate-300/75 bg-white/70 px-4 py-3 text-sm font-semibold text-foreground outline-none ring-brand-primary/30 transition focus:ring-2 focus:ring-brand-primary/20 hover:bg-white shadow-[0_10px_24px_-22px_rgba(15,23,42,0.38),inset_0_1px_0_rgba(255,255,255,0.82)] dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/90 dark:hover:bg-background dark:shadow-[0_8px_32px_0_var(--glass-shadow)]"
           >
-            <option value="">All projects</option>
+            <option value="">{t('issues.global.allProjects')}</option>
             {projects.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
@@ -504,7 +504,7 @@ export default function IssuesPage() {
                   }
                 }
               }}
-              placeholder="Search issues, keys, descriptions..."
+              placeholder={t('issues.global.search.placeholder')}
               className="w-full rounded-xl border border-slate-300/75 bg-white py-4 pl-12 pr-24 text-sm font-medium text-foreground outline-none ring-brand-primary/30 transition focus:ring-2 focus:ring-brand-primary/20 placeholder:text-foreground/50 shadow-[0_10px_24px_-22px_rgba(15,23,42,0.38),inset_0_1px_0_rgba(255,255,255,0.82)] dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/90 dark:placeholder:text-foreground/40 dark:shadow-[0_8px_32px_0_var(--glass-shadow)]"
             />
             <button
@@ -529,7 +529,7 @@ export default function IssuesPage() {
             onClick={handleSearch}
             className="rounded-xl border border-brand-primary/40 bg-brand-primary/10 px-6 py-3 text-sm font-bold text-brand-primary transition hover:bg-brand-primary/20 dark:border-border-glow/50 flex items-center gap-2"
           >
-            <Search className="h-4 w-4" /> Search
+            <Search className="h-4 w-4" /> {t('issues.global.search.action')}
           </button>
         </div>
 
@@ -561,7 +561,7 @@ export default function IssuesPage() {
             className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-foreground/80 transition hover:bg-white dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/60 dark:hover:bg-background"
           >
             <Filter className="h-4 w-4" />
-            {showFilters ? 'Hide Filters' : 'Show Filters'}
+            {showFilters ? t('issues.global.filters.hideFilters') : t('issues.global.filters.showFilters')}
             <ChevronDown className={cx('h-4 w-4 transition-transform', showFilters && 'rotate-180')} />
           </button>
         </div>
@@ -581,11 +581,11 @@ export default function IssuesPage() {
                   onChange={e => setStatusFilter(e.target.value)}
                   className="appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-foreground/80 outline-none cursor-pointer hover:bg-white shadow-[0_10px_24px_-22px_rgba(15,23,42,0.38),inset_0_1px_0_rgba(255,255,255,0.82)] dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/60 dark:hover:bg-background dark:shadow-[0_8px_32px_0_var(--glass-shadow)]"
                 >
-                  <option value="all">ALL STATUS</option>
-                  <option value="open">OPEN</option>
-                  <option value="in_progress">IN PROGRESS</option>
-                  <option value="resolved">RESOLVED</option>
-                  <option value="closed">CLOSED</option>
+                  <option value="all">{t('issues.global.filters.allStatus')}</option>
+                  <option value="open">{t('issues.search.statusOpen')}</option>
+                  <option value="in_progress">{t('issues.search.statusInProgress')}</option>
+                  <option value="resolved">{t('issues.search.statusResolved')}</option>
+                  <option value="closed">{t('issues.search.statusClosed')}</option>
                 </select>
 
                 <select
@@ -593,10 +593,10 @@ export default function IssuesPage() {
                   onChange={e => setPriorityFilter(e.target.value)}
                   className="appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-foreground/80 outline-none cursor-pointer hover:bg-white shadow-[0_10px_24px_-22px_rgba(15,23,42,0.38),inset_0_1px_0_rgba(255,255,255,0.82)] dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/60 dark:hover:bg-background dark:shadow-[0_8px_32px_0_var(--glass-shadow)]"
                 >
-                  <option value="all">ALL PRIORITY</option>
-                  <option value="high">HIGH</option>
-                  <option value="normal">NORMAL</option>
-                  <option value="low">LOW</option>
+                  <option value="all">{t('issues.global.filters.allPriority')}</option>
+                  <option value="high">{t('issues.search.priorityHigh')}</option>
+                  <option value="normal">{t('issues.search.priorityNormal')}</option>
+                  <option value="low">{t('issues.search.priorityLow')}</option>
                 </select>
 
                 <select
@@ -604,15 +604,15 @@ export default function IssuesPage() {
                   onChange={e => setTypeFilter(e.target.value)}
                   className="appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-xs font-bold text-foreground/80 outline-none cursor-pointer hover:bg-white shadow-[0_10px_24px_-22px_rgba(15,23,42,0.38),inset_0_1px_0_rgba(255,255,255,0.82)] dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/60 dark:hover:bg-background dark:shadow-[0_8px_32px_0_var(--glass-shadow)]"
                 >
-                  <option value="all">ALL TYPE</option>
-                  <option value="Bug">Bug</option>
-                  <option value="Task">Task</option>
-                  <option value="Feature">Feature</option>
-                  <option value="Story">Story</option>
+                  <option value="all">{t('issues.global.filters.allType')}</option>
+                  <option value="Bug">{t('issues.search.typeBug') || 'Bug'}</option>
+                  <option value="Task">{t('issues.search.typeTask') || 'Task'}</option>
+                  <option value="Feature">{t('issues.search.typeFeature') || 'Feature'}</option>
+                  <option value="Story">{t('issues.search.typeStory') || 'Story'}</option>
                 </select>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-foreground/55 dark:text-foreground/40">Due Date Range</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-foreground/55 dark:text-foreground/40">{t('issues.global.filters.dueDateRange')}</label>
                   <div className="flex gap-2">
                     <input
                       type="date"
@@ -636,14 +636,14 @@ export default function IssuesPage() {
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-lg font-bold text-foreground dark:text-foreground/90">{finalIssues.length} matching issues</h2>
-          <p className="text-sm font-semibold text-foreground/60 dark:text-foreground/50">Sorted by recently updated</p>
+          <h2 className="text-lg font-bold text-foreground dark:text-foreground/90">{t('issues.global.search.matchingIssues', { count: finalIssues.length })}</h2>
+          <p className="text-sm font-semibold text-foreground/60 dark:text-foreground/50">{t('issues.global.search.sortedByRecent')}</p>
         </div>
         <button
           onClick={resetFilters}
           className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-foreground/80 transition hover:-translate-y-[1px] hover:bg-white hover:shadow-md active:translate-y-0 dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/60 dark:hover:bg-background"
         >
-          <RotateCcw className="h-4 w-4" /> Reset
+          <RotateCcw className="h-4 w-4" /> {t('issues.global.search.resetFilters')}
         </button>
       </div>
 
@@ -660,14 +660,14 @@ export default function IssuesPage() {
             <IssueCardSkeleton />
             <IssueCardSkeleton />
             <div className="py-4 text-center text-xs font-bold uppercase tracking-widest text-foreground/40 animate-pulse">
-              AI is searching for similar issues...
+              {t('issues.search.aiSearching')}
             </div>
           </>
         ) : finalIssues.length === 0 ? (
           <EmptyState>
             {isAISearchEnabled && searchQuery.trim()
-              ? "AI couldn't find any relevant issues"
-              : 'No issues found matching your filters'}
+              ? t('issues.search.aiNoResults')
+              : t('issues.search.noResults')}
           </EmptyState>
         ) : (
           finalIssues.map((issue, index) => {
@@ -700,7 +700,7 @@ export default function IssuesPage() {
                       {aiMatch && (
                         <Badge tone="success">
                           <Sparkles className="mr-1.5 h-3 w-3" />
-                          {Math.round(aiMatch.similarity * 100)}% match
+                          {t('issues.global.search.matchPercent', { percent: Math.round(aiMatch.similarity * 100) })}
                         </Badge>
                       )}
                     </div>
@@ -735,11 +735,11 @@ export default function IssuesPage() {
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-300 pt-4 text-xs text-slate-600 dark:border-border-glow/40 dark:text-foreground/50">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="inline-flex items-center gap-1.5">
-                      <MessageSquare className="h-3.5 w-3.5" /> {issue.comments_count || 0} comments
+                      <MessageSquare className="h-3.5 w-3.5" /> {issue.comments_count || 0} {t('issues.global.comments')}
                     </span>
                     {issue.updated_at && (
                       <span className="inline-flex items-center gap-1.5">
-                        <Clock3 className="h-3.5 w-3.5" /> Updated {new Date(issue.updated_at).toLocaleDateString()}
+                        <Clock3 className="h-3.5 w-3.5" /> {t('issues.global.updated')} {new Date(issue.updated_at).toLocaleDateString()}
                       </span>
                     )}
                   </div>
@@ -793,8 +793,8 @@ export default function IssuesPage() {
             >
               <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-foreground dark:text-foreground/90">Select project for new issue</h3>
-                  <p className="mt-1 text-sm font-semibold text-foreground/70 dark:text-foreground/50">Choose which project to create the issue in.</p>
+                  <h3 className="text-lg font-bold text-foreground dark:text-foreground/90">{t('issues.global.newIssueSelectProject')}</h3>
+                  <p className="mt-1 text-sm font-semibold text-foreground/70 dark:text-foreground/50">{t('issues.global.newIssueSelectProjectDesc')}</p>
                 </div>
                 <button
                   onClick={() => setShowNewIssueModal(false)}
@@ -828,7 +828,7 @@ export default function IssuesPage() {
                 onClick={() => setShowNewIssueModal(false)}
                 className="mt-4 w-full rounded-xl border border-slate-300/75 bg-white/70 px-4 py-3 text-sm font-bold text-foreground/75 transition hover:-translate-y-[1px] hover:bg-white hover:shadow-md active:translate-y-0 dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/60 dark:hover:bg-background"
               >
-                Cancel
+                {t('issues.global.newIssueCancel')}
               </button>
             </motion.div>
           </div>
