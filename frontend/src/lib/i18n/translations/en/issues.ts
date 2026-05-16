@@ -39,6 +39,8 @@ export const issues: Dictionary = {
   'issues.detail.notFound': 'Issue not found.',
   'issues.detail.loadError': 'Failed to load issue.',
   'issues.detail.backToIssues': 'Back to Issues',
+  'issues.detail.preview': 'Preview issue',
+  'issues.detail.openDetails': 'Open details',
   'issues.detail.copyIssueKey': 'Copy issue key',
   'issues.detail.press': 'Press',
   'issues.detail.toEdit': 'to edit',

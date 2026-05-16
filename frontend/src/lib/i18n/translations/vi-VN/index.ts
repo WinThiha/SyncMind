@@ -227,6 +227,8 @@ export const viVN: Dictionary = {
   'issues.detail.notFound': 'Không tìm thấy issue.',
   'issues.detail.loadError': 'Không thể tải issue.',
   'issues.detail.backToIssues': 'Quay lại Issues',
+  'issues.detail.preview': 'Xem trước issue',
+  'issues.detail.openDetails': 'Mở chi tiết',
   'issues.detail.copyIssueKey': 'Sao chép khóa issue',
   'issues.detail.press': 'Nhấn',
   'issues.detail.toEdit': 'để chỉnh sửa',

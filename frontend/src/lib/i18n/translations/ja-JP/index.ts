@@ -227,6 +227,8 @@ export const jaJP: Dictionary = {
   'issues.detail.notFound': 'Issueが見つかりません。',
   'issues.detail.loadError': 'Issueの読み込みに失敗しました。',
   'issues.detail.backToIssues': 'Issuesに戻る',
+  'issues.detail.preview': 'Issueをプレビュー',
+  'issues.detail.openDetails': '詳細を開く',
   'issues.detail.copyIssueKey': 'Issueキーをコピー',
   'issues.detail.press': '押す',
   'issues.detail.toEdit': '編集する',

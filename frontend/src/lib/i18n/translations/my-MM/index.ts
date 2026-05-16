@@ -214,6 +214,8 @@ export const myMM: Dictionary = {
   'issues.detail.notFound': 'Issue မတွေ့ပါ။',
   'issues.detail.loadError': 'Issue ကို မဖွင့်နိုင်ပါ။',
   'issues.detail.backToIssues': 'Issues သို့ ပြန်သွားရန်',
+  'issues.detail.preview': 'Issue ကို အမြန်ကြည့်ရန်',
+  'issues.detail.openDetails': 'အသေးစိတ်ဖွင့်ရန်',
   'issues.detail.copyIssueKey': 'Issue key ကို ကူးယူရန်',
   'issues.detail.press': 'နှိပ်',
   'issues.detail.toEdit': 'ပြင်ရန်',

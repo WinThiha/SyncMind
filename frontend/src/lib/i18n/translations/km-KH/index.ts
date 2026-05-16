@@ -214,6 +214,8 @@ export const kmKH: Dictionary = {
   'issues.detail.notFound': 'មិនឃើញ Issue ទេ។',
   'issues.detail.loadError': 'មិនអាចផ្ទុក Issue បានទេ។',
   'issues.detail.backToIssues': 'ត្រឡប់ទៅ Issues',
+  'issues.detail.preview': 'មើល Issue ជាមុន',
+  'issues.detail.openDetails': 'បើកព័ត៌មានលម្អិត',
   'issues.detail.copyIssueKey': 'ចម្លងលេខសម្គាល់ Issue',
   'issues.detail.press': 'ចុច',
   'issues.detail.toEdit': 'ដើម្បីកែសម្រួល',
