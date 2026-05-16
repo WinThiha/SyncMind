@@ -122,6 +122,8 @@ export const myMM: Dictionary = {
   'auth.login.passwordLabel': 'စကားဝှက်',
   'auth.login.rememberMe': 'ဝင်ထားသော အခြေအနေကို ထိန်းထားရန်',
   'auth.login.forgotPassword': 'စကားဝှက် မေ့နေပါသလား?',
+  'auth.login.showPassword': 'စကားဝှက် ပြရန်',
+  'auth.login.hidePassword': 'စကားဝှက် ဝှက်ရန်',
   'auth.login.submit': 'ဝင်ရန်',
   'auth.login.submitting': 'အတည်ပြုနေသည်...',
   'auth.login.errorGeneric': 'မမျှော်လင့်ထားသော အမှားဖြစ်ခဲ့သည်။ ထပ်ကြိုးစားပါ။',

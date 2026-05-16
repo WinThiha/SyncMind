@@ -122,6 +122,8 @@ export const kmKH: Dictionary = {
   'auth.login.passwordLabel': 'ពាក្យសម្ងាត់',
   'auth.login.rememberMe': 'រក្សាស្ថានភាពចូលប្រើ',
   'auth.login.forgotPassword': 'ភ្លេចពាក្យសម្ងាត់?',
+  'auth.login.showPassword': 'បង្ហាញពាក្យសម្ងាត់',
+  'auth.login.hidePassword': 'លាក់ពាក្យសម្ងាត់',
   'auth.login.submit': 'ចូល',
   'auth.login.submitting': 'កំពុងផ្ទៀងផ្ទាត់...',
   'auth.login.errorGeneric': 'មានកំហុសមិនរំពឹងទុក។ សូមព្យាយាមម្តងទៀត។',

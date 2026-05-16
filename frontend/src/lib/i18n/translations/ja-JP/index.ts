@@ -126,6 +126,8 @@ export const jaJP: Dictionary = {
   'auth.login.passwordLabel': 'パスワード',
   'auth.login.rememberMe': 'ログイン状態を保持',
   'auth.login.forgotPassword': 'パスワードをお忘れですか？',
+  'auth.login.showPassword': 'パスワードを表示',
+  'auth.login.hidePassword': 'パスワードを非表示',
   'auth.login.submit': 'ログイン',
   'auth.login.submitting': '認証中...',
   'auth.login.errorGeneric': '予期しないエラーが発生しました。もう一度お試しください。',

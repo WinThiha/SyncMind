@@ -8,7 +8,7 @@ import { useLocale } from '@/context/LocaleContext';
 import GoogleLoginButton from './GoogleLoginButton';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
-import { User, Mail, Lock, UserPlus } from 'lucide-react';
+import { User, Mail, Lock, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 function RegisterFormContent() {
@@ -24,6 +24,8 @@ function RegisterFormContent() {
     const [errors, setErrors] = useState<Record<string, string[]>>({});
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     
     // Social registration state
     const [isSocial, setIsSocial] = useState(false);
@@ -128,14 +130,24 @@ function RegisterFormContent() {
                         <label className="flex items-center gap-2 text-[10px] font-bold text-foreground/40 uppercase tracking-widest ml-1">
                             <Lock size={14} className="text-brand-primary" />{t('auth.login.passwordLabel')}
                         </label>
-                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder={t('auth.login.passwordPlaceholder')} className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium" />
+                        <div className="relative">
+                            <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required placeholder={t('auth.login.passwordPlaceholder')} className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 pr-10 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium" />
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={t(showPassword ? 'auth.login.hidePassword' : 'auth.login.showPassword')} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors">
+                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
                         {errors.password && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1 uppercase">{errors.password[0]}</p>}
                     </div>
                     <div className="space-y-2">
                         <label className="flex items-center gap-2 text-[10px] font-bold text-foreground/40 uppercase tracking-widest ml-1">
                             <Lock size={14} className="text-brand-primary" />{t('auth.register.confirmLabel')}
                         </label>
-                        <input type="password" value={passwordConfirmation} onChange={(e) => setPasswordConfirmation(e.target.value)} required placeholder={t('auth.login.passwordPlaceholder')} className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium" />
+                        <div className="relative">
+                            <input type={showConfirmPassword ? 'text' : 'password'} value={passwordConfirmation} onChange={(e) => setPasswordConfirmation(e.target.value)} required placeholder={t('auth.login.passwordPlaceholder')} className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 pr-10 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium" />
+                            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} aria-label={t(showConfirmPassword ? 'auth.login.hidePassword' : 'auth.login.showPassword')} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors">
+                                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
                     </div>
                 </div>
 

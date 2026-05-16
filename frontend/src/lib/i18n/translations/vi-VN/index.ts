@@ -126,6 +126,8 @@ export const viVN: Dictionary = {
   'auth.login.passwordLabel': 'Mật khẩu',
   'auth.login.rememberMe': 'Giữ tôi đăng nhập',
   'auth.login.forgotPassword': 'Quên mật khẩu?',
+  'auth.login.showPassword': 'Hiện mật khẩu',
+  'auth.login.hidePassword': 'Ẩn mật khẩu',
   'auth.login.submit': 'ĐĂNG NHẬP',
   'auth.login.submitting': 'ĐANG XÁC THỰC...',
   'auth.login.errorGeneric': 'Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.',

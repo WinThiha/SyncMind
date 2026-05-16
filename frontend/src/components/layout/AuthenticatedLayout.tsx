@@ -46,7 +46,7 @@ function LayoutContent({ children }: AuthenticatedLayoutProps) {
         collapsed ? 'lg:ml-20' : 'lg:ml-64'
       }`}>
         <Topbar />
-        <main className="h-screen pt-16 overflow-y-auto">
+        <main className="h-screen pt-16 overflow-y-auto [scrollbar-gutter:stable]">
           <div className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10 xl:px-12">
             <div className="max-w-7xl mx-auto w-full">
               <TransitionWrapper>
