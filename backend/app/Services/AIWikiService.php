@@ -22,6 +22,7 @@ class AIWikiService
             'my-MM' => 'Burmese (Myanmar)',
             'km-KH' => 'Khmer (Cambodian)',
             'vi-VN' => 'Vietnamese',
+            'ko-KR' => 'Korean',
             default => 'English',
         };
     }

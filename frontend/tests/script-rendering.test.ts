@@ -19,6 +19,10 @@ describe('script rendering support', () => {
     expect(isSupportedLocale('vi-VN')).toBe(true)
   })
 
+  it('Korean locale is supported', () => {
+    expect(isSupportedLocale('ko-KR')).toBe(true)
+  })
+
   it('Burmese catalog returns Burmese script for landing descriptions', () => {
     const text = getTranslation('my-MM', 'landing.hero.description')
     expect(text).toMatch(/[က-အ]/)
@@ -27,5 +31,10 @@ describe('script rendering support', () => {
   it('Japanese catalog returns Japanese script for landing descriptions', () => {
     const text = getTranslation('ja-JP', 'landing.hero.description')
     expect(text).toMatch(/[ぁ-んァ-ン一-龯]/)
+  })
+
+  it('Korean catalog returns Korean script for landing descriptions', () => {
+    const text = getTranslation('ko-KR', 'landing.hero.description')
+    expect(text).toMatch(/[가-힣]/)
   })
 })
