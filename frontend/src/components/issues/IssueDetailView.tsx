@@ -55,9 +55,11 @@ interface IssueDetailViewProps {
   issue: Issue;
   onIssueMutated?: () => Promise<void> | void;
   onClose: () => void;
+  detailsHref?: string;
+  detailsLabel?: string;
 }
 
-export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initialIssue, onIssueMutated, onClose }) => {
+export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initialIssue, onIssueMutated, onClose, detailsHref, detailsLabel }) => {
   const { t } = useLocale();
   const [mounted, setMounted] = useState(false);
   const [issue, setIssue] = useState<Issue>(initialIssue);
@@ -199,6 +201,14 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
             <h3 className="font-bold text-base sm:text-lg line-clamp-1 min-w-0">{issue.summary}</h3>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {detailsHref && (
+              <Link href={detailsHref}>
+                <GlassButton variant="secondary" size="sm" className="gap-1.5">
+                  <Maximize2 size={13} />
+                  <span className="hidden sm:inline">{detailsLabel ?? t('issues.detail.openDetails')}</span>
+                </GlassButton>
+              </Link>
+            )}
             <Link href={`/projects/${issue.project_id}/issues/${issue.key}/edit`}>
               <GlassButton variant="ghost" size="sm" className="gap-1.5">
                 <Edit2 size={13} />

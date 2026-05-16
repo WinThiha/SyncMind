@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { AnimatePresence } from 'framer-motion';
 import {
   Search,
   Plus,
-  SlidersHorizontal,
   UserCheck,
+  UserX,
   AlertTriangle,
   Clock3,
   CircleDot,
@@ -34,6 +34,8 @@ import {
   type GetIssuesParams,
 } from '@/lib/api/issues';
 import { getProjects, Project } from '@/lib/api/projects';
+import { IssueDetailView } from '@/components/issues/IssueDetailView';
+import { useLocale } from '@/context/LocaleContext';
 
 const cardSurface =
   'border-slate-300/75 bg-white/80 shadow-[0_18px_36px_-24px_rgba(15,23,42,0.35),inset_0_1px_0_rgba(255,255,255,0.82)] dark:border-border-glow dark:bg-[var(--bg-surface)] dark:shadow-[0_8px_32px_0_var(--glass-shadow)]';
@@ -55,18 +57,6 @@ function Badge({ children, tone = 'default' }: { children: React.ReactNode; tone
     <span className={cx('inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-black', tones[tone] || tones.default)}>
       {children}
     </span>
-  );
-}
-
-function SelectPill({ label, value }: { label: string; value: string }) {
-  return (
-    <button className="group flex min-w-[150px] items-center justify-between gap-3 rounded-2xl border border-slate-300/75 bg-white px-4 py-3 text-left shadow-[0_10px_24px_-22px_rgba(15,23,42,0.38),inset_0_1px_0_rgba(255,255,255,0.82)] transition hover:-translate-y-[1px] hover:bg-white hover:shadow-md active:translate-y-0 dark:border-border-glow/50 dark:bg-foreground/5 dark:hover:bg-background">
-      <span>
-        <span className="block text-[11px] font-black uppercase tracking-[0.2em] text-foreground/75 dark:text-foreground/40">{label}</span>
-        <span className="mt-1 block text-sm font-semibold text-foreground dark:text-foreground/90">{value}</span>
-      </span>
-      <ChevronDown className="h-4 w-4 text-foreground/60 transition group-hover:text-foreground dark:text-foreground/40" />
-    </button>
   );
 }
 
@@ -163,11 +153,15 @@ function EmptyState({ children }: { children: React.ReactNode }) {
 
 export default function IssuesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { t } = useLocale();
 
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const initialProjectId = searchParams.get('project_id');
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(initialProjectId ? Number(initialProjectId) : null);
   const [summary, setSummary] = useState<IssuesSummary | null>(null);
   const [issues, setIssues] = useState<GlobalIssue[]>([]);
+  const [selectedIssue, setSelectedIssue] = useState<GlobalIssue | null>(null);
   const [loading, setLoading] = useState(true);
   const [summaryLoading, setSummaryLoading] = useState(true);
 
@@ -184,6 +178,18 @@ export default function IssuesPage() {
 
   const [showNewIssueModal, setShowNewIssueModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    const projectId = searchParams.get('project_id');
+    const nextProjectId = projectId ? Number(projectId) : null;
+    setSelectedProjectId(nextProjectId);
+    setSelectedIssue(null);
+    setLoading(true);
+    getGlobalIssues({ project_id: nextProjectId ?? undefined })
+      .then(setIssues)
+      .catch(e => console.error('Failed to load issues', e))
+      .finally(() => setLoading(false));
+  }, [searchParams]);
 
   useEffect(() => {
     async function loadProjects() {
@@ -252,7 +258,8 @@ export default function IssuesPage() {
     if (statusFilter !== 'all') params.status = statusFilter;
     if (priorityFilter !== 'all') params.priority = priorityFilter;
     if (typeFilter !== 'all') params.type = typeFilter;
-    if (dueDateFilter !== 'all') params.due_date = dueDateFilter;
+    if (dueDateFilter.start) params.due_date_start = dueDateFilter.start;
+    if (dueDateFilter.end) params.due_date_end = dueDateFilter.end;
     if (searchQuery && !isAISearchEnabled) params.search = searchQuery;
     if (newFilter === 'Assigned to Me') params.assignee = 'me';
     if (newFilter === 'Unassigned') params.assignee = 'unassigned';
@@ -376,6 +383,18 @@ export default function IssuesPage() {
     }
   };
 
+  const handleProjectChange = (projectId: number | null) => {
+    setSelectedProjectId(projectId);
+    setSelectedIssue(null);
+    setLoading(true);
+    getGlobalIssues({ project_id: projectId ?? undefined })
+      .then(setIssues)
+      .catch(e => console.error('Failed to load issues', e))
+      .finally(() => setLoading(false));
+    const query = projectId ? `?project_id=${projectId}` : '';
+    router.push(`/issues${query}`);
+  };
+
   const handleSelectProjectForNewIssue = (projectId: number) => {
     setShowNewIssueModal(false);
     router.push(`/projects/${projectId}/issues/new`);
@@ -456,8 +475,9 @@ export default function IssuesPage() {
             Project
           </label>
           <select
+            aria-label="Project"
             value={selectedProjectId ?? ''}
-            onChange={e => setSelectedProjectId(e.target.value ? Number(e.target.value) : null)}
+            onChange={e => handleProjectChange(e.target.value ? Number(e.target.value) : null)}
             className="w-full max-w-xs rounded-xl border border-slate-300/75 bg-white/70 px-4 py-3 text-sm font-semibold text-foreground outline-none ring-brand-primary/30 transition focus:ring-2 focus:ring-brand-primary/20 hover:bg-white shadow-[0_10px_24px_-22px_rgba(15,23,42,0.38),inset_0_1px_0_rgba(255,255,255,0.82)] dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/90 dark:hover:bg-background dark:shadow-[0_8px_32px_0_var(--glass-shadow)]"
           >
             <option value="">All projects</option>
@@ -658,7 +678,16 @@ export default function IssuesPage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25, delay: index * 0.04 }}
-                className="group rounded-xl border border-slate-300/80 bg-gradient-to-br from-white via-white to-slate-50 p-4 ring-1 ring-white transition hover:-translate-y-[1px] hover:border-slate-400 active:translate-y-0 md:p-5 dark:border-border-glow/50 dark:bg-background/55 dark:bg-none dark:ring-0 dark:hover:border-border-glow/70 dark:hover:bg-background"
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedIssue(issue)}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setSelectedIssue(issue);
+                  }
+                }}
+                className="group cursor-pointer rounded-xl border border-slate-300/80 bg-gradient-to-br from-white via-white to-slate-50 p-4 ring-1 ring-white transition hover:-translate-y-[1px] hover:border-slate-400 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-brand-primary/30 md:p-5 dark:border-border-glow/50 dark:bg-background/55 dark:bg-none dark:ring-0 dark:hover:border-border-glow/70 dark:hover:bg-background"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0 flex-1">
@@ -715,10 +744,13 @@ export default function IssuesPage() {
                     )}
                   </div>
                   <button
-                    onClick={() => router.push(`/projects/${issue.project_id}/issues/${issue.key}`)}
+                    onClick={event => {
+                      event.stopPropagation();
+                      setSelectedIssue(issue);
+                    }}
                     className="rounded-full px-3 py-1.5 font-bold text-brand-primary transition hover:bg-brand-primary/10"
                   >
-                    Open issue
+                    {t('issues.detail.preview')}
                   </button>
                 </div>
               </motion.div>
@@ -726,6 +758,29 @@ export default function IssuesPage() {
           })
         )}
       </div>
+
+      <AnimatePresence>
+        {selectedIssue && (
+          <IssueDetailView
+            issue={{
+              id: selectedIssue.id,
+              project_id: selectedIssue.project_id,
+              key: selectedIssue.key,
+              summary: selectedIssue.summary,
+              description: selectedIssue.description || '',
+              status: selectedIssue.status,
+              priority: selectedIssue.priority,
+              assigned_to: selectedIssue.assignee,
+              assignee: selectedIssue.assignee,
+              created_at: selectedIssue.updated_at || new Date(0).toISOString(),
+            }}
+            detailsHref={`/projects/${selectedIssue.project_id}/issues/${selectedIssue.key}`}
+            detailsLabel={t('issues.detail.openDetails')}
+            onIssueMutated={loadIssues}
+            onClose={() => setSelectedIssue(null)}
+          />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showNewIssueModal && (
