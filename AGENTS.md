@@ -1,5 +1,13 @@
 # AGENTS.md
 
+## OpenSpec Documentation
+
+When code changes behavior covered by OpenSpec, update the most relevant OpenSpec documentation in the same turn. Prefer updating the active change spec under `openspec/changes/<change>/specs/`; if no active change applies, update the canonical spec under `openspec/specs/`.
+
+## Translation Coverage
+
+When adding or changing user-facing text, update all supported locale catalogs in the same turn. Do not rely on the English fallback for newly added UI strings unless the text is intentionally untranslated and documented.
+
 ## Test Safety Rules
 
 > Temporary safety note (2026-05-06):

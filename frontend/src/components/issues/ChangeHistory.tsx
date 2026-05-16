@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * STALE COMPONENT - No longer used on the issue detail page.
+ * The detail page now uses a unified activity feed via useActivityEntities hook.
+ * Kept for reference or potential future use.
+ */
+
 import { useLocale } from '@/context/LocaleContext';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { ArrowRight, History } from 'lucide-react';
