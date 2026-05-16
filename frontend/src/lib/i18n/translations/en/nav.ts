@@ -2,6 +2,7 @@ import type { Dictionary } from '../../catalog';
 
 export const nav: Dictionary = {
   'nav.sidebar.dashboard': 'Dashboard',
+  'nav.sidebar.issues': 'Issues',
   'nav.sidebar.settings': 'Settings',
   'nav.sidebar.help': 'Help',
   'nav.sidebar.logout': 'Logout',

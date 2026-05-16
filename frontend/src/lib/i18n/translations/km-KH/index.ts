@@ -15,6 +15,7 @@ export const kmKH: Dictionary = {
   'nav.topbar.settings': 'ការកំណត់',
   'nav.topbar.signOut': 'ចេញ',
   'nav.topbar.openNav': 'បើកការរុករក',
+  'nav.sidebar.issues': 'បញ្ហា',
   'settings.title': 'ការកំណត់ប្រព័ន្ធ',
   'settings.guardrail': 'ការកំណត់ដែលពាក់ព័ន្ធនឹងគម្រោង អាចធ្វើបច្ចុប្បន្នភាពបាននៅទំព័រគ្រប់គ្រងរបស់គម្រោងនីមួយៗ។',
   'settings.sections.account': 'គណនី',

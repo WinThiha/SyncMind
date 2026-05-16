@@ -18,6 +18,7 @@ export const jaJP: Dictionary = {
   'nav.topbar.settings': '設定',
   'nav.topbar.signOut': 'サインアウト',
   'nav.topbar.openNav': 'ナビゲーションを開く',
+  'nav.sidebar.issues': '課題',
   'settings.title': 'システム設定',
   'settings.guardrail': 'プロジェクト関連の設定は、各プロジェクトの管理ページで更新できます。',
   'settings.sections.account': 'アカウント',

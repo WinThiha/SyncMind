@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
+  ListTodo,
   Settings,
   HelpCircle,
   LogOut,
@@ -19,8 +20,9 @@ import { useLocale } from '@/context/LocaleContext';
 
 const menuItems = [
   { icon: LayoutDashboard, key: 'nav.sidebar.dashboard', href: '/dashboard' },
-  { icon: Settings, key: 'nav.sidebar.settings', href: '/settings' },
-  { icon: HelpCircle, key: 'nav.sidebar.help', href: '/help' },
+  { icon: ListTodo,        key: 'nav.sidebar.issues',    href: '/issues'   },
+  { icon: Settings,        key: 'nav.sidebar.settings',  href: '/settings' },
+  { icon: HelpCircle,      key: 'nav.sidebar.help',      href: '/help'     },
 ];
 
 export const Sidebar: React.FC = () => {

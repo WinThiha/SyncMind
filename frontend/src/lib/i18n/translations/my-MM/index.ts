@@ -15,6 +15,7 @@ export const myMM: Dictionary = {
   'nav.topbar.settings': 'ဆက်တင်များ',
   'nav.topbar.signOut': 'ထွက်ရန်',
   'nav.topbar.openNav': 'လမ်းညွှန်ကို ဖွင့်ရန်',
+  'nav.sidebar.issues': 'Issues',
   'settings.title': 'စနစ်ဆက်တင်များ',
   'settings.guardrail': 'ပရောဂျက်နှင့်သက်ဆိုင်သော ဆက်တင်များကို ပရောဂျက်တစ်ခုချင်းစီ၏ စီမံခန့်ခွဲမှု စာမျက်နှာတွင် ပြင်ဆင်နိုင်ပါသည်။',
   'settings.sections.account': 'အကောင့်',

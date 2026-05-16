@@ -18,6 +18,7 @@ export const viVN: Dictionary = {
   'nav.topbar.settings': 'Cài đặt',
   'nav.topbar.signOut': 'Đăng xuất',
   'nav.topbar.openNav': 'Mở điều hướng',
+  'nav.sidebar.issues': 'Vấn đề',
   'settings.title': 'Cài đặt hệ thống',
   'settings.guardrail': 'Các cài đặt liên quan đến dự án có thể được cập nhật trong trang quản lý của từng dự án.',
   'settings.sections.account': 'Tài khoản',

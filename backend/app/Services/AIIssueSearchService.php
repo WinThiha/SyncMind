@@ -13,7 +13,7 @@ class AIIssueSearchService
     /**
      * Search for issues similar to the provided text.
      */
-    public function findSimilar(Project $project, string $text, int $limit = 5): Collection
+    public function findSimilar(Project $project, string $text, int $limit = 5, array $filters = []): Collection
     {
         $baseUrl = rtrim((string) config('openai.embedding.base_uri'), '/');
         $model = (string) config('openai.embedding.model');
@@ -49,21 +49,39 @@ class AIIssueSearchService
 
         $vectorString = '['.implode(',', $embedding).']';
 
-        // Use cosine distance (<=>) for similarity search
-        // Higher similarity = lower distance
-        return Issue::query()
+        $query = Issue::query()
             ->where('project_id', $project->id)
             ->whereNotNull('embedding')
-            ->select(['id', 'project_id', 'key_number', 'summary', 'status', 'priority'])
-            ->selectRaw('embedding <=> ? AS distance', [$vectorString])
+            ->select(['id', 'project_id', 'key_number', 'summary', 'description', 'status', 'priority', 'issue_type', 'due_date', 'updated_at', 'assignee_id'])
+            ->with('project:id,name,key')
+            ->with('assignee:id,name,email')
+            ->withCount('comments')
+            ->selectRaw('embedding <=> ? AS distance', [$vectorString]);
+
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        if (! empty($filters['priority'])) {
+            $query->where('priority', $filters['priority']);
+        }
+        if (! empty($filters['issue_type'])) {
+            $query->where('issue_type', $filters['issue_type']);
+        }
+        if (! empty($filters['due_date_start'])) {
+            $query->whereDate('due_date', '>=', $filters['due_date_start']);
+        }
+        if (! empty($filters['due_date_end'])) {
+            $query->whereDate('due_date', '<=', $filters['due_date_end']);
+        }
+
+        return $query
             ->orderBy('distance', 'asc')
             ->limit($limit)
             ->get()
             ->map(function ($issue) use ($project) {
-                // Convert distance to similarity score (0 to 1)
-                // distance = 1 - similarity
                 $issue->similarity = round(1 - $issue->distance, 4);
                 $issue->key = $issue->key_number ? "{$project->key}-{$issue->key_number}" : null;
+                $issue->comments_count = $issue->comments_count ?? 0;
                 unset($issue->distance);
                 unset($issue->embedding);
 
