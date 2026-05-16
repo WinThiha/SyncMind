@@ -49,6 +49,9 @@ class IssuesGlobalController extends Controller
             $query->whereDate('due_date', '>=', $request->input('due_date_start'));
         } elseif ($request->filled('due_date_end')) {
             $query->whereDate('due_date', '<=', $request->input('due_date_end'));
+        } elseif ($request->input('due_date') === 'overdue') {
+            $query->whereNotIn('status', ['resolved', 'closed'])
+                  ->whereDate('due_date', '<', now()->toDateString());
         }
 
         if ($request->filled('assignee') && $request->input('assignee') !== 'all') {

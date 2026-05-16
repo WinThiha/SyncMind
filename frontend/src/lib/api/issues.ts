@@ -142,6 +142,7 @@ export interface GetIssuesParams {
   type?: string;
   due_date_start?: string;
   due_date_end?: string;
+  due_date?: string;
   assignee?: string;
   high_priority?: boolean;
   search?: string;
