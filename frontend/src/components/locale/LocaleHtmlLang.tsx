@@ -9,6 +9,7 @@ const titles: Record<string, string> = {
   'ja-JP': 'SyncMind',
   'vi-VN': 'SyncMind',
   'km-KH': 'SyncMind',
+  'ko-KR': 'SyncMind',
 };
 
 export function LocaleHtmlLang() {

@@ -391,14 +391,23 @@ function StatTile({ label, value }: { label: string; value: number }) {
 }
 
 function ActivityItem({ activity }: { activity: DashboardActivity }) {
+  const { t } = useLocale();
   const Icon = activity.type === 'comment' ? MessageSquare : CheckCircle2;
+  const activityText =
+    activity.type === 'comment'
+      ? t('dashboard.activity.commented', { actor: activity.actor ?? 'Someone', issue: activity.issue_key ?? '' })
+      : t('dashboard.activity.changed', {
+          actor: activity.actor ?? 'Someone',
+          field: activity.field ?? '',
+          issue: activity.issue_key ?? '',
+        });
   return (
     <div className="flex gap-3">
-      <div className="mt-0.5 rounded-xl border border-slate-300/65 bg-white/75 p-2 text-foreground/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] dark:border-transparent dark:bg-foreground/5 dark:text-foreground/55">
+      <div className="mt-0.5 flex h-[44px] items-center rounded-xl border border-slate-300/65 bg-white/75 px-2 text-foreground/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] dark:border-transparent dark:bg-foreground/5 dark:text-foreground/55">
         <Icon size={15} />
       </div>
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-foreground/80 dark:text-foreground/75">{activity.text}</p>
+        <p className="text-sm font-semibold text-foreground/80 dark:text-foreground/75">{activityText}</p>
         <p className="mt-1 text-xs font-bold text-foreground/70 dark:text-foreground/40">
           {activity.project_name}
           {activity.created_at ? ` · ${relativeTime(activity.created_at)}` : ''}

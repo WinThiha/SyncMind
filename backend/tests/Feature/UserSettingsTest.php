@@ -142,6 +142,20 @@ class UserSettingsTest extends TestCase
             ->assertJsonPath('data.preferences.locale', 'km-KH');
     }
 
+    public function test_user_can_save_korean_locale(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user, 'web')->putJson('/api/user/settings', [
+            'preferences' => [
+                'locale' => 'ko-KR',
+            ],
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('data.preferences.locale', 'ko-KR');
+    }
+
     public function test_update_rejects_invalid_locale_value(): void
     {
         $user = User::factory()->create();

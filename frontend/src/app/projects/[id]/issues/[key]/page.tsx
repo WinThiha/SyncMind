@@ -203,7 +203,7 @@ export default function IssueDetailPage({ params }: { params: Promise<{ id: stri
     setDeleting(true);
     try {
       await deleteIssue(projectId, issueKey);
-      router.push(`/projects/${projectId}/issues`);
+      router.push(`/issues?project_id=${projectId}`);
     } catch {
       setDeleting(false);
       setConfirmDelete(false);
@@ -293,7 +293,7 @@ export default function IssueDetailPage({ params }: { params: Promise<{ id: stri
         <AlertTriangle size={32} className="text-red-500/60 mx-auto mb-4" />
         <p className="text-foreground/70 font-semibold mb-4">{error ?? t('issues.detail.notFound')}</p>
         <Link
-          href={`/projects/${projectId}/issues`}
+          href={`/issues?project_id=${projectId}`}
           className="text-brand-primary text-sm font-bold underline underline-offset-4"
         >
           {t('issues.detail.backToIssues')}
@@ -313,7 +313,7 @@ export default function IssueDetailPage({ params }: { params: Promise<{ id: stri
       {/* ── Breadcrumb ── */}
       <div className="flex items-center gap-1.5 text-xs text-foreground/35 mb-3 ml-1">
         <button
-          onClick={() => router.push(`/projects/${projectId}/issues`)}
+          onClick={() => router.push(`/issues?project_id=${projectId}`)}
           className="hover:text-foreground transition-colors font-medium flex items-center gap-1"
         >
           <ChevronLeft size={13} />

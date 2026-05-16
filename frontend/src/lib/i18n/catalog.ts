@@ -4,6 +4,7 @@ import { myMM } from './translations/my-MM';
 import { jaJP } from './translations/ja-JP';
 import { viVN } from './translations/vi-VN';
 import { kmKH } from './translations/km-KH';
+import { koKR } from './translations/ko-KR';
 
 export type Dictionary = Record<string, string>;
 
@@ -13,6 +14,7 @@ const catalogs: Record<Locale, Dictionary> = {
   'ja-JP': jaJP,
   'vi-VN': viVN,
   'km-KH': kmKH,
+  'ko-KR': koKR,
 };
 
 export function getTranslation(locale: Locale, key: string, params?: Record<string, string | number>): string {

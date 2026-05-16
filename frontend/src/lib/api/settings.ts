@@ -15,7 +15,7 @@ export interface UserSettings {
   preferences: {
     theme: 'light' | 'dark' | 'system' | null;
     sidebar_collapsed_default: boolean;
-    locale: 'en' | 'my-MM' | 'ja-JP' | 'vi-VN' | 'km-KH';
+    locale: 'en' | 'my-MM' | 'ja-JP' | 'vi-VN' | 'km-KH' | 'ko-KR';
   };
   notifications: {
     email_mentions: boolean;
@@ -31,7 +31,7 @@ export interface UpdateUserSettingsPayload extends Omit<Partial<UserSettings>, '
   preferences?: {
     theme?: 'light' | 'dark' | 'system';
     sidebar_collapsed_default?: boolean;
-    locale?: 'en' | 'my-MM' | 'ja-JP' | 'vi-VN' | 'km-KH';
+    locale?: 'en' | 'my-MM' | 'ja-JP' | 'vi-VN' | 'km-KH' | 'ko-KR';
   };
 }
 

@@ -15,6 +15,7 @@ class LocaleResolver
         'ja-JP',
         'vi-VN',
         'km-KH',
+        'ko-KR',
     ];
 
     public function resolveForUser(?User $user): string
@@ -48,8 +49,8 @@ class LocaleResolver
             'ja-JP' => 'Japanese',
             'vi-VN' => 'Vietnamese',
             'km-KH' => 'Khmer (Cambodia)',
+            'ko-KR' => 'Korean',
             default => 'English',
         };
     }
 }
-
