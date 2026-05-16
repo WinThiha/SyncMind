@@ -643,7 +643,7 @@ export default function IssuesPage() {
           onClick={resetFilters}
           className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-foreground/80 transition hover:-translate-y-[1px] hover:bg-white hover:shadow-md active:translate-y-0 dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/60 dark:hover:bg-background"
         >
-          <RotateCcw className="h-4 w-4" /> {t('issues.global.search.resetFilters')}
+          <RotateCcw className="h-4 w-4" /> {t('issues.search.resetFilters')}
         </button>
       </div>
 
