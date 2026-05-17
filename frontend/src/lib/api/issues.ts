@@ -63,15 +63,38 @@ export async function createIssueComment(projectId: number | string, key: string
 }
 
 export interface AISuggestion {
+  summary: string | null;
   description: string | null;
   issue_type: string | null;
   priority: string | null;
   estimated_hours: number | null;
+  due_date: string | null;
+  milestone_id: number | null;
   assignee_suggestions: Array<{ assignee_id: number; reason: string }>;
+  open_questions: string[];
 }
 
-export async function suggestIssueFields(projectId: number | string, summary: string): Promise<AISuggestion> {
-  const response = await api.post(`/api/projects/${projectId}/ai/suggest-issue`, { summary });
+export interface AISuggestionRequest {
+  prompt: string;
+  output_locale?: string;
+  current_fields?: {
+    summary?: string;
+    description?: string;
+    issue_type?: string;
+    priority?: string;
+    estimated_hours?: number | string | null;
+    assignee_id?: number | string | null;
+    due_date?: string | null;
+    milestone_id?: number | string | null;
+  };
+}
+
+export async function suggestIssueFields(
+  projectId: number | string,
+  request: AISuggestionRequest | string
+): Promise<AISuggestion> {
+  const payload = typeof request === 'string' ? { summary: request } : request;
+  const response = await api.post(`/api/projects/${projectId}/ai/suggest-issue`, payload);
   return response.data.data;
 }
 
