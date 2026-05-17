@@ -1,0 +1,82 @@
+FROM node:20-bookworm-slim AS frontend-builder
+
+WORKDIR /app
+
+ENV NEXT_TELEMETRY_DISABLED=1
+ARG NEXT_PUBLIC_BACKEND_URL
+ENV NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+
+COPY frontend/ ./
+RUN npm run build \
+    && npm prune --omit=dev
+
+FROM php:8.2-cli AS backend-vendor
+
+RUN apt-get update && apt-get install -y \
+    git \
+    libpq-dev \
+    libsqlite3-dev \
+    libzip-dev \
+    unzip \
+    zip \
+    && docker-php-ext-install pdo pdo_pgsql pgsql pdo_sqlite zip bcmath \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /app
+
+COPY backend/composer.json backend/composer.lock ./
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+
+COPY backend/ ./
+RUN composer run-script post-autoload-dump
+
+FROM php:8.2-apache
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    gettext-base \
+    gosu \
+    libpq-dev \
+    libsqlite3-dev \
+    libzip-dev \
+    nginx \
+    supervisor \
+    unzip \
+    zip \
+    && docker-php-ext-install pdo pdo_pgsql pgsql pdo_sqlite zip bcmath \
+    && a2enmod rewrite headers remoteip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=node:20-bookworm-slim /usr/local/bin/node /usr/local/bin/node
+COPY --from=node:20-bookworm-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+
+WORKDIR /var/www/html
+
+COPY --from=backend-vendor /app /var/www/html
+COPY --from=frontend-builder /app /srv/syncmind-frontend
+
+COPY docker/render-demo/apache-site.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/render-demo/nginx.conf.template /etc/nginx/templates/syncmind.conf.template
+COPY docker/render-demo/supervisord.conf /etc/supervisor/conf.d/syncmind.conf
+COPY docker/render-demo/start.sh /usr/local/bin/render-demo-start
+
+RUN chmod +x /usr/local/bin/render-demo-start \
+    && mkdir -p /run/nginx /var/log/supervisor \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+ENV APACHE_RUN_PORT=8080
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+
+EXPOSE 10000
+
+CMD ["/usr/local/bin/render-demo-start"]

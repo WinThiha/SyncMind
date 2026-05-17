@@ -1,0 +1,38 @@
+FROM php:8.2-apache
+
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpq-dev \
+    libsqlite3-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    gosu \
+    && docker-php-ext-install pdo pdo_pgsql pgsql pdo_sqlite zip bcmath \
+    && a2enmod rewrite headers \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+
+COPY . .
+
+RUN composer run-script post-autoload-dump \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && sed -ri 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf \
+    && printf '<Directory /var/www/html/public>\n    AllowOverride All\n    Require all granted\n</Directory>\n' > /etc/apache2/conf-available/syncmind.conf \
+    && a2enconf syncmind
+
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+EXPOSE 80
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["apache2-foreground"]
