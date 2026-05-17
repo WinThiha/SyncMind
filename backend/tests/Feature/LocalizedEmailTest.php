@@ -86,5 +86,10 @@ class LocalizedEmailTest extends TestCase
         $this->assertSame('メールアドレスの確認', $verify->subject);
         $this->assertSame('パスワード再設定通知', $reset->subject);
     }
-}
 
+    public function test_korean_mail_catalog_is_available(): void
+    {
+        $this->assertSame('이메일 주소 확인', trans('mail.auth_verify.subject', [], 'ko-KR'));
+        $this->assertSame('비밀번호 재설정', trans('mail.auth_reset.action', [], 'ko-KR'));
+    }
+}

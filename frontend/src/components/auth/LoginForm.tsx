@@ -9,7 +9,7 @@ import { useLocale } from '@/context/LocaleContext';
 import GoogleLoginButton from './GoogleLoginButton';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
-import { Mail, Lock, LogIn } from 'lucide-react';
+import { Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Suspense } from 'react';
 
@@ -24,6 +24,7 @@ function LoginFormContent() {
     const [errors, setErrors] = useState<Record<string, string[]>>({});
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -97,14 +98,24 @@ function LoginFormContent() {
                         <Lock size={14} className="text-brand-primary" />
                         {t('auth.login.passwordLabel')}
                     </label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        placeholder={t('auth.login.passwordPlaceholder')}
-                        className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium"
-                    />
+                    <div className="relative">
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            placeholder={t('auth.login.passwordPlaceholder')}
+                            className="w-full bg-foreground/5 border border-border-glow rounded-xl px-4 py-3 pr-10 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all font-medium"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            aria-label={t(showPassword ? 'auth.login.hidePassword' : 'auth.login.showPassword')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors"
+                        >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                    </div>
                     {errors.password && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1 uppercase">{errors.password[0]}</p>}
                 </div>
 

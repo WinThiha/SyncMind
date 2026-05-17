@@ -98,7 +98,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => router.push(`/projects/${unwrappedParams.id}/issues`)}
+          onClick={() => router.push(`/issues?project_id=${unwrappedParams.id}`)}
           className="self-start sm:self-auto shrink-0 bg-brand-primary text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-brand-primary/20 text-sm"
         >
           {t('projects.detail.viewIssues')}
@@ -109,7 +109,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         <GlassCard 
           glow
           whileHover={{ y: -4 }}
-          onClick={() => router.push(`/projects/${unwrappedParams.id}/issues`)}
+          onClick={() => router.push(`/issues?project_id=${unwrappedParams.id}`)}
           className="p-6 cursor-pointer group"
         >
           <div className="w-12 h-12 bg-brand-primary/10 rounded-2xl flex items-center justify-center text-brand-primary mb-4 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-300">
@@ -119,8 +119,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
           <p className="text-sm text-foreground/60">{t('projects.detail.cards.issues.description')}</p>
         </GlassCard>
 
-        <GlassCard className="p-6 opacity-40 cursor-not-allowed grayscale">
-          <div className="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center text-green-500 mb-4">
+        <GlassCard
+          glow
+          whileHover={{ y: -4 }}
+          onClick={() => router.push(`/projects/${unwrappedParams.id}/wiki`)}
+          className="p-6 cursor-pointer group"
+        >
+          <div className="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center text-green-500 mb-4 group-hover:bg-green-500 group-hover:text-white transition-colors duration-300">
             <BookOpen size={24} />
           </div>
           <h3 className="font-bold text-lg mb-1">{t('projects.detail.cards.wiki.title')}</h3>

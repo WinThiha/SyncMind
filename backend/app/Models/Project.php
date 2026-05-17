@@ -51,4 +51,9 @@ class Project extends Model
     {
         return $this->hasMany(Milestone::class);
     }
+
+    public function wikiPages()
+    {
+        return $this->hasMany(WikiPage::class);
+    }
 }

@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
+import { confirmAction } from '@/lib/alert';
 import MarkdownEditor from '../shared/MarkdownEditor';
 import { 
   X, 
@@ -31,6 +32,7 @@ import { getIssue, createIssueComment, updateIssue, summarizeIssue, ThreadSummar
 import SummaryCard from './SummaryCard';
 import { getProjectMembers, ProjectMember } from '@/lib/api/projects';
 import { useAuth } from '@/context/AuthContext';
+import { useActivityEntities } from './hooks/useActivityEntities';
 
 interface Issue {
   id: number;
@@ -54,9 +56,11 @@ interface IssueDetailViewProps {
   issue: Issue;
   onIssueMutated?: () => Promise<void> | void;
   onClose: () => void;
+  detailsHref?: string;
+  detailsLabel?: string;
 }
 
-export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initialIssue, onIssueMutated, onClose }) => {
+export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initialIssue, onIssueMutated, onClose, detailsHref, detailsLabel }) => {
   const { t } = useLocale();
   const [mounted, setMounted] = useState(false);
   const [issue, setIssue] = useState<Issue>(initialIssue);
@@ -132,6 +136,17 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
     }
   };
 
+  const handleDiscardComment = async () => {
+    if (!newComment.trim()) { setIsEditorFocused(false); return; }
+    const ok = await confirmAction({
+      title: t('common.areYouSure'),
+      text: t('issues.detail.discardConfirm'),
+      confirmText: t('common.discard'),
+      cancelText: t('common.cancel'),
+    });
+    if (ok) { setNewComment(''); setIsEditorFocused(false); }
+  };
+
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     const hasDataChanges = 
@@ -170,26 +185,22 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
     }
   };
 
-  const activityEntities = useMemo(() => {
-    const combined = [
-      ...(issue.comments || []).map(c => ({ ...c, type: 'comment' })),
-      ...(issue.history || []).map(h => ({ ...h, type: 'history' }))
-    ];
-    combined.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    const entities: any[] = [];
-    combined.forEach(item => {
-      const prevEntity = entities[entities.length - 1];
-      const itemTime = new Date(item.created_at).getTime();
-      const prevTime = prevEntity ? new Date(prevEntity.created_at).getTime() : 0;
-      if (prevEntity && prevEntity.user.id === item.user.id && Math.abs(prevTime - itemTime) < 2000) {
-        if (item.type === 'comment') prevEntity.comments.push(item);
-        else prevEntity.history.push(item);
-      } else {
-        entities.push({ id: `${item.type}-${item.id}`, user: item.user, created_at: item.created_at, comments: item.type === 'comment' ? [item] : [], history: item.type === 'history' ? [item] : [] });
-      }
-    });
-    return entities;
-  }, [issue.comments, issue.history]);
+  const { activityEntities } = useActivityEntities(
+    issue.comments || [],
+    issue.history || [],
+    {
+      members,
+      resolveAssignee: (oldValue, newValue) => {
+        const oldMember = members.find(m => m.id.toString() === oldValue?.toString());
+        const newMember = members.find(m => m.id.toString() === newValue?.toString());
+        return {
+          displayField: t('issues.create.assignee').toLowerCase(),
+          displayOld: oldMember ? oldMember.name : (oldValue || t('issues.history.none')),
+          displayNew: newMember ? newMember.name : (newValue || t('issues.history.none')),
+        };
+      },
+    },
+  );
 
   const currentAssignee = issue.assignee || issue.assigned_to;
   const overlay = (
@@ -202,6 +213,14 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
             <h3 className="font-bold text-base sm:text-lg line-clamp-1 min-w-0">{issue.summary}</h3>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {detailsHref && (
+              <Link href={detailsHref}>
+                <GlassButton variant="secondary" size="sm" className="gap-1.5">
+                  <Maximize2 size={13} />
+                  <span className="hidden sm:inline">{detailsLabel ?? t('issues.detail.openDetails')}</span>
+                </GlassButton>
+              </Link>
+            )}
             <Link href={`/projects/${issue.project_id}/issues/${issue.key}/edit`}>
               <GlassButton variant="ghost" size="sm" className="gap-1.5">
                 <Edit2 size={13} />
@@ -264,7 +283,7 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
               />
 
               <div className="space-y-10">
-                {loading ? <div className="flex items-center justify-center h-20 opacity-40"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div></div> : activityEntities.length === 0 ? <div className="text-center py-12 text-foreground/30 bg-foreground/[0.02] rounded-3xl border border-dashed border-border-glow"><p className="font-medium italic">{t('issues.detail.noActivity')}</p></div> : 
+                {loading ? <div className="flex items-center justify-center h-20 opacity-40"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div></div> : activityEntities.length === 0 ? <div className="text-center py-12 text-foreground/30 bg-foreground/[0.02] rounded-3xl border border-dashed border-border-glow"><p className="font-medium italic">{t('issues.detail.noActivity')}</p></div> :
                   activityEntities.map((entity) => (
                     <div key={entity.id} className="relative flex gap-5">
                       <div className="absolute left-[19px] top-[40px] bottom-[-40px] w-px bg-border-glow/20 last:hidden" /><div className="w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center z-10 shadow-sm border bg-background text-brand-primary border-border-glow font-bold text-xs">{entity.user.name.charAt(0)}</div>
@@ -273,11 +292,9 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
                         <div className="bg-foreground/[0.03] border border-border-glow/30 rounded-2xl overflow-hidden shadow-sm">
                           {entity.history.length > 0 && (
                             <div className={`p-4 space-y-2 bg-foreground/[0.01] ${entity.comments.length > 0 ? 'border-b border-border-glow/10' : ''}`}>
-                              {entity.history.map((h: any) => {
-                                let displayField = h.field; let displayOld = h.old_value; let displayNew = h.new_value;
-                                if (h.field === 'assignee_id') { displayField = t('issues.create.assignee').toLowerCase(); const oldMember = members.find(m => m.id.toString() === h.old_value?.toString()); const newMember = members.find(m => m.id.toString() === h.new_value?.toString()); displayOld = oldMember ? oldMember.name : (h.old_value || t('issues.history.none')); displayNew = newMember ? newMember.name : (h.new_value || t('issues.history.none')); }
-                                return (<div key={h.id} className="flex items-center gap-3 text-[11px] font-bold"><span className="text-foreground/40 uppercase tracking-wider shrink-0">{displayField.replace('_', ' ')}:</span><div className="flex flex-wrap items-center gap-2"><span className="text-foreground/30 line-through font-medium">{displayOld || t('issues.history.none')}</span><ArrowRight size={10} className="text-brand-primary/40" /><span className="text-brand-primary">{displayNew || t('issues.history.none')}</span></div></div>);
-                              })}
+                              {entity.formattedHistory.map((h) => (
+                                <div key={h.id} className="flex items-center gap-3 text-[11px] font-bold"><span className="text-foreground/40 uppercase tracking-wider shrink-0">{h.displayField}:</span><div className="flex flex-wrap items-center gap-2"><span className="text-foreground/30 line-through font-medium">{h.displayOld}</span><ArrowRight size={10} className="text-brand-primary/40" /><span className="text-brand-primary">{h.displayNew}</span></div></div>
+                              ))}
                             </div>
                           )}
                           {entity.comments.length > 0 && <div className="p-5 text-sm leading-relaxed text-foreground/80">{entity.comments.map((c: any) => <div key={c.id} className="whitespace-pre-wrap">{c.content}</div>)}</div>}
@@ -337,7 +354,7 @@ export const IssueDetailView: React.FC<IssueDetailViewProps> = ({ issue: initial
                 </div>
 
                 <div className="flex justify-end gap-3 shrink-0">
-                  <GlassButton variant="ghost" size="sm" onClick={() => { if (!newComment.trim()) setIsEditorFocused(false); else if (window.confirm(t('issues.detail.discardConfirm'))) { setNewComment(''); setIsEditorFocused(false); } }}>{t('common.cancel')}</GlassButton>
+                  <GlassButton variant="ghost" size="sm" onClick={handleDiscardComment}>{t('common.cancel')}</GlassButton>
                   <GlassButton size="sm" disabled={submittingComment} onClick={(e) => handleAddComment(e as any)}><Send size={14} />{t('issues.detail.updateAndPost')}</GlassButton>
                 </div>
               </div>

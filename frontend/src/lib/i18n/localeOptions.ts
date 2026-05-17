@@ -11,4 +11,5 @@ export const LOCALE_OPTIONS: LocaleOption[] = [
   { value: 'ja-JP', label: '日本語' },
   { value: 'vi-VN', label: 'Tiếng Việt' },
   { value: 'km-KH', label: 'ខ្មែរ' },
+  { value: 'ko-KR', label: '한국어' },
 ];

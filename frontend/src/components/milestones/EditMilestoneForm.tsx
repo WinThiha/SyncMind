@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { updateMilestone, deleteMilestone, type Milestone } from '@/lib/api/milestones';
-import { Flag, Trash2, X } from 'lucide-react';
+import { suggestMilestoneDates } from '@/lib/api/milestones-ai';
+import { Flag, Loader2, Sparkles, Trash2, X } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
+import { confirmAction } from '@/lib/alert';
 
 interface EditMilestoneFormProps {
   projectId: number | string;
@@ -27,8 +29,25 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dateLoading, setDateLoading] = useState(false);
+  const [dateRationale, setDateRationale] = useState<string | null>(null);
 
   const set = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
+
+  const handleSuggestDates = async () => {
+    setDateLoading(true);
+    setDateRationale(null);
+    try {
+      const res = await suggestMilestoneDates(String(projectId), String(milestone.id));
+      if (res.data.start_date) set('start_date', res.data.start_date);
+      if (res.data.due_date) set('due_date', res.data.due_date);
+      if (res.data.rationale) setDateRationale(res.data.rationale);
+    } catch {
+      // silently fail — user can still fill dates manually
+    } finally {
+      setDateLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +68,14 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
   };
 
   const handleDelete = async () => {
-    if (!confirm(t('milestones.delete.confirm', { name: milestone.name }))) return;
+    const ok = await confirmAction({
+      title: t('common.areYouSure'),
+      text: t('milestones.delete.confirm', { name: milestone.name }),
+      confirmText: t('common.yesDelete'),
+      cancelText: t('common.cancel'),
+      danger: true,
+    });
+    if (!ok) return;
     setDeleting(true);
     try {
       await deleteMilestone(projectId, milestone.id);
@@ -98,26 +124,39 @@ export function EditMilestoneForm({ projectId, milestone, onSuccess, onCancel, o
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('milestones.form.startDateLabel')}</label>
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-bold text-foreground/40 uppercase tracking-wider">
+              {t('milestones.form.startDateLabel')} / {t('milestones.form.dueDateLabel')}
+            </span>
+            <button
+              type="button"
+              disabled={dateLoading}
+              onClick={handleSuggestDates}
+              className="flex items-center gap-1 text-xs text-brand-primary/70 hover:text-brand-primary transition-colors disabled:opacity-40"
+            >
+              {dateLoading ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+              {t('milestones.ai.suggestDates')}
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <input
               type="date"
               value={form.start_date}
               onChange={(e) => set('start_date', e.target.value)}
-              className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+              className="w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
             />
-          </div>
-          <div>
-            <label className="text-xs font-bold text-foreground/40 uppercase tracking-wider">{t('milestones.form.dueDateLabel')}</label>
             <input
               type="date"
               value={form.due_date}
               min={form.start_date || undefined}
               onChange={(e) => set('due_date', e.target.value)}
-              className="mt-1 w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
+              className="w-full px-4 py-2.5 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
             />
           </div>
+          {dateRationale && (
+            <p className="mt-1.5 text-xs text-foreground/40 italic">{dateRationale}</p>
+          )}
         </div>
 
         <div>

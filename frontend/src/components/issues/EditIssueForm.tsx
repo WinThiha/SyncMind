@@ -169,7 +169,7 @@ export default function EditIssueForm({ projectId, issueKey }: EditIssueFormProp
         milestone_id: formData.milestone_id ? parseInt(formData.milestone_id) : null,
         due_date: formData.due_date || null,
       });
-      router.push(`/projects/${projectId}/issues`);
+      router.push(`/issues?project_id=${projectId}`);
     } catch (err: any) {
       setError(err.response?.data?.message || t('issues.edit.error'));
     } finally {

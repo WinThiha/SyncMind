@@ -149,6 +149,10 @@ Frontend `.env.local` requires: `NEXT_PUBLIC_BACKEND_URL`, `NEXT_PUBLIC_GOOGLE_C
 
 Newer changes use the OpenSpec workflow. Artifacts live in `openspec/changes/{change-name}/` and `openspec/specs/{capability}/`. The active in-progress change is `openspec/changes/schedule-tracker/` (structured milestones with dates and issue due dates).
 
+When code changes behavior covered by OpenSpec, update the most relevant OpenSpec documentation in the same change. Prefer active change specs under `openspec/changes/{change-name}/specs/`; if no active change applies, update the canonical spec under `openspec/specs/{capability}/`.
+
+When adding or changing user-facing text, update all supported locale catalogs in the same change. Avoid relying on the English fallback for new UI strings unless the fallback is intentional and documented.
+
 - `/opsx:explore` — think through a problem before proposing
 - `/opsx:propose` — create a new change with `proposal.md`, `design.md`, `tasks.md`, and per-capability `specs/`
 - `/opsx:apply` — implement tasks from `tasks.md`; mark completed items `[x]`

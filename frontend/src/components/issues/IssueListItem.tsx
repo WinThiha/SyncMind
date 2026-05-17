@@ -23,14 +23,14 @@ interface IssueListItemProps {
 }
 
 const statusColors: Record<string, string> = {
-  open: 'bg-foreground/10 text-foreground/60',
+  open: 'bg-[var(--badge-status-open-bg)] text-[var(--badge-status-open-text)]',
   in_progress: 'bg-brand-primary/10 text-brand-primary',
   resolved: 'bg-green-500/10 text-green-500',
-  closed: 'bg-foreground/10 text-foreground/40',
+  closed: 'bg-[var(--badge-status-closed-bg)] text-[var(--badge-status-closed-text)]',
 };
 
 const priorityColors: Record<string, string> = {
-  low: 'bg-foreground/5 text-foreground/40',
+  low: 'bg-[var(--badge-priority-low-bg)] text-[var(--badge-priority-low-text)]',
   normal: 'bg-yellow-500/10 text-yellow-600',
   high: 'bg-red-500/10 text-red-500',
 };

@@ -63,15 +63,38 @@ export async function createIssueComment(projectId: number | string, key: string
 }
 
 export interface AISuggestion {
+  summary: string | null;
   description: string | null;
   issue_type: string | null;
   priority: string | null;
   estimated_hours: number | null;
+  due_date: string | null;
+  milestone_id: number | null;
   assignee_suggestions: Array<{ assignee_id: number; reason: string }>;
+  open_questions: string[];
 }
 
-export async function suggestIssueFields(projectId: number | string, summary: string): Promise<AISuggestion> {
-  const response = await api.post(`/api/projects/${projectId}/ai/suggest-issue`, { summary });
+export interface AISuggestionRequest {
+  prompt: string;
+  output_locale?: string;
+  current_fields?: {
+    summary?: string;
+    description?: string;
+    issue_type?: string;
+    priority?: string;
+    estimated_hours?: number | string | null;
+    assignee_id?: number | string | null;
+    due_date?: string | null;
+    milestone_id?: number | string | null;
+  };
+}
+
+export async function suggestIssueFields(
+  projectId: number | string,
+  request: AISuggestionRequest | string
+): Promise<AISuggestion> {
+  const payload = typeof request === 'string' ? { summary: request } : request;
+  const response = await api.post(`/api/projects/${projectId}/ai/suggest-issue`, payload);
   return response.data.data;
 }
 
@@ -102,5 +125,95 @@ export interface ThreadSummary {
 
 export async function summarizeIssue(projectId: number | string, key: string, force = false): Promise<ThreadSummary> {
   const response = await api.post(`/api/projects/${projectId}/issues/${key}/ai/summarize`, { force });
+  return response.data.data;
+}
+
+export interface GlobalIssue {
+  id: number;
+  project_id: number;
+  key: string;
+  full_key: string;
+  summary: string;
+  description: string | null;
+  status: string;
+  priority: string;
+  issue_type: string;
+  due_date: string | null;
+  updated_at: string;
+  comments_count: number;
+  project_name?: string;
+  project_key?: string;
+  assignee?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
+export interface IssuesSummary {
+  assigned_to_me: number;
+  overdue: number;
+  high_priority: number;
+  unassigned: number;
+  project_name: string;
+}
+
+export interface GetIssuesParams {
+  project_id?: number | string;
+  status?: string;
+  priority?: string;
+  type?: string;
+  due_date_start?: string;
+  due_date_end?: string;
+  due_date?: string;
+  assignee?: string;
+  high_priority?: boolean;
+  search?: string;
+}
+
+export async function getGlobalIssues(params: GetIssuesParams = {}): Promise<GlobalIssue[]> {
+  const response = await api.get('/api/issues', { params });
+  return response.data.data;
+}
+
+export async function getIssuesSummary(projectId?: number | string): Promise<IssuesSummary> {
+  const response = await api.get('/api/issues/summary', {
+    params: projectId ? { project_id: projectId } : {},
+  });
+  return response.data.data;
+}
+
+export interface GlobalSimilarIssue {
+  id: number;
+  project_id: number;
+  key: string;
+  full_key: string;
+  summary: string;
+  description: string | null;
+  status: string;
+  priority: string;
+  issue_type: string;
+  due_date: string | null;
+  updated_at: string;
+  comments_count: number;
+  similarity: number;
+  project_name?: string;
+  project_key?: string;
+  assignee_id?: number;
+  assignee?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
+export async function getGlobalSimilarIssues(
+  projectId: number | string,
+  text: string,
+  filters: Record<string, string> = {}
+): Promise<GlobalSimilarIssue[]> {
+  const response = await api.get('/api/issues/ai/similar', {
+    params: { project_id: projectId, text, ...filters },
+  });
   return response.data.data;
 }

@@ -10,6 +10,7 @@ import { milestones } from './milestones';
 import { help } from './help';
 import { landing } from './landing';
 import { common } from './common';
+import { wiki } from './wiki';
 
 export const en: Dictionary = {
   ...nav,
@@ -23,4 +24,5 @@ export const en: Dictionary = {
   ...help,
   ...landing,
   ...common,
+  ...wiki,
 };
