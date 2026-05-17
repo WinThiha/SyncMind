@@ -168,6 +168,11 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
     setFormData(prev => ({ ...prev, description: value }));
   };
 
+  const canApplyAiSuggestion = (
+    field: keyof typeof formData,
+    currentValue: string | null | undefined
+  ) => !touchedFields.current.has(field) || String(currentValue ?? '').trim() === '';
+
   const handleAISuggest = async () => {
     if (!aiPrompt.trim()) {
       setAiError(t('issues.create.aiError'));
@@ -191,25 +196,25 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
       });
       setFormData(prev => {
         const next = { ...prev };
-        if (suggestions.summary && !touchedFields.current.has('summary')) {
+        if (suggestions.summary && canApplyAiSuggestion('summary', prev.summary)) {
           next.summary = suggestions.summary;
         }
-        if (suggestions.description && !touchedFields.current.has('description')) {
+        if (suggestions.description && canApplyAiSuggestion('description', prev.description)) {
           next.description = suggestions.description;
         }
-        if (suggestions.issue_type && !touchedFields.current.has('issue_type')) {
+        if (suggestions.issue_type && canApplyAiSuggestion('issue_type', prev.issue_type)) {
           next.issue_type = suggestions.issue_type;
         }
-        if (suggestions.priority && !touchedFields.current.has('priority')) {
+        if (suggestions.priority && canApplyAiSuggestion('priority', prev.priority)) {
           next.priority = suggestions.priority;
         }
-        if (suggestions.estimated_hours != null && !touchedFields.current.has('estimated_hours')) {
+        if (suggestions.estimated_hours != null && canApplyAiSuggestion('estimated_hours', prev.estimated_hours)) {
           next.estimated_hours = String(suggestions.estimated_hours);
         }
-        if (suggestions.due_date && !touchedFields.current.has('due_date')) {
+        if (suggestions.due_date && canApplyAiSuggestion('due_date', prev.due_date)) {
           next.due_date = suggestions.due_date;
         }
-        if (suggestions.milestone_id != null && !touchedFields.current.has('milestone_id')) {
+        if (suggestions.milestone_id != null && canApplyAiSuggestion('milestone_id', prev.milestone_id)) {
           next.milestone_id = String(suggestions.milestone_id);
         }
         return next;

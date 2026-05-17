@@ -1,7 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: AI Issue Field Suggestion
-The system SHALL provide an AI-driven mechanism to suggest issue fields (Summary, Description, Type, Priority, Estimate, Assignee Suggestions, Due Date, and Milestone) based on a provided source prompt and project context, using the configured chat completion abstraction that supports OpenRouter direct HTTP calls. The source prompt MAY be a natural-language brief, bug report, copied chat history, support note, meeting excerpt, or mixed-language text. The system SHALL populate untouched fields in the create issue form without overwriting existing user input.
+The system SHALL provide an AI-driven mechanism to suggest issue fields (Summary, Description, Type, Priority, Estimate, Assignee Suggestions, Due Date, and Milestone) based on a provided source prompt and project context, using the configured chat completion abstraction that supports OpenRouter direct HTTP calls. The source prompt MAY be a natural-language brief, bug report, copied chat history, support note, meeting excerpt, or mixed-language text. The system SHALL populate untouched fields in the create issue form without overwriting existing non-blank user input. Fields whose current value is null, an empty string, or whitespace-only SHALL be treated as fillable even if the user previously touched them.
 
 #### Scenario: User generates an issue draft from a source prompt
 - **WHEN** a user enters a source prompt and clicks the "Generate draft" action
@@ -13,7 +13,12 @@ The system SHALL provide an AI-driven mechanism to suggest issue fields (Summary
 
 #### Scenario: User-edited fields are preserved
 - **WHEN** a user has manually edited an issue field before generating an AI draft
+- **AND** the current field value is non-blank
 - **THEN** the generated draft does not overwrite that field.
+
+#### Scenario: User-cleared fields are filled
+- **WHEN** a user has manually edited an issue field and then clears it to null, an empty string, or whitespace-only before generating an AI draft
+- **THEN** the generated draft MAY populate that field from the AI suggestion.
 
 #### Scenario: JSON-mode fallback for unsupported models
 - **WHEN** the first suggestion request using strict JSON response mode fails due to model capability limits

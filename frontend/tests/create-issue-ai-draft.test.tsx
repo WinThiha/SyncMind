@@ -115,4 +115,38 @@ describe('CreateIssueForm AI draft', () => {
     expect(screen.getByDisplayValue('Manual summary')).toBeInTheDocument();
     expect(screen.queryByDisplayValue('AI replacement summary')).not.toBeInTheDocument();
   });
+
+  it('fills a user-touched field when the current value is blank', async () => {
+    vi.mocked(suggestIssueFields).mockResolvedValue({
+      summary: 'AI replacement summary',
+      description: 'Generated description',
+      issue_type: 'Bug',
+      priority: 'high',
+      estimated_hours: 5,
+      due_date: null,
+      milestone_id: null,
+      assignee_suggestions: [],
+      open_questions: [],
+    });
+
+    render(
+      <LocaleProvider>
+        <CreateIssueForm projectId={2} onSuccess={vi.fn()} onCancel={vi.fn()} />
+      </LocaleProvider>
+    );
+
+    const summaryInput = await screen.findByPlaceholderText('What needs to be done?');
+    fireEvent.change(summaryInput, { target: { value: 'Manual summary' } });
+    fireEvent.change(summaryInput, { target: { value: '' } });
+    const estimateInput = screen.getByPlaceholderText('e.g. 8');
+    fireEvent.change(estimateInput, { target: { value: '8' } });
+    fireEvent.change(estimateInput, { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Generate with AI' }));
+    fireEvent.change(screen.getByLabelText('Source prompt'), { target: { value: 'Draft this issue.' } });
+    fireEvent.click(within(screen.getByRole('complementary')).getByRole('button', { name: 'Generate draft' }));
+
+    await waitFor(() => expect(suggestIssueFields).toHaveBeenCalled());
+    expect(await screen.findByDisplayValue('AI replacement summary')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('5')).toBeInTheDocument();
+  });
 });
