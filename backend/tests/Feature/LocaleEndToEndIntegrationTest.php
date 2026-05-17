@@ -131,17 +131,21 @@ class LocaleEndToEndIntegrationTest extends TestCase
             ->once()
             ->withArgs(function (array $messages): bool {
                 return isset($messages[0]['content'])
-                    && str_contains($messages[0]['content'], 'Output language locale: km-KH')
+                    && str_contains($messages[0]['content'], 'Output language: Khmer (Cambodia) (km-KH)')
                     && str_contains($messages[0]['content'], 'Khmer (Cambodia)');
             })
             ->andReturn(json_encode([
+                'summary' => 'Localized summary',
                 'description' => 'Localized description',
                 'issue_type' => 'Bug',
                 'priority' => 'high',
                 'estimated_hours' => 4,
+                'due_date' => null,
+                'milestone_id' => null,
                 'assignee_suggestions' => [
                     ['assignee_id' => $user->id, 'reason' => 'Localized reason'],
                 ],
+                'open_questions' => [],
             ], JSON_THROW_ON_ERROR));
 
         $this->app->instance(ChatCompletionClient::class, $mock);

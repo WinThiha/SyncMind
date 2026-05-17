@@ -6,6 +6,7 @@ import { createIssue } from '@/lib/api/issues';
 import { suggestIssueFields, getSimilarIssues, SimilarIssue } from '@/lib/api/issues';
 import { getProject, getProjectMembers, ProjectMember } from '@/lib/api/projects';
 import { getMilestones, type Milestone } from '@/lib/api/milestones';
+import { SUPPORTED_LOCALES } from '@/lib/i18n/locales';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import MarkdownEditor from '../shared/MarkdownEditor';
@@ -21,6 +22,7 @@ import {
   Sparkles,
   Calendar,
   Flag,
+  X,
 } from 'lucide-react';
 
 interface CreateIssueFormProps {
@@ -30,7 +32,7 @@ interface CreateIssueFormProps {
 }
 
 export default function CreateIssueForm({ projectId, onSuccess, onCancel }: CreateIssueFormProps) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [formData, setFormData] = useState({
     summary: '',
     description: '',
@@ -53,6 +55,10 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [aiDrawerOpen, setAiDrawerOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiOutputLocale, setAiOutputLocale] = useState<string>(locale);
+  const [aiDraftApplied, setAiDraftApplied] = useState(false);
   const [assigneeSuggestions, setAssigneeSuggestions] = useState<Array<{ assignee_id: number; reason: string }>>([]);
   const [similarIssues, setSimilarIssues] = useState<SimilarIssue[]>([]);
   const [isSearchingSimilar, setIsSearchingSimilar] = useState(false);
@@ -77,6 +83,10 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
     }
     loadData();
   }, [projectId]);
+
+  useEffect(() => {
+    setAiOutputLocale(locale);
+  }, [locale]);
 
   // Debounced semantic search for similar issues
   useEffect(() => {
@@ -159,7 +169,7 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
   };
 
   const handleAISuggest = async () => {
-    if (!formData.summary.trim()) {
+    if (!aiPrompt.trim()) {
       setAiError(t('issues.create.aiError'));
       return;
     }
@@ -168,9 +178,22 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
     setAssigneeSuggestions([]);
 
     try {
-      const suggestions = await suggestIssueFields(projectId, formData.summary);
+      const suggestions = await suggestIssueFields(projectId, {
+        prompt: aiPrompt,
+        output_locale: aiOutputLocale,
+        current_fields: {
+          ...formData,
+          estimated_hours: formData.estimated_hours || null,
+          assignee_id: formData.assignee_id || null,
+          milestone_id: formData.milestone_id || null,
+          due_date: formData.due_date || null,
+        },
+      });
       setFormData(prev => {
         const next = { ...prev };
+        if (suggestions.summary && !touchedFields.current.has('summary')) {
+          next.summary = suggestions.summary;
+        }
         if (suggestions.description && !touchedFields.current.has('description')) {
           next.description = suggestions.description;
         }
@@ -183,9 +206,17 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
         if (suggestions.estimated_hours != null && !touchedFields.current.has('estimated_hours')) {
           next.estimated_hours = String(suggestions.estimated_hours);
         }
+        if (suggestions.due_date && !touchedFields.current.has('due_date')) {
+          next.due_date = suggestions.due_date;
+        }
+        if (suggestions.milestone_id != null && !touchedFields.current.has('milestone_id')) {
+          next.milestone_id = String(suggestions.milestone_id);
+        }
         return next;
       });
       setAssigneeSuggestions(suggestions.assignee_suggestions || []);
+      setAiDraftApplied(true);
+      setAiDrawerOpen(false);
     } catch (err: any) {
       setAiError(err.response?.data?.message || t('issues.create.aiSuggestFailed'));
     } finally {
@@ -210,6 +241,33 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="flex flex-col gap-3 rounded-xl border border-border-glow bg-foreground/[0.02] p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-bold text-foreground">{t('issues.create.aiDraft.title')}</p>
+            <p className="mt-1 text-xs text-foreground/60">{t('issues.create.aiDraft.contextHint')}</p>
+            {aiDraftApplied && (
+              <button
+                type="button"
+                onClick={() => setAiDrawerOpen(true)}
+                className="mt-2 text-xs font-semibold text-brand-primary hover:underline"
+              >
+                {t('issues.create.aiDraft.applied')} · {t('issues.create.aiDraft.viewSource')}
+              </button>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setAiError(null);
+              setAiDrawerOpen(true);
+            }}
+            className="flex items-center justify-center gap-1.5 rounded-lg bg-brand-primary/10 px-4 py-2 text-sm font-semibold text-brand-primary transition-colors hover:bg-brand-primary/20 active:scale-[0.98]"
+          >
+            <Sparkles size={15} />
+            {t('issues.create.aiDraft.open')}
+          </button>
+        </div>
+
         {/* Summary + AI button */}
         <div className="space-y-2">
           <div className="flex items-center justify-between ml-1">
@@ -217,15 +275,6 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               <Type size={16} className="text-brand-primary" />
               {t('issues.create.summary')}
             </label>
-            <button
-              type="button"
-              onClick={handleAISuggest}
-              disabled={aiLoading || !formData.summary.trim()}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <Sparkles size={13} className={aiLoading ? 'animate-spin' : ''} />
-              {aiLoading ? t('issues.create.aiThinking') : t('issues.create.aiSuggest')}
-            </button>
           </div>
           <input
             type="text"
@@ -389,7 +438,10 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               type="date"
               name="due_date"
               value={formData.due_date}
-              onChange={(e) => setFormData(prev => ({ ...prev, due_date: e.target.value }))}
+              onChange={(e) => {
+                touchedFields.current.add('due_date');
+                setFormData(prev => ({ ...prev, due_date: e.target.value }));
+              }}
               className="w-full px-4 py-3 bg-foreground/5 border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors"
             />
           </div>
@@ -403,7 +455,10 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
               <select
                 name="milestone_id"
                 value={formData.milestone_id}
-                onChange={(e) => setFormData(prev => ({ ...prev, milestone_id: e.target.value }))}
+                onChange={(e) => {
+                  touchedFields.current.add('milestone_id');
+                  setFormData(prev => ({ ...prev, milestone_id: e.target.value }));
+                }}
                 className="w-full px-4 py-3 bg-background text-foreground border border-foreground/10 rounded-xl text-sm focus:outline-none focus:border-brand-primary/50 transition-colors appearance-none"
               >
                 <option value="" className="bg-background text-foreground">{t('issues.create.noMilestone')}</option>
@@ -434,6 +489,94 @@ export default function CreateIssueForm({ projectId, onSuccess, onCancel }: Crea
           </GlassButton>
         </div>
       </form>
+      <AnimatePresence>
+        {aiDrawerOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-background/70 backdrop-blur-sm"
+              onClick={() => !aiLoading && setAiDrawerOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 260, damping: 30 }}
+              className="fixed inset-y-0 right-0 z-[101] flex w-full max-w-xl flex-col border-l border-border-glow bg-background p-6 shadow-2xl sm:w-[32rem]"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-bold text-foreground">{t('issues.create.aiDraft.title')}</h2>
+                  <p className="mt-1 text-sm text-foreground/60">{t('issues.create.aiDraft.description')}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => !aiLoading && setAiDrawerOpen(false)}
+                  className="rounded-lg p-2 text-foreground/50 transition-colors hover:bg-foreground/10 hover:text-foreground"
+                  aria-label={t('issues.create.aiDraft.close')}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="mt-6 flex-1 space-y-5 overflow-y-auto">
+                <div className="space-y-2">
+                  <label htmlFor="ai-source-prompt" className="text-sm font-bold text-foreground/70">{t('issues.create.aiDraft.promptLabel')}</label>
+                  <textarea
+                    id="ai-source-prompt"
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    placeholder={t('issues.create.aiDraft.promptPlaceholder')}
+                    className="min-h-64 w-full resize-y rounded-xl border border-border-glow bg-foreground/5 px-4 py-3 text-sm leading-6 outline-none transition-all focus:ring-2 focus:ring-brand-primary/20"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="ai-output-language" className="text-sm font-bold text-foreground/70">{t('issues.create.aiDraft.outputLanguage')}</label>
+                  <select
+                    id="ai-output-language"
+                    value={aiOutputLocale}
+                    onChange={(e) => setAiOutputLocale(e.target.value)}
+                    className="w-full rounded-xl border border-border-glow bg-background px-4 py-3 text-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-brand-primary/20"
+                  >
+                    <option value="auto">{t('issues.create.aiDraft.languageAuto')}</option>
+                    {SUPPORTED_LOCALES.map((option) => (
+                      <option key={option} value={option}>
+                        {t(`issues.create.aiDraft.language.${option}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <p className="rounded-xl border border-border-glow bg-foreground/[0.03] p-3 text-xs leading-5 text-foreground/60">
+                  {t('issues.create.aiDraft.contextHint')}
+                </p>
+                {aiError && (
+                  <p className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">{aiError}</p>
+                )}
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3 border-t border-border-glow pt-4">
+                <GlassButton
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setAiDrawerOpen(false)}
+                  disabled={aiLoading}
+                >
+                  {t('issues.create.aiDraft.cancel')}
+                </GlassButton>
+                <GlassButton
+                  type="button"
+                  onClick={handleAISuggest}
+                  disabled={aiLoading || !aiPrompt.trim()}
+                >
+                  {aiLoading ? t('issues.create.aiThinking') : t('issues.create.aiDraft.generate')}
+                </GlassButton>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
     </GlassCard>
   );
 }

@@ -19,6 +19,8 @@ The system SHALL provide an AI-driven mechanism to suggest issue fields (Summary
 - **WHEN** the first suggestion request using strict JSON response mode fails due to model capability limits
 - **THEN** the system SHALL retry via the same chat completion abstraction without strict JSON mode and continue parsing content-based JSON output.
 
+## ADDED Requirements
+
 ### Requirement: AI Issue Draft Source Prompt UI
 The system SHALL provide an AI issue draft prompt entry surface that opens from the create issue form. The surface SHALL render as a right-side overlay drawer on desktop-sized viewports and as a full-screen sheet or modal on mobile-sized viewports.
 
