@@ -76,13 +76,18 @@ class IssuesGlobalController extends Controller
             $query->whereIn('priority', ['high', 'critical']);
         }
 
-        $issues = $query
+        $paginated = $query
             ->orderByDesc('updated_at')
-            ->limit(50)
-            ->get();
+            ->paginate(10);
 
         return response()->json([
-            'data' => $issues->map(fn (Issue $issue) => $this->formatIssue($issue)),
+            'data' => collect($paginated->items())->map(fn (Issue $issue) => $this->formatIssue($issue)),
+            'meta' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page'    => $paginated->lastPage(),
+                'total'        => $paginated->total(),
+                'per_page'     => $paginated->perPage(),
+            ],
         ]);
     }
 
