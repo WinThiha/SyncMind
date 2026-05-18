@@ -19,6 +19,13 @@ if [ "$(id -u)" = "0" ]; then
     echo "==> Running database migrations..."
     php artisan migrate --force
 
+    if [ "${RUN_DEMO_SEED:-false}" = "true" ]; then
+        echo "==> RUN_DEMO_SEED=true; running demo seeder..."
+        php artisan db:seed --class=DemoSeeder --force
+    else
+        echo "==> RUN_DEMO_SEED not enabled; skipping demo seeder."
+    fi
+
     echo "==> Clearing config/cache..."
     php artisan config:clear
     php artisan cache:clear
