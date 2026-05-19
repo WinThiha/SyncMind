@@ -1,7 +1,9 @@
 package com.syncmind.android.di
 
 import com.syncmind.android.data.api.AuthApiService
+import com.syncmind.android.data.api.InvitationApiService
 import com.syncmind.android.data.api.ProjectApiService
+import com.syncmind.android.data.api.SettingsApiService
 import com.syncmind.android.util.AuthInterceptor
 import com.syncmind.android.util.Constants.BASE_URL
 import dagger.Module
@@ -66,7 +68,19 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideInvitationApiService(retrofit: Retrofit): InvitationApiService {
+        return retrofit.create(InvitationApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideProjectApiService(retrofit: Retrofit): ProjectApiService {
         return retrofit.create(ProjectApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSettingsApiService(retrofit: Retrofit): SettingsApiService {
+        return retrofit.create(SettingsApiService::class.java)
     }
 }

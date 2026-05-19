@@ -1,0 +1,1 @@
+[Moved Permanently](https://syncmind.xyz/).

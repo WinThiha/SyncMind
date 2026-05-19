@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Issue Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#dce9ff",
+                    "status-resolved": "#10B981",
+                    "surface-container-low": "#eff4ff",
+                    "tertiary-container": "#677687",
+                    "on-secondary-container": "#5c647a",
+                    "on-primary-fixed": "#001a42",
+                    "on-tertiary-fixed": "#0e1d2b",
+                    "error-container": "#ffdad6",
+                    "outline-variant": "#c2c6d6",
+                    "tertiary": "#4f5d6e",
+                    "priority-normal": "#3B82F6",
+                    "outline": "#727785",
+                    "priority-low": "#94A3B8",
+                    "primary-container": "#2170e4",
+                    "on-primary": "#ffffff",
+                    "priority-high": "#EF4444",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "inverse-on-surface": "#eaf1ff",
+                    "primary-fixed": "#d8e2ff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-highest": "#d3e4fe",
+                    "surface-container": "#e5eeff",
+                    "on-tertiary-container": "#fdfcff",
+                    "status-closed": "#0F172A",
+                    "on-background": "#0b1c30",
+                    "on-primary-container": "#fefcff",
+                    "inverse-surface": "#213145",
+                    "background-subtle": "#F8FAFC",
+                    "inverse-primary": "#adc6ff",
+                    "surface-bright": "#f8f9ff",
+                    "tertiary-fixed-dim": "#b9c8db",
+                    "secondary-container": "#dae2fd",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#adc6ff",
+                    "surface-tint": "#005ac2",
+                    "on-tertiary-fixed-variant": "#3a4858",
+                    "on-surface": "#0b1c30",
+                    "status-in-progress": "#3B82F6",
+                    "status-open": "#64748B",
+                    "error": "#ba1a1a",
+                    "secondary": "#565e74",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed": "#d5e4f8",
+                    "on-surface-variant": "#424754",
+                    "primary": "#0058be",
+                    "on-primary-fixed-variant": "#004395",
+                    "surface": "#f8f9ff",
+                    "secondary-fixed": "#dae2fd",
+                    "surface-dim": "#cbdbf5",
+                    "on-secondary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#d3e4fe",
+                    "background": "#f8f9ff",
+                    "on-secondary-fixed": "#131b2e",
+                    "secondary-fixed-dim": "#bec6e0"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "16px",
+                    "stack-lg": "24px",
+                    "stack-sm": "8px",
+                    "margin-mobile": "16px",
+                    "touch-target-min": "48px",
+                    "gutter-mobile": "12px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "body-lg": [
+                            "Hanken Grotesk"
+                    ],
+                    "body-md": [
+                            "Hanken Grotesk"
+                    ],
+                    "label-sm": [
+                            "JetBrains Mono"
+                    ],
+                    "title-lg": [
+                            "Hanken Grotesk"
+                    ],
+                    "headline-lg": [
+                            "Hanken Grotesk"
+                    ],
+                    "headline-lg-mobile": [
+                            "Hanken Grotesk"
+                    ],
+                    "headline-md": [
+                            "Hanken Grotesk"
+                    ]
+            },
+            "fontSize": {
+                    "body-lg": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "body-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-sm": [
+                            "11px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "title-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg": [
+                            "28px",
+                            {
+                                    "lineHeight": "36px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-md": [
+                            "22px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "600"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24 md:pb-0">
+<!-- Header (Custom TopAppBar for sub-page with Back button) -->
+<header class="bg-surface sticky top-0 w-full z-50 flex items-center justify-between px-margin-mobile h-touch-target-min border-b border-surface-container-highest md:hidden">
+<button aria-label="Go back" class="text-on-surface-variant hover:bg-surface-container rounded-full p-2 transition-colors duration-200">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="font-title-lg text-title-lg text-on-surface">Issue PRJ-1042</div>
+<button aria-label="More options" class="text-on-surface-variant hover:bg-surface-container rounded-full p-2 transition-colors duration-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</header>
+<main class="px-margin-mobile pt-stack-lg max-w-3xl mx-auto">
+<!-- Key Header & Summary -->
+<section class="mb-stack-lg">
+<div class="flex items-center gap-stack-sm mb-stack-sm">
+<span class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">PRJ-1042</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="text-on-surface-variant font-body-md text-body-md">Created 2d ago</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-stack-md md:font-headline-lg md:text-headline-lg">API Authentication Failure on Mobile App Login</h1>
+<!-- Status & Priority Chips -->
+<div class="flex flex-wrap gap-stack-sm">
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-status-in-progress/30 bg-status-in-progress/10 text-status-in-progress font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-status-in-progress"></span>
+                    In Progress
+                </div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] text-priority-high">keyboard_double_arrow_up</span>
+                    High Priority
+                </div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">person</span>
+                    Assigned to Sarah J.
+                </div>
+</div>
+</section>
+<!-- Collapsible AI Thread Summary (Glassmorphism/Bento feel) -->
+<section class="mb-stack-lg relative overflow-hidden rounded-xl border border-primary-fixed/50 bg-gradient-to-br from-surface-container-low to-surface shadow-sm">
+<!-- Decorative gradient orb behind -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary-container/20 rounded-full blur-2xl"></div>
+<button class="w-full flex items-center justify-between p-stack-md text-left focus:outline-none" onclick="document.getElementById('ai-summary-content').classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')">
+<div class="flex items-center gap-2 text-primary-fixed-dim">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+<span class="font-title-lg text-title-lg text-on-surface">AI Thread Summary</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant chevron transition-transform duration-200">expand_more</span>
+</button>
+<div class="px-stack-md pb-stack-md pt-0 text-on-surface-variant font-body-md text-body-md leading-relaxed hidden" id="ai-summary-content">
+<p class="mb-2">The issue stems from the recent OAuth2 token expiration logic update. Mobile clients are caching tokens longer than the server expects. Sarah J. identified the discrepancy in <code>auth_middleware.go</code>.</p>
+<p><strong>Suggested Fix:</strong> Implement a refresh token check pre-flight on the mobile client before initiating the primary API call to the protected endpoints.</p>
+</div>
+</section>
+<!-- Tabs -->
+<nav class="flex border-b border-surface-container-highest mb-stack-md overflow-x-auto no-scrollbar">
+<button class="px-stack-md py-stack-sm border-b-2 border-primary text-primary font-title-lg text-title-lg whitespace-nowrap">Description</button>
+<button class="px-stack-md py-stack-sm border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-colors font-title-lg text-title-lg whitespace-nowrap">Comments (4)</button>
+<button class="px-stack-md py-stack-sm border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-colors font-title-lg text-title-lg whitespace-nowrap">Activity</button>
+</nav>
+<!-- Description Content -->
+<section class="prose prose-sm prose-slate max-w-none font-body-md text-body-md text-on-surface-variant mb-stack-lg">
+<p>Users are reporting that they are unable to log in to the mobile application. The error message displayed is "Authentication Failed. Please try again."</p>
+<h3 class="text-on-surface font-title-lg text-title-lg mt-stack-md mb-stack-sm">Steps to reproduce:</h3>
+<ol class="list-decimal pl-5 mb-stack-sm space-y-1">
+<li>Open the mobile app on iOS or Android.</li>
+<li>Enter valid credentials (e.g., testuser / password123).</li>
+<li>Tap 'Log In'.</li>
+</ol>
+<p><strong>Expected result:</strong> User is redirected to the dashboard.</p>
+<p><strong>Actual result:</strong> A toast message appears with the authentication error, and the user remains on the login screen.</p>
+<div class="bg-surface-container rounded-lg p-stack-sm mt-stack-md font-label-sm text-label-sm font-mono text-on-surface">
+                // Log snippet from server<br/>
+                [ERROR] 2023-10-27T10:00:00Z auth_handler.go:45: Token validation failed: token expired
+            </div>
+</section>
+<!-- Action Buttons (Edit/Delete) -->
+<section class="flex gap-stack-sm mt-stack-lg border-t border-surface-container-highest pt-stack-md">
+<button class="flex-1 bg-surface-container hover:bg-surface-container-high text-on-surface font-title-lg text-title-lg py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                Edit Issue
+            </button>
+<button class="px-4 bg-error-container hover:bg-error-container/80 text-on-error-container font-title-lg text-title-lg py-3 rounded-lg transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</section>
+</main>
+</body></html>

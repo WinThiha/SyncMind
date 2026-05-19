@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.syncmind.android.data.model.GoogleSocialUser
 import com.syncmind.android.data.model.LoginRequest
 import com.syncmind.android.data.repository.AuthRepository
 import com.syncmind.android.util.NetworkResult
@@ -18,6 +19,12 @@ class LoginViewModel @Inject constructor(
 
     private val _loginState = mutableStateOf<NetworkResult<Unit>>(NetworkResult.Success(Unit))
     val loginState: State<NetworkResult<Unit>> = _loginState
+
+    private val _authenticated = mutableStateOf(false)
+    val authenticated: State<Boolean> = _authenticated
+
+    private val _socialRegistrationUser = mutableStateOf<GoogleSocialUser?>(null)
+    val socialRegistrationUser: State<GoogleSocialUser?> = _socialRegistrationUser
 
     private val _email = mutableStateOf("")
     val email: State<String> = _email
@@ -51,6 +58,29 @@ class LoginViewModel @Inject constructor(
             when (result) {
                 is NetworkResult.Success -> {
                     _loginState.value = NetworkResult.Success(Unit)
+                    _authenticated.value = true
+                }
+                is NetworkResult.Error -> {
+                    val socialUser = authRepository.parseGoogleSocialUser(result.payload)
+                    if (result.code == 404 && socialUser != null) {
+                        _socialRegistrationUser.value = socialUser
+                        _loginState.value = NetworkResult.Success(Unit)
+                    } else {
+                        _loginState.value = NetworkResult.Error(result.message, result.code)
+                    }
+                }
+                else -> {}
+            }
+        }
+    }
+
+    fun loginWithGoogleIdToken(idToken: String) {
+        _loginState.value = NetworkResult.Loading
+        viewModelScope.launch {
+            when (val result = authRepository.loginWithGoogleIdToken(idToken)) {
+                is NetworkResult.Success -> {
+                    _loginState.value = NetworkResult.Success(Unit)
+                    _authenticated.value = true
                 }
                 is NetworkResult.Error -> {
                     _loginState.value = NetworkResult.Error(result.message, result.code)
@@ -58,5 +88,9 @@ class LoginViewModel @Inject constructor(
                 else -> {}
             }
         }
+    }
+
+    fun onGoogleLoginError(message: String) {
+        _loginState.value = NetworkResult.Error(message)
     }
 }

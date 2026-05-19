@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Global Issues</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#dce9ff",
+                        "status-resolved": "#10B981",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-container": "#677687",
+                        "on-secondary-container": "#5c647a",
+                        "on-primary-fixed": "#001a42",
+                        "on-tertiary-fixed": "#0e1d2b",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#c2c6d6",
+                        "tertiary": "#4f5d6e",
+                        "priority-normal": "#3B82F6",
+                        "outline": "#727785",
+                        "priority-low": "#94A3B8",
+                        "primary-container": "#2170e4",
+                        "on-primary": "#ffffff",
+                        "priority-high": "#EF4444",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "inverse-on-surface": "#eaf1ff",
+                        "primary-fixed": "#d8e2ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-container": "#e5eeff",
+                        "on-tertiary-container": "#fdfcff",
+                        "status-closed": "#0F172A",
+                        "on-background": "#0b1c30",
+                        "on-primary-container": "#fefcff",
+                        "inverse-surface": "#213145",
+                        "background-subtle": "#F8FAFC",
+                        "inverse-primary": "#adc6ff",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary-fixed-dim": "#b9c8db",
+                        "secondary-container": "#dae2fd",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#adc6ff",
+                        "surface-tint": "#005ac2",
+                        "on-tertiary-fixed-variant": "#3a4858",
+                        "on-surface": "#0b1c30",
+                        "status-in-progress": "#3B82F6",
+                        "status-open": "#64748B",
+                        "error": "#ba1a1a",
+                        "secondary": "#565e74",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed": "#d5e4f8",
+                        "on-surface-variant": "#424754",
+                        "primary": "#0058be",
+                        "on-primary-fixed-variant": "#004395",
+                        "surface": "#f8f9ff",
+                        "secondary-fixed": "#dae2fd",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "background": "#f8f9ff",
+                        "on-secondary-fixed": "#131b2e",
+                        "secondary-fixed-dim": "#bec6e0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "margin-mobile": "16px",
+                        "touch-target-min": "48px",
+                        "gutter-mobile": "12px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "label-sm": ["JetBrains Mono"],
+                        "title-lg": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "headline-md": ["22px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-lg min-h-screen flex flex-col pb-20">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-surface flex items-center justify-between px-margin-mobile h-touch-target-min z-50 transition-colors duration-200">
+<div class="flex items-center gap-stack-sm">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-title-lg text-title-lg">
+                U
+            </div>
+<h1 class="font-headline-md-mobile text-headline-md-mobile text-primary tracking-tight">Project Flow</h1>
+</div>
+<button aria-label="notifications" class="w-touch-target-min h-touch-target-min flex items-center justify-center text-on-surface-variant hover:bg-surface-container rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<main class="flex-grow px-margin-mobile pt-stack-md flex flex-col gap-stack-lg">
+<!-- Header & AI Search -->
+<section class="flex flex-col gap-stack-sm">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Global Issues</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Your personal work queue across all active projects.</p>
+<div class="mt-stack-sm relative w-full h-12 flex items-center bg-surface-container rounded-lg px-3 hover:bg-surface-container-high transition-colors cursor-pointer border border-transparent focus-within:border-primary focus-within:border-2">
+<span class="material-symbols-outlined text-primary mr-2">smart_toy</span>
+<input class="w-full bg-transparent border-none focus:ring-0 font-body-md text-body-md text-on-surface placeholder-on-surface-variant outline-none" placeholder="AI Search: Find similar issues..." type="text"/>
+</div>
+</section>
+<!-- Filters (Scrollable) -->
+<section class="flex gap-2 overflow-x-auto pb-2 -mx-margin-mobile px-margin-mobile snap-x hide-scrollbar">
+<style> .hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; } </style>
+<button class="shrink-0 snap-start flex items-center gap-1 px-3 py-1.5 rounded-full border border-outline-variant bg-surface text-on-surface font-body-md text-body-md hover:bg-surface-container">
+                Status <span class="material-symbols-outlined text-[18px]">arrow_drop_down</span>
+</button>
+<button class="shrink-0 snap-start flex items-center gap-1 px-3 py-1.5 rounded-full border border-outline-variant bg-surface text-on-surface font-body-md text-body-md hover:bg-surface-container">
+                Priority <span class="material-symbols-outlined text-[18px]">arrow_drop_down</span>
+</button>
+<button class="shrink-0 snap-start flex items-center gap-1 px-3 py-1.5 rounded-full border border-outline-variant bg-surface text-on-surface font-body-md text-body-md hover:bg-surface-container">
+                Assignee <span class="material-symbols-outlined text-[18px]">arrow_drop_down</span>
+</button>
+<button class="shrink-0 snap-start flex items-center gap-1 px-3 py-1.5 rounded-full border border-outline-variant bg-surface text-on-surface font-body-md text-body-md hover:bg-surface-container">
+                Project <span class="material-symbols-outlined text-[18px]">arrow_drop_down</span>
+</button>
+</section>
+<!-- Issue List -->
+<section class="flex flex-col gap-stack-sm">
+<!-- Card 1 (High Priority, Open) -->
+<article class="bg-surface rounded-lg p-stack-md shadow-[0_4px_6px_-1px_rgba(0,0,0,0.04)] border border-outline-variant/30 flex relative overflow-hidden">
+<!-- Priority Strip -->
+<div class="absolute left-0 top-0 bottom-0 w-[4px] bg-priority-high"></div>
+<div class="pl-2 w-full flex flex-col gap-unit">
+<div class="flex justify-between items-start w-full">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Frontend-Core • UI-842</span>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded-full border border-outline text-status-open font-label-sm text-label-sm">Open</span>
+<span class="w-6 h-6 rounded-full bg-error-container text-on-error-container flex items-center justify-center font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+</span>
+</div>
+</div>
+<h3 class="font-title-lg text-title-lg text-on-surface mt-1">Navigation stutters on iOS Safari</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mt-1">
+                        When swiping back, the bottom navigation bar flickers and sometimes disappears completely before reappearing. Need to investigate the transition delays.
+                    </p>
+<div class="flex justify-between items-center mt-stack-sm w-full">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container border border-surface flex items-center justify-center font-label-sm text-label-sm">U</div>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">chat_bubble</span>
+<span class="font-label-sm text-label-sm">4</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Card 2 (Normal Priority, In Progress) -->
+<article class="bg-surface rounded-lg p-stack-md shadow-[0_4px_6px_-1px_rgba(0,0,0,0.04)] border border-outline-variant/30 flex relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-[4px] bg-priority-normal"></div>
+<div class="pl-2 w-full flex flex-col gap-unit">
+<div class="flex justify-between items-start w-full">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Backend-API • API-102</span>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary-fixed-dim font-label-sm text-label-sm">In Progress</span>
+</div>
+</div>
+<h3 class="font-title-lg text-title-lg text-on-surface mt-1">Optimize user settings endpoint</h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mt-1">
+                        Current response time is &gt; 400ms due to unnecessary database joins. Need to refactor the query to only fetch essential notification preferences.
+                    </p>
+<div class="flex justify-between items-center mt-stack-sm w-full">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full bg-primary-container text-on-primary-container border border-surface flex items-center justify-center font-label-sm text-label-sm">D</div>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">chat_bubble</span>
+<span class="font-label-sm text-label-sm">1</span>
+</div>
+</div>
+</div>
+</article>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-gutter-mobile py-2 bg-surface-container shadow-[0_-2px_4px_rgba(0,0,0,0.1)] font-label-sm text-label-sm text-primary">
+<!-- Dashboard (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant scale-95 active:scale-90 transition-transform p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- Projects (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant scale-95 active:scale-90 transition-transform p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1">folder_open</span>
+<span>Projects</span>
+</a>
+<!-- Issues (Active) -->
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined mb-1" data-weight="fill">bug_report</span>
+<span>Issues</span>
+</a>
+<!-- Settings (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant scale-95 active:scale-90 transition-transform p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</body></html>

@@ -60,3 +60,21 @@
 
 - [x] 7.1 Read `invite` query param on mount and persist to `sessionStorage` as `pendingInviteToken`.
 - [x] 7.2 After successful registration, redirect to `/invitations/{token}` if a pending token exists.
+
+## 9. Android Mobile Stitch Redesign
+
+- [x] 9.1 Replace Android default purple Material theme colors with SyncMind mobile tokens from `mobile_designs/stitch_syncmind_companion/syncmind_mobile/DESIGN.md`.
+- [x] 9.2 Add shared native mobile components for top app bar, bottom navigation, cards, metrics, status chips, priority strips, search, loading, and empty states.
+- [x] 9.3 Redesign Android Projects, Dashboard, Global Issues, and Settings screens using the Stitch mobile references.
+- [x] 9.4 Redesign Android Login, Project Detail, Issue Detail, Milestone cards, Wiki cards, Project cards, and Issue cards to align with the same mobile visual system.
+- [x] 9.5 Verify Android compile and unit-test path with `.\gradlew.bat testDebugUnitTest`.
+
+## 10. Android Environment-Aware Builds
+
+- [x] 10.1 Add `staging` Android build type with `.staging` application ID suffix and `-staging` version suffix.
+- [x] 10.2 Generate `BuildConfig.API_BASE_URL`, `BuildConfig.WEB_BASE_URL`, and `BuildConfig.GOOGLE_WEB_CLIENT_ID` from build-specific Gradle properties/environment variables with debug/staging/release defaults.
+- [x] 10.3 Move Retrofit base URL from hardcoded `Constants.BASE_URL` to generated `BuildConfig.API_BASE_URL`.
+- [x] 10.4 Move Compose Navigation deep-link URI patterns from hardcoded localhost/emulator URLs to generated `BuildConfig.WEB_BASE_URL`.
+- [x] 10.5 Move AndroidManifest deep-link scheme/host and cleartext policy to build-specific manifest placeholders.
+- [x] 10.6 Verify debug with `.\gradlew.bat testDebugUnitTest` and staging with `.\gradlew.bat assembleStaging`.
+- [x] 10.7 Keep Android auth API work and encrypted token persistence off the main thread; verify staging login with `ethan@syncmind.app` / `password` reaches the project list.

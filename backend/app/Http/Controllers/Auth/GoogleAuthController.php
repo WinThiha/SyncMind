@@ -23,7 +23,28 @@ class GoogleAuthController extends Controller
         $errorDetails = null;
 
         try {
-            if ($request->has('token')) {
+            if ($request->has('id_token')) {
+                $response = Http::get('https://oauth2.googleapis.com/tokeninfo', [
+                    'id_token' => $request->id_token,
+                ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $expectedAudience = config('services.google.client_id');
+
+                    if ($expectedAudience && ($data['aud'] ?? null) !== $expectedAudience) {
+                        $errorDetails = 'Google ID token audience mismatch.';
+                    } else {
+                        $socialUser = new \stdClass;
+                        $socialUser->token = $request->id_token;
+                        $socialUser->id = $data['sub'] ?? null;
+                        $socialUser->email = $data['email'] ?? null;
+                        $socialUser->name = $data['name'] ?? ($data['email'] ?? null);
+                    }
+                } else {
+                    $errorDetails = 'Google ID token verification failed: '.$response->body();
+                }
+            } elseif ($request->has('token')) {
                 try {
                     $socialUser = Socialite::driver('google')->userFromToken($request->token);
                 } catch (\Exception $e) {
