@@ -63,15 +63,38 @@ export async function createIssueComment(projectId: number | string, key: string
 }
 
 export interface AISuggestion {
+  summary: string | null;
   description: string | null;
   issue_type: string | null;
   priority: string | null;
   estimated_hours: number | null;
+  due_date: string | null;
+  milestone_id: number | null;
   assignee_suggestions: Array<{ assignee_id: number; reason: string }>;
+  open_questions: string[];
 }
 
-export async function suggestIssueFields(projectId: number | string, summary: string): Promise<AISuggestion> {
-  const response = await api.post(`/api/projects/${projectId}/ai/suggest-issue`, { summary });
+export interface AISuggestionRequest {
+  prompt: string;
+  output_locale?: string;
+  current_fields?: {
+    summary?: string;
+    description?: string;
+    issue_type?: string;
+    priority?: string;
+    estimated_hours?: number | string | null;
+    assignee_id?: number | string | null;
+    due_date?: string | null;
+    milestone_id?: number | string | null;
+  };
+}
+
+export async function suggestIssueFields(
+  projectId: number | string,
+  request: AISuggestionRequest | string
+): Promise<AISuggestion> {
+  const payload = typeof request === 'string' ? { summary: request } : request;
+  const response = await api.post(`/api/projects/${projectId}/ai/suggest-issue`, payload);
   return response.data.data;
 }
 
@@ -142,14 +165,28 @@ export interface GetIssuesParams {
   type?: string;
   due_date_start?: string;
   due_date_end?: string;
+  due_date?: string;
   assignee?: string;
   high_priority?: boolean;
   search?: string;
+  page?: number;
 }
 
-export async function getGlobalIssues(params: GetIssuesParams = {}): Promise<GlobalIssue[]> {
+export interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  total: number;
+  per_page: number;
+}
+
+export interface PaginatedGlobalIssues {
+  data: GlobalIssue[];
+  meta: PaginationMeta;
+}
+
+export async function getGlobalIssues(params: GetIssuesParams = {}): Promise<PaginatedGlobalIssues> {
   const response = await api.get('/api/issues', { params });
-  return response.data.data;
+  return { data: response.data.data, meta: response.data.meta };
 }
 
 export async function getIssuesSummary(projectId?: number | string): Promise<IssuesSummary> {

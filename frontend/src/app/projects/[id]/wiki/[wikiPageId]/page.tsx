@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Edit2, MessageCircle, BookOpen, Clock, User } from 'lucide-react';
+import { ChevronLeft, Edit2, MessageCircle, BookOpen, Clock, User, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
@@ -30,6 +31,10 @@ export default function WikiPageViewPage({
   const [page, setPage] = useState<WikiPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     async function load() {
@@ -69,19 +74,19 @@ export default function WikiPageViewPage({
   if (!page) return null;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full min-w-0">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
         <button
           onClick={() => router.push(`/projects/${projectId}/wiki`)}
-          className="p-2 hover:bg-foreground/5 rounded-full transition-colors text-foreground/40 hover:text-foreground shrink-0"
+          className="p-1.5 sm:p-2 hover:bg-foreground/5 rounded-full transition-colors text-foreground/40 hover:text-foreground shrink-0"
           aria-label={t('wiki.view.back')}
         >
-          <ChevronLeft size={22} />
+          <ChevronLeft size={20} />
         </button>
         <div className="flex items-center gap-2 min-w-0">
-          <BookOpen size={20} className="text-green-500 shrink-0" />
-          <h1 className="text-2xl font-bold tracking-tight truncate">{page.title}</h1>
+          <BookOpen size={18} className="text-green-500 shrink-0" />
+          <h1 className="text-lg sm:text-2xl font-bold tracking-tight truncate">{page.title}</h1>
         </div>
         {isAdmin && (
           <GlassButton
@@ -96,17 +101,29 @@ export default function WikiPageViewPage({
         )}
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 pb-20 lg:pb-4">
+        {/* Mobile sidebar toggle */}
+        <button
+          onClick={() => setSidebarOpen((v) => !v)}
+          className="lg:hidden flex items-center gap-2 w-full text-sm font-medium px-3 py-2 rounded-xl border border-border-glow bg-foreground/5 hover:bg-foreground/10 text-foreground/70 hover:text-foreground transition-colors"
+        >
+          <FileText size={14} />
+          {t('wiki.list.pages')}
+          {sidebarOpen ? <ChevronUp size={14} className="ml-auto" /> : <ChevronDown size={14} className="ml-auto" />}
+        </button>
+
         {/* Sidebar page list */}
-        <GlassCard className="w-60 shrink-0 p-0 overflow-hidden self-start sticky top-4">
-          <WikiPageList pages={pages} projectId={projectId} isAdmin={!!isAdmin} />
-        </GlassCard>
+        <div className={`${sidebarOpen ? 'block' : 'hidden'} lg:block lg:w-60 lg:shrink-0 lg:self-start lg:sticky lg:top-4`}>
+          <GlassCard className="p-0 overflow-hidden">
+            <WikiPageList pages={pages} projectId={projectId} isAdmin={!!isAdmin} />
+          </GlassCard>
+        </div>
 
         {/* Main content */}
-        <div className="flex-1 min-w-0">
-          <GlassCard className="p-8">
+        <div className="flex-1 min-w-0 w-full overflow-x-hidden">
+          <GlassCard className="p-3 sm:p-5 lg:p-8 w-full overflow-hidden">
             {/* Page metadata */}
-            <div className="flex flex-wrap gap-4 mb-6 pb-6 border-b border-border-glow text-xs text-foreground/40">
+            <div className="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-border-glow text-xs text-foreground/40">
               {page.author && (
                 <span className="flex items-center gap-1">
                   <User size={11} />
@@ -130,30 +147,38 @@ export default function WikiPageViewPage({
         </div>
       </div>
 
-      {/* Floating chat toggle button */}
-      <button
-        onClick={() => setChatOpen((v) => !v)}
-        className="fixed bottom-6 right-6 z-30 flex items-center gap-2 bg-brand-primary text-white px-4 py-2.5 rounded-2xl shadow-lg shadow-brand-primary/30 hover:bg-brand-primary/85 transition-colors font-medium text-sm"
-        aria-label="Toggle AI chat"
-      >
-        <MessageCircle size={16} />
-        {chatOpen ? t('wiki.view.closeChat') : t('wiki.view.askAi')}
-      </button>
 
-      {/* Chat panel */}
-      <AnimatePresence>
-        {chatOpen && (
-          <motion.div
-            key="chat"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={BASE_SPRING}
-          >
-            <WikiChatPanel projectId={projectId} onClose={() => setChatOpen(false)} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Portal: renders outside the motion.div transform tree so fixed positioning is relative to the real viewport */}
+      {mounted && createPortal(
+        <>
+          {!chatOpen && (
+            <button
+              onClick={() => setChatOpen(true)}
+              className="fixed bottom-6 right-4 sm:right-6 z-50 flex items-center gap-2 bg-brand-primary text-white px-3 sm:px-4 py-2.5 rounded-2xl shadow-lg shadow-brand-primary/30 hover:bg-brand-primary/85 transition-colors font-medium text-sm"
+              aria-label={t('wiki.view.askAi')}
+            >
+              <MessageCircle size={16} />
+              {t('wiki.view.askAi')}
+            </button>
+          )}
+
+          <AnimatePresence>
+            {chatOpen && (
+              <motion.div
+                key="chat"
+                className="fixed right-0 top-16 bottom-0 w-full sm:w-96 z-50"
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={BASE_SPRING}
+              >
+                <WikiChatPanel projectId={projectId} onClose={() => setChatOpen(false)} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>,
+        document.body
+      )}
     </div>
   );
 }

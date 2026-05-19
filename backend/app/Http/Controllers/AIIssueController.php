@@ -30,10 +30,28 @@ class AIIssueController extends Controller
         }
 
         $validated = $request->validate([
-            'summary' => 'required|string|max:255',
+            'prompt' => 'nullable|string|max:8000|required_without:summary',
+            'summary' => 'nullable|string|max:255|required_without:prompt',
+            'output_locale' => 'nullable|string|max:20',
+            'current_fields' => 'nullable|array',
+            'current_fields.summary' => 'nullable|string|max:255',
+            'current_fields.description' => 'nullable|string|max:20000',
+            'current_fields.issue_type' => 'nullable|string|max:255',
+            'current_fields.priority' => 'nullable|string|max:50',
+            'current_fields.estimated_hours' => 'nullable|numeric|min:0',
+            'current_fields.assignee_id' => 'nullable|integer',
+            'current_fields.due_date' => 'nullable|date',
+            'current_fields.milestone_id' => 'nullable|integer',
         ]);
 
-        $suggestions = $this->suggestionService->suggest($project, $validated['summary'], $request->user());
+        $prompt = $validated['prompt'] ?? $validated['summary'];
+        $suggestions = $this->suggestionService->suggest(
+            $project,
+            $prompt,
+            $request->user(),
+            $validated['output_locale'] ?? null,
+            $validated['current_fields'] ?? []
+        );
 
         return response()->json(['data' => $suggestions]);
     }

@@ -9,6 +9,7 @@ import { GlassButton } from '@/components/ui/GlassButton';
 import { Settings, Trash2, UserPlus, AlertTriangle, Save, FolderEdit, ListTree, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLocale } from '@/context/LocaleContext';
+import { confirmAction } from '@/lib/alert';
 
 interface ProjectSettingsProps {
   project: Project;
@@ -48,14 +49,20 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
   };
 
   const handleDelete = async () => {
-    if (confirm(t('projects.settings.confirmDelete'))) {
-      try {
-        await deleteProject(project.id);
-        router.push('/dashboard');
-      } catch (err) {
-        const axiosError = err as AxiosError<{ message?: string }>;
-        setError(axiosError.response?.data?.message || t('projects.settings.deleteError'));
-      }
+    const ok = await confirmAction({
+      title: t('common.areYouSure'),
+      text: t('projects.settings.confirmDelete'),
+      confirmText: t('common.yesDelete'),
+      cancelText: t('common.cancel'),
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await deleteProject(project.id);
+      router.push('/dashboard');
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      setError(axiosError.response?.data?.message || t('projects.settings.deleteError'));
     }
   };
 
@@ -72,14 +79,19 @@ export default function ProjectSettings({ project, onUpdate, isOwner }: ProjectS
 
   const handleTransfer = async () => {
     if (!transferUserId) return;
-    if (confirm(t('projects.settings.confirmTransfer'))) {
-      try {
-        await transferOwnership(project.id, transferUserId);
-        router.push('/dashboard');
-      } catch (err) {
-        const axiosError = err as AxiosError<{ message?: string }>;
-        setTransferError(axiosError.response?.data?.message || t('projects.settings.transferError'));
-      }
+    const ok = await confirmAction({
+      title: t('common.areYouSure'),
+      text: t('projects.settings.confirmTransfer'),
+      confirmText: t('common.yesTransfer'),
+      cancelText: t('common.cancel'),
+    });
+    if (!ok) return;
+    try {
+      await transferOwnership(project.id, transferUserId);
+      router.push('/dashboard');
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      setTransferError(axiosError.response?.data?.message || t('projects.settings.transferError'));
     }
   };
 

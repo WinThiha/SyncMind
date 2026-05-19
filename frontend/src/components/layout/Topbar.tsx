@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Settings, LogOut, ChevronDown, Menu } from 'lucide-react';
+import { Settings, LogOut, ChevronDown, Menu } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
-import { useModifierKey } from '@/hooks/useModifierKey';
 import { useLocale } from '@/context/LocaleContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ToolbarPreferences } from '@/components/toolbar/ToolbarPreferences';
@@ -13,11 +12,9 @@ import { ToolbarPreferences } from '@/components/toolbar/ToolbarPreferences';
 export const Topbar: React.FC = () => {
   const { user, logout } = useAuth();
   const { collapsed, mobileOpen, setMobileOpen } = useSidebar();
-  const { modKey, isMac } = useModifierKey();
   const { t } = useLocale();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
 
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
@@ -33,24 +30,13 @@ export const Topbar: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    const mod = isMac ? e.metaKey : e.ctrlKey;
-    if (mod && e.key === 'k') {
-      e.preventDefault();
-      searchRef.current?.focus();
-      searchRef.current?.select();
-      return;
-    }
-    if (e.key === 'Escape') {
-      setDropdownOpen(false);
-      if (document.activeElement === searchRef.current) searchRef.current?.blur();
-    }
-  }, [isMac]);
-
   useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setDropdownOpen(false);
+    }
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
+  }, []);
 
   return (
     <header
@@ -66,21 +52,6 @@ export const Topbar: React.FC = () => {
       >
         <Menu size={18} />
       </button>
-
-      {/* Search */}
-      <div className="flex items-center gap-2 bg-foreground/5 border border-border-glow px-3 py-2 rounded-xl flex-1 max-w-xs sm:max-w-sm lg:max-w-md focus-within:ring-4 focus-within:ring-brand-primary/10 focus-within:border-brand-primary/30 transition-all">
-        <Search size={15} className="text-foreground/35 shrink-0" />
-        <input
-          ref={searchRef}
-          id="topbar-search"
-          type="text"
-          placeholder={t('nav.topbar.search')}
-          className="bg-transparent border-none outline-none text-sm w-full min-w-0 placeholder:text-foreground/35 font-medium"
-        />
-        <kbd className="hidden md:flex items-center gap-0.5 px-1.5 py-0.5 bg-foreground/8 border border-foreground/10 rounded text-[10px] font-mono text-foreground/35 shrink-0 whitespace-nowrap">
-          {modKey} K
-        </kbd>
-      </div>
 
       {/* Right actions */}
       <div className="ml-auto flex items-center gap-2 shrink-0">

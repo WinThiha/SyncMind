@@ -36,4 +36,6 @@ export const dashboard: Dictionary = {
   'dashboard.due': 'Due',
   'dashboard.noDueDate': 'No due date',
   'dashboard.updated': 'Updated',
+  'dashboard.activity.commented': '{actor} commented on {issue}',
+  'dashboard.activity.changed': '{actor} changed {field} on {issue}',
 };

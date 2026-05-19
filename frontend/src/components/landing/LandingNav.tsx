@@ -2,11 +2,26 @@
 
 import { useState } from 'react';
 import { useLocale } from '@/context/LocaleContext';
+import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
-import { BrainCircuit, LayoutDashboard, LogIn, Menu, UserPlus, X } from 'lucide-react';
+import {
+  BrainCircuit,
+  ChevronDown,
+  Globe,
+  LayoutDashboard,
+  LogIn,
+  Menu,
+  Moon,
+  Sun,
+  UserPlus,
+  X,
+} from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LandingButtonLink } from './LandingButtonLink';
 import { ToolbarPreferences } from '@/components/toolbar/ToolbarPreferences';
+import { updateUserSettings } from '@/lib/api/settings';
+import { LOCALE_OPTIONS } from '@/lib/i18n/localeOptions';
 
 interface LandingNavProps {
   isAuthenticated: boolean;
@@ -14,12 +29,27 @@ interface LandingNavProps {
 }
 
 export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
-  const { t } = useLocale();
+  const { t, locale, setLocale } = useLocale();
+  const { isDarkMode, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const anchorLinks = [
-    { label: t('landing.nav.capabilities'), href: '#capabilities' },
-    { label: t('landing.nav.start'), href: '#cta' },
-  ];
+  const [savingLocale, setSavingLocale] = useState(false);
+
+  const themeLabel = isDarkMode ? t('nav.topbar.themeLight') : t('nav.topbar.themeDark');
+
+  const handleLocaleChange = async (nextLocale: string) => {
+    const prev = locale;
+    setLocale(nextLocale);
+    if (!user) return;
+    setSavingLocale(true);
+    try {
+      await updateUserSettings({ preferences: { locale: nextLocale as typeof locale } });
+    } catch {
+      setLocale(prev);
+    } finally {
+      setSavingLocale(false);
+    }
+  };
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 lg:px-8">
@@ -41,6 +71,8 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
 
           {/* Right actions */}
           <div className="flex items-center gap-2 shrink-0">
+
+            {/* ToolbarPreferences: desktop only */}
             <div className="hidden sm:block">
               <ToolbarPreferences />
             </div>
@@ -57,10 +89,13 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
               </>
             ) : (
               <>
-                <LandingButtonLink href="/login" variant="ghost" size="sm">
-                  <LogIn size={16} />
-                  {t('landing.nav.signIn')}
-                </LandingButtonLink>
+                {/* Sign In: desktop only — mobile users use the hamburger or Get Started */}
+                <div className="hidden sm:block">
+                  <LandingButtonLink href="/login" variant="ghost" size="sm">
+                    <LogIn size={16} />
+                    {t('landing.nav.signIn')}
+                  </LandingButtonLink>
+                </div>
                 <LandingButtonLink href="/register" variant="primary" size="sm">
                   <UserPlus size={16} />
                   <span className="hidden sm:inline">{t('landing.nav.getStarted')}</span>
@@ -68,7 +103,7 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
               </>
             )}
 
-            {/* Hamburger — hidden on md+ */}
+            {/* Hamburger — mobile/tablet only */}
             <button
               onClick={() => setMobileOpen((v) => !v)}
               aria-label={mobileOpen ? t('landing.nav.closeMenu') : t('landing.nav.openMenu')}
@@ -79,7 +114,7 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
           </div>
         </div>
 
-        {/* Mobile dropdown — animated */}
+        {/* Mobile dropdown */}
         <AnimatePresence>
           {mobileOpen && (
             <motion.div
@@ -90,37 +125,48 @@ export function LandingNav({ isAuthenticated, userName }: LandingNavProps) {
               transition={{ duration: 0.2, ease: 'easeInOut' }}
               className="md:hidden overflow-hidden border-t border-border-glow/30"
             >
-              <div className="px-3 py-3 flex flex-col gap-0.5">
-                {anchorLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground/65 hover:bg-foreground/5 hover:text-foreground transition-colors"
+              <div className="px-4 py-4 flex flex-col gap-4">
+
+                {/* Language */}
+                <div>
+                  <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-foreground/40">
+                    {t('nav.toolbar.locale')}
+                  </p>
+                  <div className="relative">
+                    <Globe size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
+                    <select
+                      aria-label={t('nav.toolbar.locale')}
+                      value={locale}
+                      disabled={savingLocale}
+                      onChange={e => void handleLocaleChange(e.target.value)}
+                      className="w-full appearance-none rounded-xl border border-border-glow bg-foreground/5 pl-9 pr-8 py-3 text-sm font-medium text-foreground outline-none transition-all focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary/30"
+                    >
+                      {LOCALE_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value} className="bg-background text-foreground">
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-foreground/35" />
+                  </div>
+                </div>
+
+                {/* Appearance */}
+                <div>
+                  <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-foreground/40">
+                    Appearance
+                  </p>
+                  <button
+                    type="button"
+                    onClick={toggleTheme}
+                    aria-label={themeLabel}
+                    className="w-full flex items-center gap-3 rounded-xl border border-border-glow bg-foreground/5 px-4 py-3 text-sm font-semibold text-foreground/70 hover:bg-foreground/10 hover:text-foreground transition-colors"
                   >
-                    {link.label}
-                  </Link>
-                ))}
-                {!isAuthenticated && (
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground/65 hover:bg-foreground/5 hover:text-foreground transition-colors flex items-center gap-2"
-                  >
-                    <LogIn size={16} />
-                    {t('landing.nav.signIn')}
-                  </Link>
-                )}
-                {isAuthenticated && (
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground/65 hover:bg-foreground/5 hover:text-foreground transition-colors flex items-center gap-2"
-                  >
-                    <LayoutDashboard size={16} />
-                    {t('landing.nav.goToDashboard')}
-                  </Link>
-                )}
+                    {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+                    {themeLabel}
+                  </button>
+                </div>
+
               </div>
             </motion.div>
           )}

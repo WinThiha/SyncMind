@@ -19,10 +19,10 @@ class AITestEnvironmentSeeder extends Seeder
         $acmeProject = Project::where('key', 'ACME')->first();
 
         if ($acmeProject) {
-            $issueIds = $acmeProject->issues()->pluck('id');
+            $issueIds = $acmeProject->issues()->withTrashed()->pluck('id');
             Comment::whereIn('issue_id', $issueIds)->delete();
             IssueHistory::whereIn('issue_id', $issueIds)->delete();
-            $acmeProject->issues()->delete();
+            $acmeProject->issues()->withTrashed()->forceDelete();
             $acmeProject->members()->detach();
             $acmeProject->delete();
         }
@@ -61,7 +61,6 @@ class AITestEnvironmentSeeder extends Seeder
             'icon' => 'rocket',
             'issue_types' => ['story', 'task', 'bug'],
             'categories' => ['frontend', 'backend', 'devops'],
-            'milestones' => ['M1 - Foundation', 'M2 - Core Features', 'M3 - Polish'],
             'versions' => ['v0.1.0', 'v0.2.0'],
             'creator_id' => $users['alice']->id,
         ]);
@@ -101,7 +100,7 @@ class AITestEnvironmentSeeder extends Seeder
                 'assignee_id' => $users['charlie']->id,
                 'creator_id' => $users['alice']->id,
                 'category' => 'backend',
-                'milestone' => 'M1 - Foundation',
+                'milestone_id' => null,
                 'version' => 'v0.1.0',
                 'created_at' => '2026-03-01 09:00:00',
             ],
@@ -116,7 +115,7 @@ class AITestEnvironmentSeeder extends Seeder
                 'assignee_id' => $users['bob']->id,
                 'creator_id' => $users['alice']->id,
                 'category' => 'frontend',
-                'milestone' => 'M1 - Foundation',
+                'milestone_id' => null,
                 'version' => 'v0.1.0',
                 'created_at' => '2026-03-01 10:00:00',
             ],
@@ -131,7 +130,7 @@ class AITestEnvironmentSeeder extends Seeder
                 'assignee_id' => $users['bob']->id,
                 'creator_id' => $users['alice']->id,
                 'category' => 'frontend',
-                'milestone' => 'M1 - Foundation',
+                'milestone_id' => null,
                 'version' => 'v0.1.0',
                 'created_at' => '2026-03-03 09:00:00',
             ],
@@ -146,7 +145,7 @@ class AITestEnvironmentSeeder extends Seeder
                 'assignee_id' => $users['bob']->id,
                 'creator_id' => $users['alice']->id,
                 'category' => 'frontend',
-                'milestone' => 'M2 - Core Features',
+                'milestone_id' => null,
                 'version' => 'v0.1.0',
                 'created_at' => '2026-03-05 09:00:00',
             ],
@@ -161,7 +160,7 @@ class AITestEnvironmentSeeder extends Seeder
                 'assignee_id' => $users['charlie']->id,
                 'creator_id' => $users['bob']->id,
                 'category' => 'backend',
-                'milestone' => 'M2 - Core Features',
+                'milestone_id' => null,
                 'version' => 'v0.2.0',
                 'created_at' => '2026-03-08 14:30:00',
             ],
@@ -176,7 +175,7 @@ class AITestEnvironmentSeeder extends Seeder
                 'assignee_id' => $users['charlie']->id,
                 'creator_id' => $users['bob']->id,
                 'category' => 'backend',
-                'milestone' => 'M2 - Core Features',
+                'milestone_id' => null,
                 'version' => 'v0.2.0',
                 'created_at' => '2026-03-10 11:15:00',
             ],
@@ -191,7 +190,7 @@ class AITestEnvironmentSeeder extends Seeder
                 'assignee_id' => null,
                 'creator_id' => $users['alice']->id,
                 'category' => 'frontend',
-                'milestone' => 'M3 - Polish',
+                'milestone_id' => null,
                 'version' => 'v0.2.0',
                 'created_at' => '2026-03-12 16:00:00',
             ],

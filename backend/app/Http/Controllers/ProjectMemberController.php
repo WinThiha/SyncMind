@@ -93,6 +93,14 @@ class ProjectMemberController extends Controller
             return response()->json(['message' => 'Cannot remove the project creator. Transfer ownership first.'], 422);
         }
 
+        $actorIsCreator = $project->creator_id == $request->user()->id;
+        if (! $actorIsCreator) {
+            $targetMember = $project->members()->where('user_id', $userId)->first();
+            if ($targetMember && $targetMember->pivot->role === 'admin') {
+                return response()->json(['message' => 'Admins cannot remove other admins.'], 403);
+            }
+        }
+
         $project->members()->detach($userId);
 
         return response()->json(['message' => 'Member removed successfully.']);

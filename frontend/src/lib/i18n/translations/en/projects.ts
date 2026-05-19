@@ -46,6 +46,8 @@ export const projects: Dictionary = {
   'projects.members.updateError': 'Failed to update member',
   'projects.members.cancelInviteError': 'Failed to cancel invitation',
   'projects.members.confirmRemove': 'Are you sure you want to remove this member?',
+  'projects.members.removeNoPermission': 'Permission Denied',
+  'projects.members.removeNoPermissionText': 'You do not have permission to remove this member.',
   'projects.members.inviteSent': 'Invitation sent to {email}',
   'projects.members.addedSuccess': '{name} added to the project',
   'projects.members.positionFieldPlaceholder': 'Position',

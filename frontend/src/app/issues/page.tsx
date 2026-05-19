@@ -17,6 +17,8 @@ import {
   MessageSquare,
   CalendarDays,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CheckCircle2,
   RotateCcw,
   X,
@@ -26,10 +28,8 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { GlassButton } from '@/components/ui/GlassButton';
 import {
   getGlobalIssues,
-  getIssuesSummary,
   getGlobalSimilarIssues,
   GlobalIssue,
-  IssuesSummary,
   GlobalSimilarIssue,
   type GetIssuesParams,
 } from '@/lib/api/issues';
@@ -159,11 +159,12 @@ export default function IssuesPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const initialProjectId = searchParams.get('project_id');
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(initialProjectId ? Number(initialProjectId) : null);
-  const [summary, setSummary] = useState<IssuesSummary | null>(null);
   const [issues, setIssues] = useState<GlobalIssue[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<GlobalIssue | null>(null);
   const [loading, setLoading] = useState(true);
-  const [summaryLoading, setSummaryLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isAISearchEnabled, setIsAISearchEnabled] = useState(false);
@@ -184,9 +185,10 @@ export default function IssuesPage() {
     const nextProjectId = projectId ? Number(projectId) : null;
     setSelectedProjectId(nextProjectId);
     setSelectedIssue(null);
+    setCurrentPage(1);
     setLoading(true);
-    getGlobalIssues({ project_id: nextProjectId ?? undefined })
-      .then(setIssues)
+    getGlobalIssues({ project_id: nextProjectId ?? undefined, page: 1 })
+      .then(r => { setIssues(r.data); setTotalPages(r.meta.last_page); setTotalCount(r.meta.total); })
       .catch(e => console.error('Failed to load issues', e))
       .finally(() => setLoading(false));
   }, [searchParams]);
@@ -203,25 +205,11 @@ export default function IssuesPage() {
     loadProjects();
   }, []);
 
-  useEffect(() => {
-    async function loadSummary() {
-      setSummaryLoading(true);
-      try {
-        const data = await getIssuesSummary(selectedProjectId ?? undefined);
-        setSummary(data);
-      } catch (e) {
-        console.error('Failed to load summary', e);
-      } finally {
-        setSummaryLoading(false);
-      }
-    }
-    loadSummary();
-  }, [selectedProjectId]);
-
-  const loadIssues = useCallback(async () => {
+  const loadIssues = useCallback(async (overridePage?: number) => {
     setLoading(true);
     try {
       const params: GetIssuesParams = {};
+      params.page = overridePage ?? currentPage;
       if (selectedProjectId) params.project_id = selectedProjectId;
       if (statusFilter !== 'all') params.status = statusFilter;
       if (priorityFilter !== 'all') params.priority = priorityFilter;
@@ -240,14 +228,16 @@ export default function IssuesPage() {
         params.due_date = undefined;
       }
 
-      const data = await getGlobalIssues(params);
-      setIssues(data);
+      const response = await getGlobalIssues(params);
+      setIssues(response.data);
+      setTotalPages(response.meta.last_page);
+      setTotalCount(response.meta.total);
     } catch (e) {
       console.error('Failed to load issues', e);
     } finally {
       setLoading(false);
     }
-  }, [selectedProjectId, statusFilter, priorityFilter, typeFilter, dueDateFilter, searchQuery, isAISearchEnabled, activeFilter]);
+  }, [selectedProjectId, statusFilter, priorityFilter, typeFilter, dueDateFilter, searchQuery, isAISearchEnabled, activeFilter, currentPage]);
 
   const handleQuickFilterClick = (filterLabel: string) => {
     const newFilter = activeFilter === filterLabel ? 'All' : filterLabel;
@@ -265,12 +255,17 @@ export default function IssuesPage() {
     if (newFilter === 'Unassigned') params.assignee = 'unassigned';
     if (newFilter === 'High Priority') params.high_priority = true;
     if (newFilter === 'Overdue') params.due_date = 'overdue';
+    setCurrentPage(1);
     setLoading(true);
-    getGlobalIssues(params).then(setIssues).catch(e => console.error('Failed to load issues', e)).finally(() => setLoading(false));
+    getGlobalIssues({ ...params, page: 1 })
+      .then(r => { setIssues(r.data); setTotalPages(r.meta.last_page); setTotalCount(r.meta.total); })
+      .catch(e => console.error('Failed to load issues', e))
+      .finally(() => setLoading(false));
   };
 
   const handleSearch = useCallback(() => {
     if (isAISearchEnabled && selectedProjectId && searchQuery.trim()) {
+      setCurrentPage(1);
       setIsSearchingAI(true);
       const filters: Record<string, string> = {};
       if (statusFilter !== 'all') filters.status = statusFilter;
@@ -283,7 +278,8 @@ export default function IssuesPage() {
         .catch(() => setAISearchResults([]))
         .finally(() => setIsSearchingAI(false));
     } else {
-      loadIssues();
+      setCurrentPage(1);
+      loadIssues(1);
     }
   }, [loadIssues, isAISearchEnabled, selectedProjectId, searchQuery, statusFilter, priorityFilter, typeFilter, dueDateFilter]);
 
@@ -368,9 +364,10 @@ export default function IssuesPage() {
     setSearchQuery('');
     setIsAISearchEnabled(false);
     setAISearchResults([]);
+    setCurrentPage(1);
     setLoading(true);
-    getGlobalIssues({ project_id: selectedProjectId ?? undefined })
-      .then(setIssues)
+    getGlobalIssues({ project_id: selectedProjectId ?? undefined, page: 1 })
+      .then(r => { setIssues(r.data); setTotalPages(r.meta.last_page); setTotalCount(r.meta.total); })
       .catch(e => console.error('Failed to load issues', e))
       .finally(() => setLoading(false));
   };
@@ -386,9 +383,10 @@ export default function IssuesPage() {
   const handleProjectChange = (projectId: number | null) => {
     setSelectedProjectId(projectId);
     setSelectedIssue(null);
+    setCurrentPage(1);
     setLoading(true);
-    getGlobalIssues({ project_id: projectId ?? undefined })
-      .then(setIssues)
+    getGlobalIssues({ project_id: projectId ?? undefined, page: 1 })
+      .then(r => { setIssues(r.data); setTotalPages(r.meta.last_page); setTotalCount(r.meta.total); })
       .catch(e => console.error('Failed to load issues', e))
       .finally(() => setLoading(false));
     const query = projectId ? `?project_id=${projectId}` : '';
@@ -400,12 +398,17 @@ export default function IssuesPage() {
     router.push(`/projects/${projectId}/issues/new`);
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    loadIssues(page);
+  };
+
   const quickFilters = [
-    { label: 'All', icon: CircleDot },
-    { label: 'Assigned to Me', icon: UserCheck },
-    { label: 'Overdue', icon: AlertTriangle },
-    { label: 'High Priority', icon: AlertTriangle },
-    { label: 'Unassigned', icon: UserCheck },
+    { label: 'All', value: 'all', icon: CircleDot },
+    { label: 'Assigned to Me', value: 'assignedToMe', icon: UserCheck },
+    { label: 'Overdue', value: 'overdue', icon: AlertTriangle },
+    { label: 'High Priority', value: 'highPriority', icon: AlertTriangle },
+    { label: 'Unassigned', value: 'unassigned', icon: UserCheck },
   ];
 
   return (
@@ -497,10 +500,12 @@ export default function IssuesPage() {
               onKeyDown={e => {
                 if (e.key === 'Enter' && searchQuery.trim()) {
                   if (isAISearchEnabled && selectedProjectId) {
+                    setCurrentPage(1);
                     setAISearchResults([]);
                     performAISearch();
                   } else {
-                    loadIssues();
+                    setCurrentPage(1);
+                    loadIssues(1);
                   }
                 }
               }}
@@ -548,7 +553,7 @@ export default function IssuesPage() {
                     : 'border-slate-300 bg-white text-foreground/80 hover:bg-white hover:-translate-y-[1px] hover:shadow-md active:translate-y-0 dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/60 dark:hover:bg-background'
                 )}
               >
-                <Icon className="h-4 w-4" /> {filter.label}
+                <Icon className="h-4 w-4" /> {t(`issues.global.quickFilters.${filter.value}`)}
                 {active && <span className="ml-0.5 text-brand-primary">✓</span>}
               </button>
             );
@@ -636,7 +641,9 @@ export default function IssuesPage() {
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-lg font-bold text-foreground dark:text-foreground/90">{t('issues.global.search.matchingIssues', { count: finalIssues.length })}</h2>
+          <h2 className="text-lg font-bold text-foreground dark:text-foreground/90">
+            {t('issues.global.search.matchingIssues', { count: isAISearchEnabled && aiSearchResults.length > 0 ? finalIssues.length : totalCount })}
+          </h2>
           <p className="text-sm font-semibold text-foreground/60 dark:text-foreground/50">{t('issues.global.search.sortedByRecent')}</p>
         </div>
         <button
@@ -710,7 +717,7 @@ export default function IssuesPage() {
                     <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600 dark:text-foreground/50">
                       {'project_name' in issue && issue.project_name && <span className="font-bold text-slate-800 dark:text-foreground/50">{issue.project_name}</span>}
                       <span className="hidden h-1 w-1 rounded-full bg-slate-600 sm:inline-block" />
-                      <Pill>{issue.status.replace('_', ' ')}</Pill>
+                      <Pill>{t(`issues.global.status.${issue.status}`) || issue.status.replace('_', ' ')}</Pill>
                       {issue.assignee && (
                         <>
                           <span className="hidden h-1 w-1 rounded-full bg-slate-600 sm:inline-block" />
@@ -722,7 +729,7 @@ export default function IssuesPage() {
 
                   <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                     <Badge tone={issue.priority === 'critical' ? 'critical' : issue.priority === 'high' ? 'high' : 'muted'}>
-                      {issue.priority}
+                      {t(`issues.global.priority.${issue.priority}`) || issue.priority}
                     </Badge>
                     {issue.due_date && (
                       <Badge tone={new Date(issue.due_date) < new Date() ? 'critical' : 'default'}>
@@ -758,6 +765,65 @@ export default function IssuesPage() {
           })
         )}
       </div>
+
+      {!loading && !isSearchingAI && !isAISearchEnabled && totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-2">
+          {/* Prev button */}
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={cx(
+              'flex h-9 w-9 items-center justify-center rounded-xl border text-sm font-bold transition',
+              currentPage === 1
+                ? 'cursor-not-allowed border-slate-200 bg-white/50 text-foreground/30 dark:border-border-glow/20 dark:bg-foreground/[0.02]'
+                : 'border-slate-300 bg-white text-foreground/80 hover:-translate-y-[1px] hover:shadow-md dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/60 dark:hover:bg-background'
+            )}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          {/* Mobile: "Page X of Y" */}
+          <span className="flex items-center sm:hidden px-3 py-2 text-sm font-bold text-foreground/70 dark:text-foreground/50">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          {/* Desktop: numbered pages with ellipsis */}
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
+            .map((page, idx, arr) => (
+              <React.Fragment key={page}>
+                {idx > 0 && arr[idx - 1] !== page - 1 && (
+                  <span className="hidden sm:inline px-1 text-sm text-foreground/40">…</span>
+                )}
+                <button
+                  onClick={() => handlePageChange(page)}
+                  className={cx(
+                    'hidden sm:flex h-9 w-9 items-center justify-center rounded-xl border text-sm font-bold transition',
+                    currentPage === page
+                      ? 'border-brand-primary bg-brand-primary text-white shadow-md'
+                      : 'border-slate-300 bg-white text-foreground/80 hover:-translate-y-[1px] hover:shadow-md dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/60 dark:hover:bg-background'
+                  )}
+                >
+                  {page}
+                </button>
+              </React.Fragment>
+            ))}
+
+          {/* Next button */}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={cx(
+              'flex h-9 w-9 items-center justify-center rounded-xl border text-sm font-bold transition',
+              currentPage === totalPages
+                ? 'cursor-not-allowed border-slate-200 bg-white/50 text-foreground/30 dark:border-border-glow/20 dark:bg-foreground/[0.02]'
+                : 'border-slate-300 bg-white text-foreground/80 hover:-translate-y-[1px] hover:shadow-md dark:border-border-glow/50 dark:bg-foreground/5 dark:text-foreground/60 dark:hover:bg-background'
+            )}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       <AnimatePresence>
         {selectedIssue && (

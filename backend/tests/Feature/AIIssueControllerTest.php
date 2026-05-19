@@ -50,7 +50,7 @@ class AIIssueControllerTest extends TestCase
             ])->assertStatus(403);
     }
 
-    public function test_summary_is_required(): void
+    public function test_prompt_or_summary_is_required(): void
     {
         $user = User::factory()->create();
         $project = $this->makeProject($user);
@@ -62,7 +62,7 @@ class AIIssueControllerTest extends TestCase
         $this->actingAs($user)
             ->postJson("/api/projects/{$project->id}/ai/suggest-issue", [])
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['summary']);
+            ->assertJsonValidationErrors(['prompt', 'summary']);
     }
 
     public function test_returns_correct_json_structure(): void
@@ -71,13 +71,17 @@ class AIIssueControllerTest extends TestCase
         $project = $this->makeProject($user);
 
         $fakeSuggestion = [
+            'summary' => 'Fix authentication flow',
             'description' => 'An AI-generated description.',
             'issue_type' => 'Bug',
             'priority' => 'high',
             'estimated_hours' => 4.0,
+            'due_date' => '2026-05-24',
+            'milestone_id' => null,
             'assignee_suggestions' => [
                 ['assignee_id' => $user->id, 'reason' => 'Backend specialist familiar with auth'],
             ],
+            'open_questions' => [],
         ];
 
         $this->mock(AIIssueSuggestionService::class, function ($mock) use ($fakeSuggestion) {
@@ -86,16 +90,57 @@ class AIIssueControllerTest extends TestCase
 
         $this->actingAs($user)
             ->postJson("/api/projects/{$project->id}/ai/suggest-issue", [
-                'summary' => 'Fix the authentication flow',
+                'prompt' => 'Fix the authentication flow',
+                'output_locale' => 'en',
+                'current_fields' => ['summary' => ''],
             ])
             ->assertStatus(200)
             ->assertJsonStructure([
-                'data' => ['description', 'issue_type', 'priority', 'estimated_hours', 'assignee_suggestions'],
+                'data' => ['summary', 'description', 'issue_type', 'priority', 'estimated_hours', 'due_date', 'milestone_id', 'assignee_suggestions', 'open_questions'],
             ])
+            ->assertJsonPath('data.summary', 'Fix authentication flow')
             ->assertJsonPath('data.issue_type', 'Bug')
             ->assertJsonPath('data.priority', 'high')
             ->assertJsonPath('data.assignee_suggestions.0.assignee_id', $user->id)
             ->assertJsonPath('data.assignee_suggestions.0.reason', 'Backend specialist familiar with auth');
+    }
+
+    public function test_prompt_request_passes_output_locale_and_current_fields_to_service(): void
+    {
+        $user = User::factory()->create();
+        $project = $this->makeProject($user);
+
+        $this->mock(AIIssueSuggestionService::class, function ($mock) use ($project, $user) {
+            $mock->shouldReceive('suggest')
+                ->once()
+                ->withArgs(function ($actualProject, string $prompt, $actor, ?string $outputLocale, array $currentFields) use ($project, $user) {
+                    return $actualProject->is($project)
+                        && $prompt === 'Copied customer chat about checkout failure'
+                        && $actor->is($user)
+                        && $outputLocale === 'vi-VN'
+                        && ($currentFields['summary'] ?? null) === 'Existing summary';
+                })
+                ->andReturn([
+                    'summary' => 'Checkout failure',
+                    'description' => 'Generated',
+                    'issue_type' => 'Bug',
+                    'priority' => 'high',
+                    'estimated_hours' => 3.0,
+                    'due_date' => null,
+                    'milestone_id' => null,
+                    'assignee_suggestions' => [],
+                    'open_questions' => [],
+                ]);
+        });
+
+        $this->actingAs($user)
+            ->postJson("/api/projects/{$project->id}/ai/suggest-issue", [
+                'prompt' => 'Copied customer chat about checkout failure',
+                'output_locale' => 'vi-VN',
+                'current_fields' => ['summary' => 'Existing summary'],
+            ])
+            ->assertStatus(200)
+            ->assertJsonPath('data.summary', 'Checkout failure');
     }
 
     public function test_normal_member_can_access_ai_suggest(): void
@@ -107,11 +152,15 @@ class AIIssueControllerTest extends TestCase
 
         $this->mock(AIIssueSuggestionService::class, function ($mock) {
             $mock->shouldReceive('suggest')->once()->andReturn([
+                'summary' => null,
                 'description' => null,
                 'issue_type' => null,
                 'priority' => null,
                 'estimated_hours' => null,
+                'due_date' => null,
+                'milestone_id' => null,
                 'assignee_suggestions' => [],
+                'open_questions' => [],
             ]);
         });
 
@@ -130,11 +179,15 @@ class AIIssueControllerTest extends TestCase
 
         $this->mock(AIIssueSuggestionService::class, function ($mock) {
             $mock->shouldReceive('suggest')->once()->andReturn([
+                'summary' => 'Refactor widget system',
                 'description' => 'Something generic.',
                 'issue_type' => 'Task',
                 'priority' => 'normal',
                 'estimated_hours' => 2.0,
+                'due_date' => null,
+                'milestone_id' => null,
                 'assignee_suggestions' => [],
+                'open_questions' => [],
             ]);
         });
 
@@ -154,13 +207,17 @@ class AIIssueControllerTest extends TestCase
 
         $this->mock(AIIssueSuggestionService::class, function ($mock) use ($userId) {
             $mock->shouldReceive('suggest')->once()->andReturn([
+                'summary' => 'Fix bug',
                 'description' => 'Fix the thing.',
                 'issue_type' => 'Bug',
                 'priority' => 'high',
                 'estimated_hours' => 1.0,
+                'due_date' => null,
+                'milestone_id' => null,
                 'assignee_suggestions' => [
                     ['assignee_id' => $userId, 'reason' => 'Valid member'],
                 ],
+                'open_questions' => [],
             ]);
         });
 
@@ -181,15 +238,19 @@ class AIIssueControllerTest extends TestCase
 
         $this->mock(AIIssueSuggestionService::class, function ($mock) use ($user) {
             $mock->shouldReceive('suggest')->once()->andReturn([
+                'summary' => 'Big epic story',
                 'description' => 'Multi-person issue.',
                 'issue_type' => 'Story',
                 'priority' => 'normal',
                 'estimated_hours' => 8.0,
+                'due_date' => null,
+                'milestone_id' => null,
                 'assignee_suggestions' => [
                     ['assignee_id' => $user->id, 'reason' => 'First'],
                     ['assignee_id' => $user->id, 'reason' => 'Second'],
                     ['assignee_id' => $user->id, 'reason' => 'Third'],
                 ],
+                'open_questions' => [],
             ]);
         });
 
