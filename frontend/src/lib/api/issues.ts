@@ -169,11 +169,24 @@ export interface GetIssuesParams {
   assignee?: string;
   high_priority?: boolean;
   search?: string;
+  page?: number;
 }
 
-export async function getGlobalIssues(params: GetIssuesParams = {}): Promise<GlobalIssue[]> {
+export interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  total: number;
+  per_page: number;
+}
+
+export interface PaginatedGlobalIssues {
+  data: GlobalIssue[];
+  meta: PaginationMeta;
+}
+
+export async function getGlobalIssues(params: GetIssuesParams = {}): Promise<PaginatedGlobalIssues> {
   const response = await api.get('/api/issues', { params });
-  return response.data.data;
+  return { data: response.data.data, meta: response.data.meta };
 }
 
 export async function getIssuesSummary(projectId?: number | string): Promise<IssuesSummary> {
